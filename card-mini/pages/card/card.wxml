@@ -1,0 +1,157 @@
+<!--pages/card/card.wxml-->
+<view class="container">
+  <!-- 顶部导航栏 -->
+  <view class="nav-bar">
+    <view class="nav-back" bindtap="handlePrev">
+      <text class="nav-icon">←</text>
+    </view>
+    <view class="nav-title">
+      <text>{{subjectName || '知识点学习'}}</text>
+    </view>
+    <view class="nav-forward" bindtap="handleNext">
+      <text class="nav-icon">→</text>
+    </view>
+  </view>
+
+  <!-- 进度指示器 -->
+  <view class="progress-indicator">
+    <view class="progress-dots">
+      <view class="dot {{currentIndex >= index ? 'active' : ''}}" wx:for="{{totalCount}}" wx:key="index" wx:if="{{index < 10}}"></view>
+      <text class="more-dots" wx:if="{{totalCount > 10}}">...</text>
+    </view>
+    <view class="progress-text">
+      <text>{{currentIndex + 1}} / {{totalCount}}</text>
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading-container" wx:if="{{!currentCard}}">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <!-- 卡片滑动区域 -->
+  <view
+    class="card-swipe-area"
+    wx:if="{{currentCard}}"
+    bindtouchstart="onTouchStart"
+    bindtouchmove="onTouchMove"
+    bindtouchend="onTouchEnd"
+  >
+    <!-- 滑动提示 -->
+    <view class="swipe-hint left" wx:if="{{isSwiping && moveX > 50 && currentIndex > 0}}">
+      <text>← 上一张</text>
+    </view>
+    <view class="swipe-hint right" wx:if="{{isSwiping && moveX < -50}}">
+      <text>下一张 →</text>
+    </view>
+
+    <!-- 卡片容器 -->
+    <view class="card-container" style="transform: translateX({{moveX}}px);">
+      <!-- 3D翻转卡片 -->
+      <view class="flip-card {{isFlipped ? 'flipped' : ''}}" bindtap="toggleFlip">
+        <!-- 卡片正面 -->
+        <view class="flip-card-front">
+          <view class="card-header">
+            <view class="card-badge">
+              <text class="badge-text">问题</text>
+            </view>
+            <view class="card-difficulty">
+              <text class="difficulty-label">难度</text>
+              <view class="difficulty-stars">
+                <text class="star {{item <= currentCard.difficultyLevel ? 'active' : ''}}" wx:for="{{[1,2,3,4,5]}}" wx:key="*this">★</text>
+              </view>
+            </view>
+          </view>
+
+          <!-- 正面内容区域 - 支持滚动 -->
+          <scroll-view class="card-body" scroll-y="true" enhanced="true" show-scrollbar="false">
+            <view class="card-content-wrapper">
+              <text class="card-content">{{currentCard.frontContent}}</text>
+            </view>
+          </scroll-view>
+
+          <view class="card-footer">
+            <view class="flip-hint">
+              <text class="hint-icon">👆</text>
+              <text class="hint-text">点击翻转查看答案</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 卡片反面 -->
+        <view class="flip-card-back">
+          <view class="card-header">
+            <view class="card-badge success">
+              <text class="badge-text">答案</text>
+            </view>
+            <view class="card-difficulty">
+              <text class="difficulty-label">难度</text>
+              <view class="difficulty-stars">
+                <text class="star {{item <= currentCard.difficultyLevel ? 'active' : ''}}" wx:for="{{[1,2,3,4,5]}}" wx:key="*this">★</text>
+              </view>
+            </view>
+          </view>
+
+          <!-- 答案内容区域 - 支持滚动 -->
+          <scroll-view class="card-body answer-body" scroll-y="true" enhanced="true" show-scrollbar="false">
+            <view class="card-content-wrapper">
+              <text class="card-content">{{currentCard.backContent}}</text>
+            </view>
+          </scroll-view>
+
+          <view class="card-footer">
+            <view class="flip-hint">
+              <text class="hint-icon">👆</text>
+              <text class="hint-text">点击返回问题</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 标签展示 -->
+  <view class="tags-section" wx:if="{{currentCard && currentCard.tags && currentCard.tags.length > 0}}">
+    <view class="tags-container">
+      <view class="tag-item" wx:for="{{currentCard.tags}}" wx:key="*this">
+        <text>{{item}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 学习状态按钮 -->
+  <view class="status-buttons" wx:if="{{isFlipped && currentCard}}">
+    <view class="status-btn unlearned" data-status="0" bindtap="handleStatus">
+      <view class="btn-icon">
+        <text class="icon-text">✗</text>
+      </view>
+      <text class="btn-label">不熟</text>
+    </view>
+
+    <view class="status-btn fuzzy" data-status="1" bindtap="handleStatus">
+      <view class="btn-icon">
+        <text class="icon-text">~</text>
+      </view>
+      <text class="btn-label">模糊</text>
+    </view>
+
+    <view class="status-btn mastered" data-status="2" bindtap="handleStatus">
+      <view class="btn-icon">
+        <text class="icon-text">✓</text>
+      </view>
+      <text class="btn-label">掌握</text>
+    </view>
+  </view>
+
+  <!-- 底部进度条 -->
+  <view class="bottom-progress" wx:if="{{currentCard}}">
+    <view class="progress-bar-track">
+      <view class="progress-bar-fill" style="width: {{progress}}%;"></view>
+    </view>
+    <view class="progress-labels">
+      <text class="progress-percent">{{progress}}%</text>
+      <text class="progress-remain">剩余 {{totalCount - currentIndex - 1}} 张</text>
+    </view>
+  </view>
+</view>

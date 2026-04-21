@@ -1,0 +1,146 @@
+<!--pages/profile/profile.wxml-->
+<view class="container">
+  <!-- 用户信息卡片 -->
+  <view class="user-section card" bindtap="handleUserCardClick">
+    <view class="user-info">
+      <view class="avatar {{isLoggedIn ? 'logged-in' : ''}}">
+        <text class="avatar-text">{{isLoggedIn ? userInfo.nickname[0] : '游'}}</text>
+      </view>
+      <view class="user-detail">
+        <text class="user-name">{{isLoggedIn ? userInfo.nickname : '游客模式'}}</text>
+        <text class="user-status">{{isLoggedIn ? '已登录' : '点击登录保存学习进度'}}</text>
+      </view>
+    </view>
+    <!-- 退出按钮 -->
+    <view class="logout-btn" wx:if="{{isLoggedIn}}" catchtap="logout">
+      <text class="logout-text">退出</text>
+    </view>
+  </view>
+
+  <!-- 学习统计 -->
+  <view class="stats-section">
+    <view class="section-title">学习统计</view>
+    <view class="stats-grid">
+      <view class="stat-item card">
+        <text class="stat-value text-primary">{{stats.learned}}</text>
+        <text class="stat-label">已学习</text>
+      </view>
+      <view class="stat-item card">
+        <text class="stat-value text-success">{{stats.mastered}}</text>
+        <text class="stat-label">已掌握</text>
+      </view>
+      <view class="stat-item card">
+        <text class="stat-value text-warning">{{stats.review}}</text>
+        <text class="stat-label">待复习</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 学习历史 -->
+  <view class="history-section" wx:if="{{historyList.length > 0}}">
+    <view class="section-title">最近学习</view>
+    <view class="history-list">
+      <view class="history-item card" wx:for="{{historyList}}" wx:key="id">
+        <view class="history-header">
+          <text class="subject-name">{{item.subjectName}}</text>
+          <text class="history-time">{{item.time}}</text>
+        </view>
+        <view class="history-progress">
+          <view class="progress-track">
+            <view class="progress-fill" style="width: {{item.progress}}%"></view>
+          </view>
+          <text class="progress-percent">{{item.progress}}%</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 设置 -->
+  <view class="settings-section">
+    <view class="section-title">设置</view>
+    <view class="settings-list">
+      <view class="setting-item card" bindtap="handleSetting" data-key="notification">
+        <text class="setting-label">学习提醒</text>
+        <switch checked="{{settings.notification}}" color="#409EFF" />
+      </view>
+      <view class="setting-item card" bindtap="handleSetting" data-key="sound">
+        <text class="setting-label">音效</text>
+        <switch checked="{{settings.sound}}" color="#409EFF" />
+      </view>
+      <view class="setting-item card" bindtap="handleClearCache">
+        <text class="setting-label">清除缓存</text>
+        <text class="cache-size">12KB</text>
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- 登录弹窗 -->
+<view class="modal-mask" wx:if="{{showLoginModal}}" bindtap="hideLoginModal"></view>
+<view class="login-modal" wx:if="{{showLoginModal}}">
+  <view class="modal-header">
+    <text class="modal-title">账号登录</text>
+    <view class="modal-close" catchtap="hideLoginModal">
+      <text class="close-icon">✕</text>
+    </view>
+  </view>
+
+  <view class="modal-body">
+    <!-- 账号输入 -->
+    <view class="input-group">
+      <text class="input-label">账号</text>
+      <input
+        class="input-field"
+        type="text"
+        placeholder="请输入账号"
+        value="{{username}}"
+        bindinput="onUsernameInput"
+      />
+    </view>
+
+    <!-- 密码输入 -->
+    <view class="input-group">
+      <text class="input-label">密码</text>
+      <input
+        class="input-field"
+        type="password"
+        placeholder="请输入密码"
+        value="{{password}}"
+        bindinput="onPasswordInput"
+      />
+    </view>
+
+    <!-- 验证码 -->
+    <view class="input-group">
+      <text class="input-label">验证码</text>
+      <view class="captcha-row">
+        <input
+          class="captcha-input"
+          type="text"
+          placeholder="请输入验证码"
+          value="{{captcha}}"
+          bindinput="onCaptchaInput"
+        />
+        <view class="captcha-box" catchtap="refreshCaptcha">
+          <image
+            class="captcha-image"
+            src="{{captchaImage}}"
+            mode="aspectFill"
+            wx:if="{{captchaImage}}"
+          />
+          <text class="captcha-loading" wx:else>加载中</text>
+        </view>
+      </view>
+      <text class="captcha-tip" catchtap="refreshCaptcha">点击图片刷新验证码</text>
+    </view>
+  </view>
+
+  <view class="modal-footer">
+    <view class="cancel-btn" catchtap="hideLoginModal">
+      <text>取消</text>
+    </view>
+    <view class="confirm-btn {{loginLoading ? 'disabled' : ''}}" catchtap="doLogin">
+      <text>{{loginLoading ? '登录中...' : '登录'}}</text>
+    </view>
+  </view>
+</view>

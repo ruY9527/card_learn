@@ -1,0 +1,126 @@
+<!--pages/study/study.wxml-->
+<view class="container">
+  <!-- 科目标题 -->
+  <view class="header">
+    <view class="header-bg"></view>
+    <view class="header-content">
+      <text class="subject-title">{{subjectName}}</text>
+      <view class="stats-row">
+        <view class="stat-box">
+          <text class="stat-value">{{learnedCount}}</text>
+          <text class="stat-label">已学习</text>
+        </view>
+        <view class="stat-box">
+          <text class="stat-value text-warning">{{reviewCount}}</text>
+          <text class="stat-label">待复习</text>
+        </view>
+        <view class="stat-box">
+          <text class="stat-value text-muted">{{totalCount}}</text>
+          <text class="stat-label">总卡片</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 错误状态 -->
+  <view class="error-section" wx:if="{{error}}">
+    <view class="error-icon">⚠️</view>
+    <text class="error-text">{{errorMsg}}</text>
+    <view class="error-actions">
+      <view class="retry-btn" bindtap="handleRetry" wx:if="{{subjectId}}">重新加载</view>
+      <view class="home-btn" bindtap="handleGoHome">返回首页</view>
+    </view>
+  </view>
+
+  <!-- 正常内容区域 -->
+  <block wx:if="{{!error}}">
+    <!-- 快速开始按钮 -->
+    <view class="quick-start" wx:if="{{cardList.length > 0 && !loading}}">
+      <view class="start-btn" bindtap="handleStartStudy">
+        <text class="start-icon">📖</text>
+        <text class="start-text">开始连续学习</text>
+        <text class="start-hint">左右滑动切换卡片</text>
+      </view>
+    </view>
+
+    <!-- 筛选标签 -->
+    <view class="filter-bar">
+      <view class="tabs">
+        <view
+          class="tab-item {{currentTab === 'all' ? 'active' : ''}}"
+          data-tab="all"
+          bindtap="handleTabChange"
+        >
+          全部
+        </view>
+        <view
+          class="tab-item {{currentTab === 'learned' ? 'active' : ''}}"
+          data-tab="learned"
+          bindtap="handleTabChange"
+        >
+          已学
+        </view>
+        <view
+          class="tab-item {{currentTab === 'unlearned' ? 'active' : ''}}"
+          data-tab="unlearned"
+          bindtap="handleTabChange"
+        >
+          未学
+        </view>
+      </view>
+    </view>
+
+    <!-- 加载状态 -->
+    <view class="loading-section" wx:if="{{loading && cardList.length === 0}}">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">加载中...</text>
+    </view>
+
+    <!-- 卡片列表 -->
+    <view class="card-section" wx:if="{{!loading || cardList.length > 0}}">
+      <view
+        class="card-item"
+        wx:for="{{cardList}}"
+        wx:key="cardId"
+        data-card="{{item}}"
+        bindtap="handleCardClick"
+      >
+        <view class="card-header">
+          <view class="difficulty-badge {{item.difficultyLevel <= 2 ? 'easy' : (item.difficultyLevel === 3 ? 'medium' : 'hard')}}">
+            <text>难度 {{item.difficultyLevel || 1}}</text>
+          </view>
+          <view class="status-badge {{item.status === 2 ? 'mastered' : (item.status === 1 ? 'fuzzy' : 'unlearned')}}">
+            <text>{{item.status === 2 ? '✓ 掌握' : (item.status === 1 ? '~ 模糊' : '✗ 未学')}}</text>
+          </view>
+        </view>
+        <view class="card-content">
+          <text class="card-text">{{item.frontContent || '暂无内容'}}</text>
+        </view>
+        <view class="card-footer">
+          <text class="card-id">#{{item.cardId}}</text>
+          <text class="view-hint">点击查看详情 →</text>
+        </view>
+      </view>
+
+      <!-- 加载更多 -->
+      <view class="load-more" wx:if="{{hasMore && !loading}}" bindtap="loadMore">
+        <text class="load-text">加载更多</text>
+      </view>
+      <view class="load-more" wx:if="{{loading && cardList.length > 0}}">
+        <text class="load-text">加载中...</text>
+      </view>
+
+      <!-- 已加载全部 -->
+      <view class="all-loaded" wx:if="{{!hasMore && cardList.length > 0}}">
+        <text class="all-loaded-text">已加载全部 {{totalCount}} 张卡片</text>
+      </view>
+    </view>
+
+    <!-- 无数据 -->
+    <view class="empty" wx:if="{{cardList.length === 0 && !loading && !error}}">
+      <view class="empty-icon">📚</view>
+      <text class="empty-text">该科目暂无卡片数据</text>
+      <text class="empty-hint">请通过管理后台添加知识点卡片</text>
+    </view>
+  </block>
+</view>

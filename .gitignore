@@ -1,0 +1,47 @@
+# Java/Spring Boot
+**/target/
+*.class
+*.jar
+*.war
+*.log
+
+# Node.js
+**/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+dist/
+build/
+out/
+
+# Env
+.env
+.env.local
+*.local
+
+# Logs
+logs/
+*.log
+
+# Temp
+*.tmp
+*.temp
+*.swp
+*~
+
+# Package lock (可选，根据团队约定)
+# package-lock.json
+# yarn.lock

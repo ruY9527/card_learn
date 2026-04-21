@@ -1,0 +1,87 @@
+<!--pages/index/index.wxml-->
+<view class="container">
+  <!-- 考研倒计时 -->
+  <view class="countdown-bar">
+    <view class="countdown-content">
+      <view class="countdown-left">
+        <text class="countdown-label">{{countdownText}}</text>
+        <text class="countdown-desc">距离考研还有</text>
+      </view>
+      <view class="countdown-right">
+        <text class="countdown-days">{{countdownDays}}</text>
+        <text class="countdown-unit">天</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 专业分类 -->
+  <view class="section">
+    <view class="section-title">专业分类</view>
+    <view class="major-list">
+      <view
+        class="major-item card {{currentMajor === item.majorId ? 'active' : ''}}"
+        wx:for="{{majorList}}"
+        wx:key="majorId"
+        data-major-id="{{item.majorId}}"
+        bindtap="handleMajorClick"
+      >
+        <view class="major-content">
+          <text class="major-name">{{item.majorName}}</text>
+          <text class="major-desc">{{item.description || '点击查看科目'}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 科目列表 -->
+  <view class="section" wx:if="{{subjectList.length > 0}}">
+    <view class="section-title">科目列表</view>
+    <view class="subject-list">
+      <view
+        class="subject-item"
+        wx:for="{{subjectList}}"
+        wx:key="subjectId"
+        data-subject-id="{{item.subjectId}}"
+        data-subject-name="{{item.subjectName}}"
+        bindtap="handleSubjectClick"
+      >
+        <view class="subject-icon bg-primary">
+          <text class="text-white">{{item.subjectName[0]}}</text>
+        </view>
+        <text class="subject-name">{{item.subjectName}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 无科目提示 -->
+  <view class="section" wx:if="{{subjectList.length === 0 && currentMajor}}">
+    <view class="empty-tip">
+      <text>该专业暂无科目数据</text>
+    </view>
+  </view>
+
+  <!-- 推荐卡片 -->
+  <view class="section">
+    <view class="section-title">今日推荐</view>
+    <view class="card-list" wx:if="{{recommendCards.length > 0}}">
+      <view
+        class="recommend-card card"
+        wx:for="{{recommendCards}}"
+        wx:key="cardId"
+        data-card-id="{{item.cardId}}"
+        bindtap="handleCardClick"
+      >
+        <view class="card-content">
+          <text>{{item.frontContent}}</text>
+        </view>
+        <view class="card-footer">
+          <text class="difficulty">难度: {{item.difficultyLevel}}级</text>
+          <text class="hint text-primary">点击查看答案</text>
+        </view>
+      </view>
+    </view>
+    <view class="empty-tip" wx:else>
+      <text>暂无推荐卡片</text>
+    </view>
+  </view>
+</view>

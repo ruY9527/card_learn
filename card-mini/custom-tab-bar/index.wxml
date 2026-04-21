@@ -1,0 +1,27 @@
+<!--custom-tab-bar/index.wxml-->
+<view class="tab-bar">
+  <view 
+    class="tab-bar-item {{selected === 0 ? 'selected' : ''}}" 
+    data-index="0"
+    bindtap="switchTab"
+  >
+    <text class="tab-bar-icon">🏠</text>
+    <text class="tab-bar-text">首页</text>
+  </view>
+  <view 
+    class="tab-bar-item {{selected === 1 ? 'selected' : ''}}" 
+    data-index="1"
+    bindtap="switchTab"
+  >
+    <text class="tab-bar-icon">📚</text>
+    <text class="tab-bar-text">学习</text>
+  </view>
+  <view 
+    class="tab-bar-item {{selected === 2 ? 'selected' : ''}}" 
+    data-index="2"
+    bindtap="switchTab"
+  >
+    <text class="tab-bar-icon">👤</text>
+    <text class="tab-bar-text">我的</text>
+  </view>
+</view>
