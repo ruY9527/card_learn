@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.card.learn.mapper.BizCardMapper">
+
+    <resultMap id="CardVOResultMap" type="com.card.learn.vo.CardVO">
+        <id property="cardId" column="card_id"/>
+        <result property="subjectId" column="subject_id"/>
+        <result property="subjectName" column="subject_name"/>
+        <result property="frontContent" column="front_content"/>
+        <result property="backContent" column="back_content"/>
+        <result property="difficultyLevel" column="difficulty_level"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <select id="selectCardsWithSubjectName" resultMap="CardVOResultMap">
+        SELECT
+            c.card_id,
+            c.subject_id,
+            s.subject_name,
+            c.front_content,
+            c.back_content,
+            c.difficulty_level,
+            c.create_time,
+            c.update_time
+        FROM biz_card c
+        LEFT JOIN biz_subject s ON c.subject_id = s.subject_id
+        WHERE c.del_flag = '0'
+        <if test="subjectId != null">
+            AND c.subject_id = #{subjectId}
+        </if>
+        ORDER BY c.create_time DESC
+    </select>
+
+</mapper>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.card.learn.mapper.BizCardTagMapper">
+
+    <select id="selectTagsByCardId" resultType="com.card.learn.entity.BizTag">
+        SELECT t.tag_id, t.tag_name
+        FROM biz_tag t
+        INNER JOIN biz_card_tag ct ON t.tag_id = ct.tag_id
+        WHERE ct.card_id = #{cardId}
+    </select>
+
+    <delete id="deleteByCardId">
+        DELETE FROM biz_card_tag WHERE card_id = #{cardId}
+    </delete>
+
+    <insert id="batchInsert">
+        INSERT INTO biz_card_tag (card_id, tag_id)
+        VALUES
+        <foreach collection="tagIds" item="tagId" separator=",">
+            (#{cardId}, #{tagId})
+        </foreach>
+    </insert>
+
+</mapper>

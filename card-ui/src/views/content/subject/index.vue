@@ -9,7 +9,7 @@
       </template>
       <el-table :data="tableData" border stripe>
         <el-table-column prop="subjectId" label="ID" width="80" />
-        <el-table-column prop="majorId" label="所属专业" width="100" />
+        <el-table-column prop="majorName" label="所属专业" width="120" />
         <el-table-column prop="subjectName" label="科目名称" />
         <el-table-column prop="orderNum" label="排序" width="80" />
         <el-table-column label="操作" width="150">
@@ -24,7 +24,12 @@
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="500px">
       <el-form ref="formRef" :model="formData" :rules="rules" label-width="100px">
         <el-form-item label="所属专业" prop="majorId">
-          <el-select v-model="formData.majorId" placeholder="请选择专业">
+          <el-select
+            v-model="formData.majorId"
+            placeholder="请选择专业"
+            style="width: 100%"
+            popper-class="major-select-popper"
+          >
             <el-option
               v-for="item in majorList"
               :key="item.majorId"

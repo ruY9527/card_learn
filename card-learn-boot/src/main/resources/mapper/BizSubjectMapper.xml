@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.card.learn.mapper.BizSubjectMapper">
+
+    <resultMap id="SubjectVOResultMap" type="com.card.learn.vo.SubjectVO">
+        <id property="subjectId" column="subject_id"/>
+        <result property="majorId" column="major_id"/>
+        <result property="majorName" column="major_name"/>
+        <result property="subjectName" column="subject_name"/>
+        <result property="icon" column="icon"/>
+        <result property="orderNum" column="order_num"/>
+    </resultMap>
+
+    <select id="selectSubjectsWithMajorName" resultMap="SubjectVOResultMap">
+        SELECT
+            s.subject_id,
+            s.major_id,
+            m.major_name,
+            s.subject_name,
+            s.icon,
+            s.order_num
+        FROM biz_subject s
+        LEFT JOIN biz_major m ON s.major_id = m.major_id
+        <if test="majorId != null">
+            WHERE s.major_id = #{majorId}
+        </if>
+        ORDER BY s.order_num ASC, s.subject_id ASC
+    </select>
+
+</mapper>

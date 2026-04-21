@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.card.learn.entity.BizCard;
 import com.card.learn.mapper.BizCardMapper;
 import com.card.learn.service.IBizCardService;
+import com.card.learn.vo.CardVO;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -13,6 +15,9 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class BizCardServiceImpl extends ServiceImpl<BizCardMapper, BizCard> implements IBizCardService {
+
+    @Autowired
+    private BizCardMapper cardMapper;
 
     @Override
     public Page<BizCard> pageCards(Long subjectId, Integer pageNum, Integer pageSize) {
@@ -22,6 +27,12 @@ public class BizCardServiceImpl extends ServiceImpl<BizCardMapper, BizCard> impl
         }
         wrapper.orderByDesc(BizCard::getCreateTime);
         return page(new Page<>(pageNum, pageSize), wrapper);
+    }
+
+    @Override
+    public Page<CardVO> pageCardsWithSubjectName(Long subjectId, Integer pageNum, Integer pageSize) {
+        Page<CardVO> page = new Page<>(pageNum, pageSize);
+        return cardMapper.selectCardsWithSubjectName(page, subjectId);
     }
 
 }

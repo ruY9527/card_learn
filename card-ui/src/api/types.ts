@@ -67,6 +67,7 @@ export interface Major {
 export interface Subject {
   subjectId?: number
   majorId: number
+  majorName?: string
   subjectName: string
   icon?: string
   orderNum?: number
@@ -76,6 +77,7 @@ export interface Subject {
 export interface Card {
   cardId?: number
   subjectId: number
+  subjectName?: string
   frontContent: string
   backContent: string
   difficultyLevel?: number

@@ -3,6 +3,7 @@ package com.card.learn.controller;
 import com.card.learn.common.Result;
 import com.card.learn.entity.BizSubject;
 import com.card.learn.service.IBizSubjectService;
+import com.card.learn.vo.SubjectVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,8 +24,8 @@ public class BizSubjectController {
 
     @GetMapping("/list")
     @ApiOperation("获取科目列表")
-    public Result<List<BizSubject>> list(@RequestParam(required = false) Long majorId) {
-        return Result.success(subjectService.list());
+    public Result<List<SubjectVO>> list(@RequestParam(required = false) Long majorId) {
+        return Result.success(subjectService.listSubjectsWithMajorName(majorId));
     }
 
     @PostMapping

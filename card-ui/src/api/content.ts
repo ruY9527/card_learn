@@ -44,12 +44,20 @@ export const getCardById = (id: number) => {
   return request.get<any, { data: Card }>(`/card/${id}`)
 }
 
+export const getCardTags = (id: number) => {
+  return request.get<any, { data: Tag[] }>(`/card/${id}/tags`)
+}
+
 export const createCard = (data: Card) => {
   return request.post('/card', data)
 }
 
 export const updateCard = (data: Card) => {
   return request.put('/card', data)
+}
+
+export const setCardTags = (id: number, tagIds: number[]) => {
+  return request.put(`/card/${id}/tags`, tagIds)
 }
 
 export const deleteCard = (id: number) => {

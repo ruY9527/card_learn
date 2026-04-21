@@ -9,7 +9,13 @@
       </template>
       <el-form :inline="true" class="search-form">
         <el-form-item label="科目">
-          <el-select v-model="queryParams.subjectId" placeholder="请选择科目" clearable>
+          <el-select
+            v-model="queryParams.subjectId"
+            placeholder="请选择科目"
+            clearable
+            style="width: 200px"
+            popper-class="subject-select-popper"
+          >
             <el-option
               v-for="item in subjectList"
               :key="item.subjectId"
@@ -24,8 +30,30 @@
       </el-form>
       <el-table :data="tableData" border stripe>
         <el-table-column prop="cardId" label="ID" width="80" />
-        <el-table-column prop="subjectId" label="科目ID" width="80" />
+        <el-table-column prop="subjectName" label="科目名称" width="120" />
         <el-table-column prop="frontContent" label="正面内容" show-overflow-tooltip />
+        <el-table-column label="标签" width="150">
+          <template #default="{ row }">
+            <div class="tag-cell">
+              <el-tag
+                v-for="tag in row.tags"
+                :key="tag.tagId"
+                size="small"
+                class="tag-item"
+              >
+                {{ tag.tagName }}
+              </el-tag>
+              <el-button
+                type="primary"
+                size="small"
+                link
+                @click="handleEditTags(row)"
+              >
+                配置
+              </el-button>
+            </div>
+          </template>
+        </el-table-column>
         <el-table-column prop="difficultyLevel" label="难度" width="80">
           <template #default="{ row }">
             <el-tag :type="getDifficultyType(row.difficultyLevel)">
@@ -52,10 +80,16 @@
       />
     </el-card>
 
+    <!-- 新增/编辑卡片对话框 -->
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="800px">
       <el-form ref="formRef" :model="formData" :rules="rules" label-width="100px">
         <el-form-item label="科目" prop="subjectId">
-          <el-select v-model="formData.subjectId" placeholder="请选择科目">
+          <el-select
+            v-model="formData.subjectId"
+            placeholder="请选择科目"
+            style="width: 100%"
+            popper-class="subject-select-popper"
+          >
             <el-option
               v-for="item in subjectList"
               :key="item.subjectId"
@@ -89,6 +123,35 @@
         <el-button type="primary" :loading="loading" @click="handleSubmit">确定</el-button>
       </template>
     </el-dialog>
+
+    <!-- 配置标签对话框 -->
+    <el-dialog v-model="tagDialogVisible" title="配置标签" width="500px">
+      <el-form label-width="80px">
+        <el-form-item label="当前卡片">
+          <el-text>{{ currentCard?.frontContent }}</el-text>
+        </el-form-item>
+        <el-form-item label="选择标签">
+          <el-select
+            v-model="selectedTagIds"
+            multiple
+            placeholder="请选择标签"
+            style="width: 100%"
+            popper-class="tag-select-popper"
+          >
+            <el-option
+              v-for="item in allTagList"
+              :key="item.tagId"
+              :label="item.tagName"
+              :value="item.tagId"
+            />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="tagDialogVisible = false">取消</el-button>
+        <el-button type="primary" :loading="tagLoading" @click="handleSaveTags">保存</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -96,16 +159,37 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
-import { getCardPage, getCardById, createCard, updateCard, deleteCard, getSubjectList } from '@/api/content'
-import type { Card, Subject } from '@/api/types'
+import {
+  getCardPage,
+  getCardById,
+  getCardTags,
+  createCard,
+  updateCard,
+  setCardTags,
+  deleteCard,
+  getSubjectList,
+  getTagList
+} from '@/api/content'
+import type { Card, Subject, Tag } from '@/api/types'
+
+interface CardWithTags extends Card {
+  tags: Tag[]
+}
 
 const formRef = ref<FormInstance>()
 const loading = ref(false)
 const dialogVisible = ref(false)
 const dialogTitle = ref('新增卡片')
-const tableData = ref<Card[]>([])
+const tableData = ref<CardWithTags[]>([])
 const subjectList = ref<Subject[]>([])
+const allTagList = ref<Tag[]>([])
 const total = ref(0)
+
+// 标签配置相关
+const tagDialogVisible = ref(false)
+const tagLoading = ref(false)
+const currentCard = ref<Card | null>(null)
+const selectedTagIds = ref<number[]>([])
 
 const queryParams = reactive({
   subjectId: undefined as number | undefined,
@@ -136,7 +220,19 @@ const getDifficultyType = (level: number) => {
 const fetchData = async () => {
   try {
     const res = await getCardPage(queryParams)
-    tableData.value = res.data.records
+    // 为每张卡片加载标签
+    const cards = res.data.records
+    const cardsWithTags: CardWithTags[] = await Promise.all(
+      cards.map(async (card) => {
+        try {
+          const tagRes = await getCardTags(card.cardId!)
+          return { ...card, tags: tagRes.data || [] }
+        } catch {
+          return { ...card, tags: [] }
+        }
+      })
+    )
+    tableData.value = cardsWithTags
     total.value = res.data.total
   } catch (error) {
     console.error(error)
@@ -147,6 +243,15 @@ const fetchSubjectList = async () => {
   try {
     const res = await getSubjectList()
     subjectList.value = res.data
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+const fetchTagList = async () => {
+  try {
+    const res = await getTagList()
+    allTagList.value = res.data
   } catch (error) {
     console.error(error)
   }
@@ -174,6 +279,32 @@ const handleEdit = async (row: Card) => {
     dialogVisible.value = true
   } catch (error) {
     console.error(error)
+  }
+}
+
+const handleEditTags = async (row: Card) => {
+  currentCard.value = row
+  try {
+    const res = await getCardTags(row.cardId!)
+    selectedTagIds.value = res.data.map((tag: Tag) => tag.tagId!)
+  } catch {
+    selectedTagIds.value = []
+  }
+  tagDialogVisible.value = true
+}
+
+const handleSaveTags = async () => {
+  if (!currentCard.value?.cardId) return
+  tagLoading.value = true
+  try {
+    await setCardTags(currentCard.value.cardId, selectedTagIds.value)
+    ElMessage.success('标签配置成功')
+    tagDialogVisible.value = false
+    fetchData()
+  } catch (error) {
+    console.error(error)
+  } finally {
+    tagLoading.value = false
   }
 }
 
@@ -211,6 +342,7 @@ const handleSubmit = async () => {
 onMounted(() => {
   fetchData()
   fetchSubjectList()
+  fetchTagList()
 })
 </script>
 
@@ -229,6 +361,17 @@ onMounted(() => {
   .el-pagination {
     margin-top: 16px;
     justify-content: flex-end;
+  }
+
+  .tag-cell {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+
+    .tag-item {
+      margin: 2px;
+    }
   }
 }
 </style>
