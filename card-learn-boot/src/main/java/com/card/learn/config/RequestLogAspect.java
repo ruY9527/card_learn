@@ -50,6 +50,7 @@ public class RequestLogAspect {
 
     /**
      * 环绕通知：打印请求和响应日志，异步写入数据库
+     * 注意：只记录非查询类请求（POST/PUT/DELETE），GET请求不记录
      */
     @Around("controllerPointcut()")
     public Object doAround(ProceedingJoinPoint joinPoint) throws Throwable {
@@ -62,13 +63,18 @@ public class RequestLogAspect {
         }
 
         HttpServletRequest request = attributes.getRequest();
+        String requestMethod = request.getMethod();
+
+        // GET请求（查询类）不记录日志，直接执行目标方法
+        if ("GET".equalsIgnoreCase(requestMethod)) {
+            return joinPoint.proceed();
+        }
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = signature.getMethod();
 
         // 获取请求基本信息
         String className = joinPoint.getTarget().getClass().getName();
         String methodName = method.getName();
-        String requestMethod = request.getMethod();
         String requestUrl = request.getRequestURI();
         String ipAddress = getIpAddress(request);
 
