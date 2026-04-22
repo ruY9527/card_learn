@@ -2,9 +2,10 @@ import axios from 'axios'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/store/user'
 import router from '@/router'
+import envConfig from '@/config'
 
 const request = axios.create({
-  baseURL: '/api',
+  baseURL: envConfig.baseURL,
   timeout: 10000
 })
 
