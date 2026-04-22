@@ -10,7 +10,7 @@ set -e
 # ==================== 基础配置 ====================
 APP_NAME="card-learn-boot"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-APP_HOME="$(cd "$SCRIPT_DIR/.." && pwd)"
+APP_HOME="${SCRIPT_DIR}"
 
 # 目录配置
 JAR_DIR="${APP_HOME}"
@@ -40,19 +40,19 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 print_info() {
-    echo "${BLUE}[INFO]${NC} $1"
+    echo -e "${BLUE}[INFO]${NC} $1"
 }
 
 print_success() {
-    echo "${GREEN}[SUCCESS]${NC} $1"
+    echo -e "${GREEN}[SUCCESS]${NC} $1"
 }
 
 print_warning() {
-    echo "${YELLOW}[WARNING]${NC} $1"
+    echo -e "${YELLOW}[WARNING]${NC} $1"
 }
 
 print_error() {
-    echo "${RED}[ERROR]${NC} $1"
+    echo -e "${RED}[ERROR]${NC} $1"
 }
 
 # ==================== 辅助函数 ====================
@@ -286,7 +286,7 @@ status() {
         # 显示端口监听
         echo ""
         echo "端口监听:"
-        netstat -tlnp 2>/dev/null | grep $pid || ss -tlnp | grep $pid || print_warning "无法获取端口信息"
+        lsof -i -P -n 2>/dev/null | grep $pid || netstat -an 2>/dev/null | grep LISTEN | head -5 || print_warning "无法获取端口信息"
         
         # 显示 JVM 内存使用（如果 jstat 可用）
         if command -v jstat &> /dev/null; then
