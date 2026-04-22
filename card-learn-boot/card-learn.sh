@@ -131,12 +131,20 @@ build_jvm_opts() {
             ;;
     esac
     
-    # GC 日志配置 (JDK8/9+ 通用格式)
-    opts="$opts -Xloggc:${GC_LOG_FILE}"
-    opts="$opts -XX:+PrintGCDetails"
-    opts="$opts -XX:+PrintGCDateStamps"
-    opts="$opts -XX:+PrintGCTimeStamps"
-    opts="$opts -XX:+PrintGCApplicationStoppedTime"
+    # GC 日志配置 - 自动检测 JDK 版本
+    # 检测 Java 版本
+    java_version=$(java -version 2>&1 | head -1 | cut -d'"' -f2 | cut -d'.' -f1)
+    if [ "$java_version" -ge 9 ]; then
+        # JDK 9+ 新格式
+        opts="$opts -Xlog:gc*:file=${GC_LOG_FILE}:time,level,tags:filecount=5,filesize=10m"
+    else
+        # JDK 8 旧格式
+        opts="$opts -Xloggc:${GC_LOG_FILE}"
+        opts="$opts -XX:+PrintGCDetails"
+        opts="$opts -XX:+PrintGCDateStamps"
+        opts="$opts -XX:+PrintGCTimeStamps"
+        opts="$opts -XX:+PrintGCApplicationStoppedTime"
+    fi
     
     # 其他优化参数
     opts="$opts -XX:+HeapDumpOnOutOfMemoryError"
