@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.card.learn.mapper.BizFeedbackMapper">
+
+    <resultMap id="FeedbackVOResultMap" type="com.card.learn.vo.FeedbackVO">
+        <id property="id" column="id"/>
+        <result property="appUserId" column="app_user_id"/>
+        <result property="userNickname" column="user_nickname"/>
+        <result property="cardId" column="card_id"/>
+        <result property="cardFrontContent" column="card_front_content"/>
+        <result property="type" column="type"/>
+        <result property="rating" column="rating"/>
+        <result property="content" column="content"/>
+        <result property="contact" column="contact"/>
+        <result property="images" column="images"/>
+        <result property="status" column="status"/>
+        <result property="adminReply" column="admin_reply"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <select id="selectFeedbackWithDetails" resultMap="FeedbackVOResultMap">
+        SELECT
+            f.id,
+            f.app_user_id,
+            u.nickname as user_nickname,
+            f.card_id,
+            c.front_content as card_front_content,
+            f.type,
+            f.rating,
+            f.content,
+            f.contact,
+            f.images,
+            f.status,
+            f.admin_reply,
+            f.create_time,
+            f.update_time
+        FROM biz_feedback f
+        LEFT JOIN sys_app_user u ON f.app_user_id = u.app_user_id
+        LEFT JOIN biz_card c ON f.card_id = c.card_id
+        <where>
+            <if test="type != null and type != ''">
+                AND f.type = #{type}
+            </if>
+            <if test="status != null and status != ''">
+                AND f.status = #{status}
+            </if>
+        </where>
+        ORDER BY f.create_time DESC
+    </select>
+
+</mapper>

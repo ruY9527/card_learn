@@ -1,0 +1,44 @@
+[
+  {
+    "subject_id": 1,
+    "front_content": "什么是端口号？常见端口号有哪些？",
+    "back_content": "**端口号：**\n\n16位，范围0~65535。\n\n**分类：**\n\n1. **熟知端口（0~1023）**\n   - 由系统分配\n\n2. **登记端口（1024~49151）**\n   - IANA登记\n\n3. **动态端口（49152~65535）**\n   - 客户端临时使用\n\n**常见熟知端口：**\n\n| 协议 | 端口 |\n|------|------|\n| HTTP | 80 |\n| HTTPS | 443 |\n| FTP | 20/21 |\n| SMTP | 25 |\n| DNS | 53 |\n| SSH | 22 |\n| Telnet | 23 |",
+    "difficulty_level": 3
+  },
+  {
+    "subject_id": 1,
+    "front_content": "TCP和UDP有什么区别？",
+    "back_content": "**TCP vs UDP：**\n\n| 特性 | TCP | UDP |\n|------|-----|------|\n| 连接 | 面向连接 | 无连接 |\n| 可靠性 | 可靠传输 | 不可靠 |\n| 流量控制 | 有 | 无 |\n| 拥塞控制 | 有 | 无 |\n| 传输效率 | 低 | 高 |\n| 首部开销 | 20字节 | 8字节 |\n| 传输方式 | 字节流 | 报文 |\n\n**应用：**\n- **TCP**：文件传输、邮件、网页\n- **UDP**：视频流、DNS、游戏",
+    "difficulty_level": 3
+  },
+  {
+    "subject_id": 1,
+    "front_content": "TCP报文段的首部格式是怎样的？",
+    "back_content": "**TCP首部（20字节固定部分）：**\n\n| 字段 | 长度 | 说明 |\n|------|------|------|\n| 源端口 | 16位 | |\n| 目的端口 | 16位 | |\n| 序号 | 32位 | 字节流编号 |\n| 确认号 | 32位 | 期望收到的序号 |\n| 数据偏移 | 4位 | 首部长度 |\n| 标志位 | 6位 | URG,ACK,PSH,RST,SYN,FIN |\n| 窗口 | 16位 | 接收窗口大小 |\n| 校验和 | 16位 | |\n| 紧急指针 | 16位 | |\n\n**重要标志位：**\n- SYN：建立连接\n- ACK：确认有效\n- FIN：释放连接",
+    "difficulty_level": 4
+  },
+  {
+    "subject_id": 1,
+    "front_content": "TCP的三次握手过程是怎样的？",
+    "back_content": "**TCP三次握手：**\n\n```\n客户端                服务端\n   │                   │\n   │─── SYN ──────────→│ (1) 客户请求建立连接\n   │     seq=x         │\n   │                   │\n   │←── SYN+ACK ───────│ (2) 服务确认并请求\n   │     seq=y,ack=x+1 │\n   │                   │\n   │─── ACK ──────────→│ (3) 客户确认\n   │     ack=y+1       │\n```\n\n**状态变化：**\n- 客户端：CLOSED → SYN_SENT → ESTABLISHED\n- 服务端：CLOSED → LISTEN → SYN_RCVD → ESTABLISHED\n\n**目的：** 防止已失效的连接请求突然到达服务端",
+    "difficulty_level": 4
+  },
+  {
+    "subject_id": 1,
+    "front_content": "TCP的四次挥手过程是怎样的？",
+    "back_content": "**TCP四次挥手：**\n\n1. 客户端发送FIN，请求关闭连接\n2. 服务端收到FIN，发送ACK确认\n3. 服务端发送FIN，请求关闭连接\n4. 客户端收到FIN，发送ACK确认\n\n**状态变化：**\n- 客户端：ESTABLISHED -> FIN_WAIT_1 -> FIN_WAIT_2 -> TIME_WAIT -> CLOSED\n- 服务端：ESTABLISHED -> CLOSE_WAIT -> LAST_ACK -> CLOSED\n\n**TIME_WAIT：**\n- 客户端等待2MSL（最大段生存时间）\n- 确保最后的ACK到达",
+    "difficulty_level": 4
+  },
+  {
+    "subject_id": 1,
+    "front_content": "TCP的拥塞控制机制是怎样的？",
+    "back_content": "**TCP拥塞控制：**\n\n**四个阶段：**\n\n1. **慢开始**\n   - cwnd从1开始，每RTT翻倍\n   - 到慢开始门限ssthresh\n\n2. **拥塞避免**\n   - cwnd线性增长\n   - 每RTT加1\n\n3. **快重传**\n   - 收到3个重复ACK立即重传\n   - 不等超时\n\n4. **快恢复**\n   - 检测到拥塞后：\n   - ssthresh = cwnd/2\n   - cwnd = ssthresh\n   - 进入拥塞避免\n\n**超时处理：**\n- ssthresh = cwnd/2\n- cwnd = 1，慢开始",
+    "difficulty_level": 5
+  },
+  {
+    "subject_id": 1,
+    "front_content": "UDP报文的首部格式是怎样的？",
+    "back_content": "**UDP首部（8字节）：**\n\n**字段说明：**\n\n- **源端口**：2字节，发送方端口\n- **目的端口**：2字节，接收方端口\n- **长度**：2字节，整个UDP报文长度\n- **校验和**：2字节，可选，检验整个报文\n\n**注意：**\n- UDP首部开销小\n- 校验和计算包含伪首部",
+    "difficulty_level": 3
+  }
+]

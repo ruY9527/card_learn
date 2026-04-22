@@ -1,0 +1,92 @@
+# ============================================================================
+# card-learn-boot 生产环境配置示例
+# 配置文件放置于 jar 同级目录的 conf/ 下
+# ============================================================================
+
+server:
+  port: 8080
+
+spring:
+  application:
+    name: card-learn-boot
+  
+  # 数据源配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/card_learn?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: root
+    password: your_password_here
+    # 连接池配置
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      idle-timeout: 30000
+      max-lifetime: 1800000
+      connection-timeout: 30000
+  
+  # Redis 配置
+  redis:
+    host: localhost
+    port: 6379
+    password: your_redis_password
+    database: 0
+    timeout: 10000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+  
+  # Jackson 配置
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+    serialization:
+      write-dates-as-timestamps: false
+  
+  # MVC 配置
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+
+# MyBatis Plus 配置
+mybatis-plus:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.card.learn.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    # 生产环境关闭 SQL 日志输出
+    # log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: delFlag
+      logic-delete-value: '2'
+      logic-not-delete-value: '0'
+
+# JWT 配置
+jwt:
+  secret: your_jwt_secret_key_here_change_this_in_production
+  expiration: 86400000  # 24小时
+  header: Authorization
+  prefix: Bearer
+
+# Knife4j 配置（生产环境可关闭）
+knife4j:
+  enable: true
+  setting:
+    language: zh-CN
+
+# 日志配置
+logging:
+  level:
+    root: INFO
+    com.card.learn: INFO
+  file:
+    path: logs
+    name: logs/card-learn.log
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      max-history: 30
+      total-size-cap: 1GB

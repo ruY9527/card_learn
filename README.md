@@ -109,12 +109,92 @@ npm run dev:mp-weixin
 ## 开发计划
 
 - [x] 项目初始化
-- [ ] 后端完整API实现
-- [ ] 管理后台完整页面
-- [ ] 小程序完整功能
-- [ ] LaTeX公式渲染支持
+- [x] 后端完整API实现
+- [x] 管理后台完整页面
+- [x] 小程序完整功能
+- [x] LaTeX公式渲染支持
 - [ ] 艾宾浩斯复习提醒
 - [ ] AI辅助录入功能
+
+## 部署脚本
+文件清单
+
+    1. 主管理脚本 card-learn.sh
+
+    使用方法：
+
+     1 ./card-learn.sh <命令> [参数]
+
+    支持命令：
+
+    ┌─────────────┬───────────────┐
+    │ 命令        │ 功能          │
+    ├─────────────┼───────────────┤
+    │ start       │ 启动服务      │
+    ├─────────────┼───────────────┤
+    │ stop        │ 停止服务      │
+    ├─────────────┼───────────────┤
+    │ restart     │ 重启服务      │
+    ├─────────────┼───────────────┤
+    │ status      │ 查看运行状态  │
+    ├─────────────┼───────────────┤
+    │ clean       │ 清理日志      │
+    ├─────────────┼───────────────┤
+    │ logs [type] │ 查看日志      │
+    ├─────────────┼───────────────┤
+    │ tail [type] │ 实时查看日志  │
+    ├─────────────┼───────────────┤
+    │ jvm         │ 显示 JVM 配置 │
+    └─────────────┴───────────────┘
+
+
+    环境变量配置：
+
+     1 export JVM_XMS=512m        # 初始堆内存
+     2 export JVM_XMX=1024m       # 最大堆内存
+     3 export GC_TYPE=G1          # GC 类型 (G1/CMS/Parallel)
+     4 export LOG_RETENTION_DAYS=7  # 日志保留天数
+
+    2. 日志清理脚本 scripts/clean_logs.sh
+
+    定时任务配置（crontab）：
+
+     1 # 每天凌晨3点执行日志清理
+     2 0 3 * * * /path/to/card-learn-boot/scripts/clean_logs.sh >> logs/clean.log 2>&1
+
+    3. 配置文件 conf/application.yml
+     - 生产环境配置示例
+     - 放在 jar 同级目录的 conf/ 下
+
+    4. Logback 配置 src/main/resources/logback-spring.xml
+     - 按日期和大小滚动
+     - 自动清理过期日志
+     - 区分开发和生产环境
+
+    目录结构
+
+      1 card-learn-boot/
+      2   ├── card-learn.jar          # jar 文件
+      3   ├── card-learn.sh           # 管理脚本
+      4   ├── conf/
+      5   │   └── application.yml     # 配置文件
+      6   ├── logs/
+      7   │   ├── console.log         # 控制台日志
+      8   │   ├── gc.log              # GC 日志
+      9   │   ├── card-learn.log      # 应用日志
+     10   │   └── card-learn-error.log # 错误日志
+     11   ├── scripts/
+     12   │   └── clean_logs.sh       # 日志清理脚本
+     13   └── card-learn-boot.pid     # PID 文件
+
+    JVM 配置说明
+
+    脚本默认配置：
+     - 内存: -Xms256m -Xmx512m
+     - GC: G1GC，带详细日志输出
+     - OOM处理: 自动生成 heap dump
+     - 错误日志: JVM crash 日志自动保存
+
 
 ## License
 

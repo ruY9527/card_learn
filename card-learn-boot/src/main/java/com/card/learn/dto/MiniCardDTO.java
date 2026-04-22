@@ -3,6 +3,7 @@ package com.card.learn.dto;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -20,5 +21,7 @@ public class MiniCardDTO implements Serializable {
     private String backContent;
     private Integer difficultyLevel;
     private List<String> tags;
+    private Integer status; // 学习状态：0未学/1模糊/2掌握
+    private LocalDateTime updateTime; // 学习/更新时间
 
 }

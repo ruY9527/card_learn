@@ -114,6 +114,23 @@
             placeholder="答案/解析，支持Markdown/LaTeX格式"
           />
         </el-form-item>
+        <el-form-item label="标签" prop="tagIds">
+          <el-select
+            v-model="formData.tagIds"
+            multiple
+            clearable
+            placeholder="请选择标签"
+            style="width: 100%"
+            popper-class="tag-select-popper"
+          >
+            <el-option
+              v-for="item in allTagList"
+              :key="item.tagId"
+              :label="item.tagName"
+              :value="item.tagId!"
+            />
+          </el-select>
+        </el-form-item>
         <el-form-item label="难度等级" prop="difficultyLevel">
           <el-rate v-model="formData.difficultyLevel" :max="5" />
         </el-form-item>
@@ -197,12 +214,17 @@ const queryParams = reactive({
   pageSize: 10
 })
 
-const formData = reactive<Card>({
+interface CardFormData extends Card {
+  tagIds: number[]
+}
+
+const formData = reactive<CardFormData>({
   cardId: undefined,
   subjectId: undefined as unknown as number,
   frontContent: '',
   backContent: '',
-  difficultyLevel: 1
+  difficultyLevel: 1,
+  tagIds: []
 })
 
 const rules: FormRules = {
@@ -264,6 +286,7 @@ const handleAdd = () => {
   formData.frontContent = ''
   formData.backContent = ''
   formData.difficultyLevel = 1
+  formData.tagIds = []
   dialogVisible.value = true
 }
 
@@ -276,6 +299,13 @@ const handleEdit = async (row: Card) => {
     formData.frontContent = res.data.frontContent
     formData.backContent = res.data.backContent
     formData.difficultyLevel = res.data.difficultyLevel || 1
+    // 获取卡片关联的标签
+    try {
+      const tagRes = await getCardTags(row.cardId!)
+      formData.tagIds = tagRes.data.map((tag: Tag) => tag.tagId!)
+    } catch {
+      formData.tagIds = []
+    }
     dialogVisible.value = true
   } catch (error) {
     console.error(error)
@@ -323,12 +353,18 @@ const handleSubmit = async () => {
   await formRef.value?.validate()
   loading.value = true
   try {
+    let cardId: number | undefined = formData.cardId
     if (formData.cardId) {
       await updateCard(formData)
       ElMessage.success('更新成功')
     } else {
-      await createCard(formData)
+      const res = await createCard(formData)
+      cardId = res.data
       ElMessage.success('创建成功')
+    }
+    // 保存标签关联
+    if (cardId) {
+      await setCardTags(cardId, formData.tagIds)
     }
     dialogVisible.value = false
     fetchData()

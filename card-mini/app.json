@@ -3,7 +3,10 @@
     "pages/index/index",
     "pages/study/study",
     "pages/card/card",
-    "pages/profile/profile"
+    "pages/profile/profile",
+    "pages/feedback/feedback",
+    "pages/feedback-list/feedback-list",
+    "pages/progress-cards/progress-cards"
   ],
   "window": {
     "navigationBarTextStyle": "black",
@@ -21,10 +24,6 @@
       {
         "pagePath": "pages/index/index",
         "text": "首页"
-      },
-      {
-        "pagePath": "pages/study/study",
-        "text": "学习"
       },
       {
         "pagePath": "pages/profile/profile",

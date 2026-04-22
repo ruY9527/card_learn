@@ -67,9 +67,17 @@ public class SysLoginController {
             return Result.error("账号已停用");
         }
         String token = jwtUtil.generateToken(user.getUsername());
+        
+        // 构建用户信息（不返回敏感字段）
+        Map<String, Object> userMap = new HashMap<>();
+        userMap.put("userId", user.getUserId());
+        userMap.put("username", user.getUsername());
+        userMap.put("nickname", user.getNickname());
+        userMap.put("avatar", user.getAvatar());
+        
         Map<String, Object> data = new HashMap<>();
         data.put("token", token);
-        data.put("user", user);
+        data.put("user", userMap);
         return Result.success(data);
     }
 

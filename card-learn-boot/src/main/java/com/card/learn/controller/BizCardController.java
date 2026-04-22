@@ -51,9 +51,9 @@ public class BizCardController {
 
     @PostMapping
     @ApiOperation("新增卡片")
-    public Result<Void> save(@RequestBody BizCard card) {
+    public Result<Long> save(@RequestBody BizCard card) {
         cardService.save(card);
-        return Result.success();
+        return Result.success(card.getCardId());
     }
 
     @PutMapping

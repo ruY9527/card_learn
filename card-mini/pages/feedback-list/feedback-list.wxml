@@ -1,0 +1,65 @@
+<!--pages/feedback-list/feedback-list.wxml-->
+<view class="feedback-list-page">
+  <!-- 未登录提示 -->
+  <view class="empty-tip" wx:if="{{!isLoggedIn}}">
+    <text class="empty-icon">🔒</text>
+    <text class="empty-text">请先登录后查看反馈记录</text>
+    <button class="login-btn" bindtap="goLogin">去登录</button>
+  </view>
+
+  <!-- 反馈列表 -->
+  <view class="feedback-list" wx:if="{{isLoggedIn}}">
+    <block wx:for="{{feedbackList}}" wx:key="id">
+      <view class="feedback-item" bindtap="viewDetail" data-id="{{item.id}}">
+        <!-- 类型标签 -->
+        <view class="feedback-header">
+          <view class="type-tag {{item.type}}">
+            {{typeMap[item.type] || item.type}}
+          </view>
+          <view class="status-tag {{item.status}}">
+            {{statusMap[item.status] || '待处理'}}
+          </view>
+        </view>
+
+        <!-- 内容 -->
+        <view class="feedback-content">
+          {{item.content}}
+        </view>
+
+        <!-- 卡片关联 -->
+        <view class="feedback-card" wx:if="{{item.cardId}}">
+          <text class="card-label">关联卡片:</text>
+          <text class="card-id">#{{item.cardId}}</text>
+        </view>
+
+        <!-- 时间和评分 -->
+        <view class="feedback-meta">
+          <text class="feedback-time">{{item.createTime}}</text>
+          <view class="feedback-rating" wx:if="{{item.rating}}">
+            <block wx:for="{{[1,2,3,4,5]}}" wx:key="*this">
+              <text class="star {{item.rating >= item ? 'active' : ''}}">★</text>
+            </block>
+          </view>
+        </view>
+
+        <!-- 管理员回复 -->
+        <view class="admin-reply" wx:if="{{item.adminReply}}">
+          <view class="reply-label">管理员回复:</view>
+          <view class="reply-content">{{item.adminReply}}</view>
+        </view>
+      </view>
+    </block>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{feedbackList.length === 0 && !loading}}">
+      <text class="empty-icon">📝</text>
+      <text class="empty-text">暂无反馈记录</text>
+      <button class="add-btn" bindtap="goFeedback">提交反馈</button>
+    </view>
+
+    <!-- 加载更多 -->
+    <view class="load-more" wx:if="{{hasMore}}" bindtap="loadMore">
+      <text>{{loading ? '加载中...' : '加载更多'}}</text>
+    </view>
+  </view>
+</view>

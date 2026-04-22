@@ -11,11 +11,15 @@
           <text class="stat-label">已学习</text>
         </view>
         <view class="stat-box">
-          <text class="stat-value text-warning">{{reviewCount}}</text>
+          <text class="stat-value success">{{masteredCount}}</text>
+          <text class="stat-label">已掌握</text>
+        </view>
+        <view class="stat-box">
+          <text class="stat-value warning">{{reviewCount}}</text>
           <text class="stat-label">待复习</text>
         </view>
         <view class="stat-box">
-          <text class="stat-value text-muted">{{totalCount}}</text>
+          <text class="stat-value muted">{{totalCount}}</text>
           <text class="stat-label">总卡片</text>
         </view>
       </view>
@@ -38,7 +42,7 @@
     <view class="quick-start" wx:if="{{cardList.length > 0 && !loading}}">
       <view class="start-btn" bindtap="handleStartStudy">
         <text class="start-icon">📖</text>
-        <text class="start-text">开始连续学习</text>
+        <text class="start-text">开始学习</text>
         <text class="start-hint">左右滑动切换卡片</text>
       </view>
     </view>
@@ -51,21 +55,21 @@
           data-tab="all"
           bindtap="handleTabChange"
         >
-          全部
+          全部({{totalCount}})
         </view>
         <view
           class="tab-item {{currentTab === 'learned' ? 'active' : ''}}"
           data-tab="learned"
           bindtap="handleTabChange"
         >
-          已学
+          已学({{learnedCount}})
         </view>
         <view
           class="tab-item {{currentTab === 'unlearned' ? 'active' : ''}}"
           data-tab="unlearned"
           bindtap="handleTabChange"
         >
-          未学
+          未学({{totalCount - learnedCount}})
         </view>
       </view>
     </view>
@@ -97,8 +101,15 @@
           <text class="card-text">{{item.frontContent || '暂无内容'}}</text>
         </view>
         <view class="card-footer">
-          <text class="card-id">#{{item.cardId}}</text>
-          <text class="view-hint">点击查看详情 →</text>
+          <view class="card-info">
+            <text class="card-subject" wx:if="{{item.subjectName}}">{{item.subjectName}}</text>
+            <text class="card-id">#{{item.cardId}}</text>
+          </view>
+          <text class="view-hint">点击查看 →</text>
+        </view>
+        <!-- 标签显示 -->
+        <view class="card-tags" wx:if="{{item.tags && item.tags.length > 0}}">
+          <text class="tag" wx:for="{{item.tags}}" wx:key="*this" wx:for-item="tag">{{tag}}</text>
         </view>
       </view>
 
@@ -119,8 +130,11 @@
     <!-- 无数据 -->
     <view class="empty" wx:if="{{cardList.length === 0 && !loading && !error}}">
       <view class="empty-icon">📚</view>
-      <text class="empty-text">该科目暂无卡片数据</text>
-      <text class="empty-hint">请通过管理后台添加知识点卡片</text>
+      <text class="empty-text">
+        {{currentTab === 'all' ? '该科目暂无卡片数据' : 
+          (currentTab === 'learned' ? '还没有学习过的卡片' : '所有卡片都已学习')}}
+      </text>
+      <text class="empty-hint" wx:if="{{currentTab === 'all'}}">请通过管理后台添加知识点卡片</text>
     </view>
   </block>
 </view>

@@ -105,6 +105,10 @@
               <text class="hint-icon">👆</text>
               <text class="hint-text">点击返回问题</text>
             </view>
+            <view class="feedback-btn" catchtap="goFeedback">
+              <text class="feedback-icon">📝</text>
+              <text class="feedback-text">纠错反馈</text>
+            </view>
           </view>
         </view>
       </view>

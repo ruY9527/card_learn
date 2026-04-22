@@ -132,3 +132,86 @@ export interface AiCardDTO {
   difficultyLevel: number
   tags?: string[]
 }
+
+// 用户反馈
+export interface Feedback {
+  id?: number
+  appUserId?: number
+  userNickname?: string
+  cardId?: number
+  cardFrontContent?: string
+  type: string
+  rating?: number
+  content: string
+  contact?: string
+  images?: string
+  status?: string
+  adminReply?: string
+  createTime?: string
+  updateTime?: string
+}
+
+// 反馈视图对象（包含用户和卡片信息）
+export interface FeedbackVO {
+  id?: number
+  appUserId?: number
+  userNickname?: string
+  cardId?: number
+  cardFrontContent?: string
+  type: string
+  rating?: number
+  content: string
+  contact?: string
+  images?: string
+  status?: string
+  adminReply?: string
+  createTime?: string
+  updateTime?: string
+}
+
+// 系统请求日志
+export interface RequestLog {
+  id: number
+  requestMethod: string
+  requestUrl: string
+  className: string
+  methodName: string
+  requestParams?: string
+  responseResult?: string
+  executionTime: number
+  status: string
+  errorMsg?: string
+  ipAddress?: string
+  userId?: number
+  userName?: string
+  createTime: string
+}
+
+// 日志统计信息
+export interface LogStats {
+  total: number
+  success: number
+  fail: number
+  today: number
+}
+
+// 系统配置
+export interface SysConfig {
+  id: number
+  configKey: string
+  configValue: string
+  configName: string
+  configType: string
+  description?: string
+  createTime?: string
+  updateTime?: string
+}
+
+// 冲刺配置
+export interface SprintConfig {
+  examName: string
+  examDate: string
+  daysRemaining: number
+  isExpired: boolean
+  enabled: boolean
+}

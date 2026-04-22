@@ -1,5 +1,5 @@
 import request from './request'
-import type { Major, Subject, Card, Tag, PageResult } from './types'
+import type { Major, Subject, Card, Tag, Feedback, FeedbackVO, PageResult } from './types'
 
 // 专业相关
 export const getMajorList = () => {
@@ -49,7 +49,7 @@ export const getCardTags = (id: number) => {
 }
 
 export const createCard = (data: Card) => {
-  return request.post('/card', data)
+  return request.post<any, { data: number }>('/card', data)
 }
 
 export const updateCard = (data: Card) => {
@@ -75,4 +75,25 @@ export const createTag = (data: Tag) => {
 
 export const deleteTag = (id: number) => {
   return request.delete(`/tag/${id}`)
+}
+
+// 反馈相关
+export const getFeedbackPage = (params: { type?: string; status?: string; pageNum: number; pageSize: number }) => {
+  return request.get<any, PageResult<FeedbackVO>>('/feedback/page', { params })
+}
+
+export const getFeedbackById = (id: number) => {
+  return request.get<any, { data: Feedback }>(`/feedback/${id}`)
+}
+
+export const processFeedback = (id: number, status: string, adminReply?: string) => {
+  return request.put(`/feedback/${id}/process`, null, { params: { status, adminReply } })
+}
+
+export const deleteFeedback = (id: number) => {
+  return request.delete(`/feedback/${id}`)
+}
+
+export const getPendingFeedbackCount = () => {
+  return request.get<any, { data: number }>('/feedback/pending/count')
 }

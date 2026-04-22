@@ -30,6 +30,9 @@
           <el-menu-item index="/system/user">用户管理</el-menu-item>
           <el-menu-item index="/system/role">角色管理</el-menu-item>
           <el-menu-item index="/system/menu">菜单管理</el-menu-item>
+          <el-menu-item index="/system/feedback">反馈管理</el-menu-item>
+          <el-menu-item index="/system/log">日志管理</el-menu-item>
+          <el-menu-item index="/system/sprint">冲刺配置</el-menu-item>
         </el-sub-menu>
         <el-menu-item index="/ai">
           <el-icon><MagicStick /></el-icon>

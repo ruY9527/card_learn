@@ -1,0 +1,115 @@
+[
+  {
+    "id": 57,
+    "subject_id": 1,
+    "chapter": "查找",
+    "front_content": "查找的基本概念",
+    "back_content": "**ASL（平均查找长度）** = Σ Pi × Ci\n\n**静态查找表**：只查找，不修改。\n\n**动态查找表**：查找同时可插入删除。\n\n**关键字**：用于区分数据元素的数据项。",
+    "difficulty_level": 1,
+    "tags": [
+      "查找",
+      "ASL",
+      "关键字"
+    ]
+  },
+  {
+    "id": 58,
+    "subject_id": 1,
+    "chapter": "查找",
+    "front_content": "顺序查找",
+    "back_content": "**思想**：从一端开始逐个比较。\n\n**ASL成功**：(n+1)/2\n\n**ASL失败**：n+1\n\n**时间复杂度**：O(n)\n\n**优化**：哨兵、有序表提前终止、高频元素放前。",
+    "difficulty_level": 2,
+    "tags": [
+      "顺序查找",
+      "ASL"
+    ]
+  },
+  {
+    "id": 59,
+    "subject_id": 1,
+    "chapter": "查找",
+    "front_content": "折半查找（二分查找）",
+    "back_content": "**适用条件**：顺序存储、有序、静态查找表。\n\n**ASL** ≈ log₂(n+1) - 1\n\n**时间复杂度**：O(log n)\n\n**判定树高度**：⌈log₂(n+1)⌉\n\n**缺点**：插入删除需移动元素。",
+    "difficulty_level": 2,
+    "tags": [
+      "折半查找",
+      "二分查找",
+      "判定树"
+    ]
+  },
+  {
+    "id": 60,
+    "subject_id": 1,
+    "chapter": "查找",
+    "front_content": "分块查找",
+    "back_content": "**特点**：块间有序，块内无序。\n\n**过程**：索引表折半查找确定块，块内顺序查找。\n\n**最优块大小**：s=√n\n\n**ASL** ≈ log₂b + (s+1)/2",
+    "difficulty_level": 2,
+    "tags": [
+      "分块查找",
+      "索引顺序查找"
+    ]
+  },
+  {
+    "id": 61,
+    "subject_id": 1,
+    "chapter": "查找",
+    "front_content": "什么是二叉排序树（BST）？",
+    "back_content": "**定义**：左子树<根<右子树的二叉树。\n\n**性质**：中序遍历得到有序序列。\n\n**时间复杂度**：最好O(log n)，最坏O(n)。\n\n**删除**：\n- 叶子：直接删\n- 一孩子：孩子替代\n- 两孩子：中序前驱/后继替代",
+    "difficulty_level": 2,
+    "tags": [
+      "二叉排序树",
+      "BST"
+    ]
+  },
+  {
+    "id": 62,
+    "subject_id": 1,
+    "chapter": "查找",
+    "front_content": "什么是平衡二叉树（AVL）？",
+    "back_content": "**定义**：|左子树高度-右子树高度|≤1的BST。\n\n**平衡因子BF** = h左 - h右，BF∈{-1,0,1}\n\n**旋转调整**：\n- LL型：右单旋\n- RR型：左单旋\n- LR型：先左旋后右旋\n- RL型：先右旋后左旋\n\n**查找效率**：O(log n)",
+    "difficulty_level": 4,
+    "tags": [
+      "平衡二叉树",
+      "AVL",
+      "旋转"
+    ]
+  },
+  {
+    "id": 63,
+    "subject_id": 1,
+    "chapter": "查找",
+    "front_content": "什么是B树？",
+    "back_content": "**定义**：多路平衡查找树，所有结点平衡因子为0。\n\n**m阶B树性质**：\n- 根至少2个孩子\n- 非根非叶至少⌈m/2⌉个孩子\n- 有k个孩子有k-1个关键字\n- 叶子在同一层\n\n**高度**：≤log_{⌈m/2⌉}((n+1)/2) + 1",
+    "difficulty_level": 4,
+    "tags": [
+      "B树",
+      "多路平衡"
+    ]
+  },
+  {
+    "id": 64,
+    "subject_id": 1,
+    "chapter": "查找",
+    "front_content": "什么是B+树？",
+    "back_content": "**与B树区别**：\n- 关键字数=孩子数\n- 数据只存叶子\n- 叶子有链表\n- 查找必须到叶子\n\n**优点**：范围查询方便（叶子链表）。",
+    "difficulty_level": 3,
+    "tags": [
+      "B+树",
+      "范围查询"
+    ]
+  },
+  {
+    "id": 65,
+    "subject_id": 1,
+    "chapter": "查找",
+    "front_content": "什么是散列查找？",
+    "back_content": "**散列函数**：H(key)将关键字映射为地址。\n\n**冲突**：不同关键字映射同一地址。\n\n**常用方法**：\n- 除留余数法：H(key)=key mod p\n\n**冲突处理**：\n- 开放定址法\n- 链地址法\n\n**装填因子α**=n/m，越小冲突越少。",
+    "difficulty_level": 3,
+    "tags": [
+      "散列查找",
+      "哈希",
+      "冲突",
+      "装填因子"
+    ]
+  }
+]

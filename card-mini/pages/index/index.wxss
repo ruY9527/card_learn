@@ -157,6 +157,19 @@
   box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
 }
 
+.card-header {
+  margin-bottom: 16rpx;
+}
+
+.subject-tag {
+  display: inline-block;
+  padding: 6rpx 16rpx;
+  font-size: 22rpx;
+  color: #409eff;
+  background-color: #ecf5ff;
+  border-radius: 8rpx;
+}
+
 .card-content {
   font-size: 28rpx;
   color: #303133;

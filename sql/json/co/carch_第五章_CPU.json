@@ -1,0 +1,38 @@
+[
+  {
+    "subject_id": 1,
+    "front_content": "PC（程序计数器）的作用是什么？",
+    "back_content": "**PC（Program Counter）：**\n\n**定义：**\nPC存放下一条指令的地址。\n\n**功能：**\n1. 取指时：PC内容送MAR\n2. 取指后：PC自动加1（或加指令长度）\n3. 执行转移指令时：PC被新地址替换\n\n**PC自增方式：**\n- 按字节寻址：PC + 指令字节数\n- 按字寻址：PC + 1\n\n**注意：**\n- PC位数由存储器地址空间决定\n- PC不一定是字长",
+    "difficulty_level": 3
+  },
+  {
+    "subject_id": 1,
+    "front_content": "MAR和MDR的作用是什么？",
+    "back_content": "**MAR（Memory Address Register）：**\n\n存放要访问的主存单元地址。\n\n**位数：** 与主存地址线宽度相同\n\n**功能：**\n- 地址总线与主存连接\n- CPU访存时地址送MAR\n\n---\n\n**MDR（Memory Data Register）：**\n\n存放从主存读出的数据或要写入主存的数据。\n\n**位数：** 与主存数据线宽度相同\n\n**功能：**\n- 数据总线与主存连接\n- 读操作：主存数据→MDR\n- 写操作：MDR数据→主存",
+    "difficulty_level": 3
+  },
+  {
+    "subject_id": 1,
+    "front_content": "什么是流水线技术？",
+    "back_content": "**流水线技术：**\n\n将指令执行过程分解为若干个子过程，每个子过程由独立的功能部件并行执行。\n\n**基本原理：**\n```\n时间片:  1   2   3   4   5   6   7   8\n指令1:  IF  ID  EX  WB\n指令2:      IF  ID  EX  WB\n指令3:          IF  ID  EX  WB\n指令4:              IF  ID  EX  WB\n```\n\n**流水线阶段：**\n- IF（Instruction Fetch）：取指\n- ID（Instruction Decode）：译码\n- EX（Execute）：执行\n- WB（Write Back）：写回\n\n**理想吞吐率：**\n$$TP = \\frac{n}{T}$$",
+    "difficulty_level": 4
+  },
+  {
+    "subject_id": 1,
+    "front_content": "流水线有哪些冲突？如何解决？",
+    "back_content": "**流水线冲突（Hazard）：**\n\n**1. 结构冲突**\n- 多条指令同时使用同一硬件资源\n- 解决：资源重复配置\n\n**2. 数据冲突**\n- 后续指令需要前面指令的结果\n- 解决方法：\n  - 暂停（ Stall）\n  - 数据旁路（Forwarding）\n  - 编译优化\n\n**3. 控制冲突**\n- 转移指令改变执行顺序\n- 解决方法：\n  - 分支预测\n  - 延迟分支\n  - 预取目标指令",
+    "difficulty_level": 5
+  },
+  {
+    "subject_id": 1,
+    "front_content": "什么是数据旁路技术？",
+    "back_content": "**数据旁路（Forwarding）：**\n\n将前一条指令的执行结果直接送到后一条指令的执行阶段，避免等待写回。\n\n**工作原理：**\n```\n指令1: IF  ID  EX  *──→ WB\n指令2:     IF  ID ←──* EX  WB\n                  (旁路连接)\n```\n\n**优点：**\n- 减少流水线停顿\n- 提高流水线效率\n\n**适用条件：**\n- RAW（Read After Write）冲突\n- 后读前写的情况",
+    "difficulty_level": 4
+  },
+  {
+    "subject_id": 1,
+    "front_content": "什么是超标量处理器？",
+    "back_content": "**超标量处理器：**\n\n**定义：**\n具有多条流水线，可同时发射多条指令并行执行。\n\n**特点：**\n1. 多个执行单元\n2. 多条指令并行发射\n3. 动态指令调度\n\n**与普通流水线的区别：**\n\n| 特性 | 普通流水线 | 超标量 |\n|------|-----------|--------|\n| 指令发射 | 1条/周期 | 多条/周期 |\n| 流水线数 | 1条 | 多条 |\n| 并行度 | 时间并行 | 时间+空间并行 |\n\n**例子：**\n- Intel Core系列\n- AMD Ryzen系列",
+    "difficulty_level": 5
+  }
+]

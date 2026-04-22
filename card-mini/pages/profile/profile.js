@@ -1,5 +1,5 @@
 // pages/profile/profile.js
-const BASE_URL = 'http://localhost:8080'
+const { getCaptcha, login, getSprintConfig } = require('../../utils/request')
 
 Page({
   data: {
@@ -7,6 +7,13 @@ Page({
     userInfo: {
       nickname: '游客',
       avatar: ''
+    },
+    sprintConfig: {
+      enabled: false,
+      examName: '',
+      examDate: '',
+      daysRemaining: 0,
+      isExpired: false
     },
     stats: {
       learned: 0,
@@ -24,37 +31,61 @@ Page({
     password: '',
     captcha: '',
     captchaKey: '',
-    captchaImage: ''
+    captchaImage: '',
+    needNavigateBack: false,  // 是否需要在登录成功后返回上一页
+    showPassword: false,      // 是否显示密码
+    canSubmit: false          // 是否可以提交登录
   },
 
-  onLoad() {
-    this.checkLoginStatus()
+  onLoad(options) {
+    // 先检查本地存储的登录状态（同步）
+    const userInfo = wx.getStorageSync('userInfo')
+    const isLoggedIn = userInfo && userInfo.userId
+
+    this.setData({
+      isLoggedIn,
+      userInfo: isLoggedIn ? userInfo : { nickname: '游客', avatar: '' }
+    })
+
     this.loadLocalData()
     this.fetchStats()
+    this.fetchSprintConfig()
+
+    // 检查是否需要显示登录弹窗（从反馈页面跳转过来）
+    const needShowLogin = wx.getStorageSync('need_show_login')
+    if (needShowLogin && !isLoggedIn) {
+      wx.removeStorageSync('need_show_login')
+      this.setData({ needNavigateBack: true })
+      this.showLoginModal()
+    }
   },
 
   onShow() {
     this.checkLoginStatus()
+    this.fetchSprintConfig()
     if (this.data.isLoggedIn) {
       this.fetchStats()
       this.loadHistory()
+    }
+
+    // 检查是否需要显示登录弹窗（从反馈页面跳转过来）
+    const needShowLogin = wx.getStorageSync('need_show_login')
+    if (needShowLogin && !this.data.isLoggedIn) {
+      wx.removeStorageSync('need_show_login')
+      this.setData({ needNavigateBack: true })
+      this.showLoginModal()
     }
   },
 
   // 检查登录状态
   checkLoginStatus() {
     const userInfo = wx.getStorageSync('userInfo')
-    if (userInfo && userInfo.nickname) {
-      this.setData({
-        isLoggedIn: true,
-        userInfo: userInfo
-      })
-    } else {
-      this.setData({
-        isLoggedIn: false,
-        userInfo: { nickname: '游客', avatar: '' }
-      })
-    }
+    const isLoggedIn = userInfo && userInfo.userId
+
+    this.setData({
+      isLoggedIn,
+      userInfo: isLoggedIn ? userInfo : { nickname: '游客', avatar: '' }
+    })
   },
 
   // 加载本地数据
@@ -83,6 +114,25 @@ Page({
     })
   },
 
+  // 获取冲刺配置
+  fetchSprintConfig() {
+    getSprintConfig().then(res => {
+      if (res && res.data) {
+        this.setData({
+          sprintConfig: {
+            enabled: res.data.enabled || false,
+            examName: res.data.examName || '',
+            examDate: res.data.examDate || '',
+            daysRemaining: res.data.daysRemaining || 0,
+            isExpired: res.data.isExpired || false
+          }
+        })
+      }
+    }).catch(err => {
+      console.error('获取冲刺配置失败:', err)
+    })
+  },
+
   // 点击用户卡片 - 显示登录弹窗
   handleUserCardClick() {
     if (!this.data.isLoggedIn) {
@@ -96,7 +146,9 @@ Page({
       showLoginModal: true,
       username: '',
       password: '',
-      captcha: ''
+      captcha: '',
+      showPassword: false,
+      canSubmit: false
     })
     this.fetchCaptcha()
   },
@@ -108,31 +160,24 @@ Page({
       username: '',
       password: '',
       captcha: '',
-      captchaImage: ''
+      captchaImage: '',
+      showPassword: false,
+      canSubmit: false,
+      needNavigateBack: false
     })
   },
 
   // 获取验证码
-  fetchCaptcha() {
-    wx.request({
-      url: BASE_URL + '/captcha/generate',
-      method: 'GET',
-      success: (res) => {
-        if (res.data && res.data.code === 200) {
-          this.setData({
-            captchaImage: res.data.data.image,
-            captchaKey: res.data.data.key
-          })
-        }
-      },
-      fail: (err) => {
-        console.error('获取验证码失败:', err)
-        wx.showToast({
-          title: '获取验证码失败',
-          icon: 'none'
-        })
-      }
-    })
+  async fetchCaptcha() {
+    try {
+      const captchaData = await getCaptcha()
+      this.setData({
+        captchaImage: captchaData.image,
+        captchaKey: captchaData.key
+      })
+    } catch (error) {
+      console.error('获取验证码失败:', error)
+    }
   },
 
   // 刷新验证码
@@ -144,91 +189,101 @@ Page({
   // 输入账号
   onUsernameInput(e) {
     this.setData({ username: e.detail.value })
+    this.checkCanSubmit()
   },
 
   // 输入密码
   onPasswordInput(e) {
     this.setData({ password: e.detail.value })
+    this.checkCanSubmit()
   },
 
   // 输入验证码
   onCaptchaInput(e) {
     this.setData({ captcha: e.detail.value })
+    this.checkCanSubmit()
   },
 
-  // 执行登录
-  doLogin() {
+  // 清除账号
+  clearUsername() {
+    this.setData({ username: '' })
+    this.checkCanSubmit()
+  },
+
+  // 切换密码显示
+  togglePassword() {
+    this.setData({ showPassword: !this.data.showPassword })
+  },
+
+  // 检查是否可以提交登录
+  checkCanSubmit() {
+    const { username, password, captcha } = this.data
+    const canSubmit = username.trim() && password.trim() && captcha.trim()
+    this.setData({ canSubmit })
+  },
+
+  // 输入框聚焦效果
+  onInputFocus(e) {
+    const field = e.currentTarget.dataset.field
+    console.log('聚焦:', field)
+  },
+
+  // 输入框失焦效果
+  onInputBlur(e) {
+    console.log('失焦')
+  },
+
+  // 执行登录 - 使用统一的登录API
+  async doLogin() {
+    // 检查是否可以提交
+    if (!this.data.canSubmit || this.data.loginLoading) {
+      return
+    }
+
     const { username, password, captcha, captchaKey } = this.data
-
-    if (!username.trim()) {
-      wx.showToast({ title: '请输入账号', icon: 'none' })
-      return
-    }
-
-    if (!password.trim()) {
-      wx.showToast({ title: '请输入密码', icon: 'none' })
-      return
-    }
-
-    if (!captcha.trim()) {
-      wx.showToast({ title: '请输入验证码', icon: 'none' })
-      return
-    }
 
     this.setData({ loginLoading: true })
 
-    wx.request({
-      url: BASE_URL + '/api/miniprogram/login',
-      method: 'POST',
-      data: {
-        username: username.trim(),
-        password: password.trim(),
-        captcha: captcha.trim(),
-        captchaKey: captchaKey
-      },
-      success: (res) => {
-        if (res.data && res.data.code === 200) {
-          const userInfo = res.data.data.user || {
-            userId: Date.now(),
-            nickname: username.trim(),
-            avatar: ''
-          }
+    try {
+      const loginResult = await login({
+        username,
+        password,
+        captcha,
+        captchaKey
+      })
 
-          wx.setStorageSync('userInfo', userInfo)
-          wx.setStorageSync('token', res.data.data.token || '')
+      // 登录成功
+      const userInfo = wx.getStorageSync('userInfo')
+      this.setData({
+        isLoggedIn: true,
+        userInfo: userInfo,
+        showLoginModal: false,
+        username: '',
+        password: '',
+        captcha: '',
+        loginLoading: false,
+        showPassword: false,
+        canSubmit: false
+      })
 
-          this.setData({
-            isLoggedIn: true,
-            userInfo: userInfo,
-            showLoginModal: false,
-            username: '',
-            password: '',
-            captcha: '',
-            loginLoading: false
+      wx.showToast({ title: '登录成功', icon: 'success' })
+      this.fetchStats()
+      this.loadHistory()
+
+      // 如果是从反馈页面跳转过来登录的，重新跳转到反馈页面
+      if (this.data.needNavigateBack) {
+        this.setData({ needNavigateBack: false })
+        setTimeout(() => {
+          wx.navigateTo({
+            url: '/pages/feedback/feedback'
           })
-
-          wx.showToast({ title: '登录成功', icon: 'success' })
-          this.fetchStats()
-          this.loadHistory()
-        } else {
-          wx.showToast({
-            title: res.data.message || '登录失败',
-            icon: 'none'
-          })
-          this.setData({ loginLoading: false })
-          this.refreshCaptcha()
-        }
-      },
-      fail: (err) => {
-        console.error('登录失败:', err)
-        wx.showToast({
-          title: '登录失败，请检查网络',
-          icon: 'none'
-        })
-        this.setData({ loginLoading: false })
-        this.refreshCaptcha()
+        }, 1000)
       }
-    })
+    } catch (error) {
+      console.error('登录失败:', error)
+      this.setData({ loginLoading: false })
+      this.refreshCaptcha()
+    }
   },
 
   // 退出登录
@@ -285,6 +340,46 @@ Page({
           wx.showToast({ title: '已清除', icon: 'success' })
         }
       }
+    })
+  },
+
+  // 去提交反馈
+  goFeedback() {
+    wx.navigateTo({
+      url: '/pages/feedback/feedback'
+    })
+  },
+
+  // 去反馈记录列表
+  goFeedbackList() {
+    wx.navigateTo({
+      url: '/pages/feedback-list/feedback-list'
+    })
+  },
+
+  // 去进度卡片列表页面
+  goToProgressCards(e) {
+    const type = e.currentTarget.dataset.type
+    if (!type) return
+
+    // 未登录时提示
+    if (!this.data.isLoggedIn) {
+      wx.showModal({
+        title: '提示',
+        content: '登录后才能查看学习进度详情',
+        confirmText: '去登录',
+        success: (res) => {
+          if (res.confirm) {
+            this.setData({ needNavigateBack: true })
+            this.showLoginModal()
+          }
+        }
+      })
+      return
+    }
+
+    wx.navigateTo({
+      url: `/pages/progress-cards/progress-cards?type=${type}`
     })
   },
 

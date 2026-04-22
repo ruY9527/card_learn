@@ -1,0 +1,44 @@
+[
+  {
+    "subject_id": 1,
+    "front_content": "什么是Cache？Cache的基本原理是什么？",
+    "back_content": "**Cache的定义：**\nCache是位于CPU和主存之间的高速小容量存储器。\n\n**基本原理：**\n\n**局部性原理：**\n1. **时间局部性**：最近访问的信息可能很快再次访问\n2. **空间局部性**：最近访问的信息附近的信息可能很快访问\n\n**Cache工作方式：**\n- CPU访问数据，先查Cache\n- Cache命中：直接返回数据\n- Cache缺失：从主存调入数据块\n\n**命中率：**\n$$h = \\frac{Cache命中次数}{总访问次数}$$",
+    "difficulty_level": 4
+  },
+  {
+    "subject_id": 1,
+    "front_content": "Cache的命中率和平均访问时间如何计算？",
+    "back_content": "**Cache性能计算：**\n\n**命中率：**\n$$h = \\frac{N_c}{N_c + N_m}$$\n\n其中：$N_c$为Cache命中次数，$N_m$为Cache缺失次数\n\n**缺失率：**\n$$缺失率 = 1 - h$$\n\n**平均访问时间：**\n$$t_a = h \\times t_c + (1-h) \\times t_m$$\n\n其中：\n- $t_c$：Cache访问时间\n- $t_m$：主存访问时间\n\n**效率：**\n$$e = \\frac{t_c}{t_a}$$",
+    "difficulty_level": 4
+  },
+  {
+    "subject_id": 1,
+    "front_content": "Cache的映射方式有哪些？",
+    "back_content": "**Cache映射方式：**\n\n**1. 直接映射**\n- 主存块固定映射到Cache某一行\n- 映射公式：$Cache行号 = 主存块号 \\mod Cache行数$\n- 简单，但冲突率高\n\n**2. 全相联映射**\n- 主存块可映射到任意Cache行\n- 灵活，命中率高\n- 但比较电路复杂\n\n**3. 组相联映射**\n- Cache分组，组内全相联\n- 折中方案\n- 映射公式：$组号 = 主存块号 \\mod 组数$\n\n**比较：**\n\n| 方式 | 灵活性 | 硬件复杂度 | 命中率 |\n|------|--------|-----------|--------|\n| 直接 | 低 | 低 | 低 |\n| 全相联 | 高 | 高 | 高 |\n| 组相联 | 中 | 中 | 中 |",
+    "difficulty_level": 5
+  },
+  {
+    "subject_id": 1,
+    "front_content": "Cache替换算法有哪些？",
+    "back_content": "**Cache替换算法：**\n\n**1. 随机算法（RAND）**\n- 随机选择一行替换\n- 简单，但性能差\n\n**2. 先进先出（FIFO）**\n- 替换最早进入的行\n- 简单，可能替换常用数据\n\n**3. 最近最少使用（LRU）**\n- 替换最长时间未使用的行\n- 性能好，常用\n- 需要记录使用情况\n\n**4. 最不经常使用（LFU）**\n- 替换使用次数最少的行\n\n**注意：** 直接映射无需替换算法",
+    "difficulty_level": 4
+  },
+  {
+    "subject_id": 1,
+    "front_content": "Cache写策略有哪些？",
+    "back_content": "**Cache写策略：**\n\n**1. 写回法（Write-Back）**\n- 写Cache时暂不写主存\n- 替换时才写回主存\n- 减少主存写入次数\n- 需修改位标记\n\n**2. 写直达法（Write-Through）**\n- 写Cache时同时写主存\n- 主存数据始终最新\n- 增加主存写入次数\n\n**3. 写不分配（Write-No-Allocate）**\n- 写缺失时直接写主存，不调入Cache\n\n**4. 写分配（Write-Allocate）**\n- 写缺失时先调入Cache再写入\n\n**推荐搭配：**\n- 写回法 + 写分配\n- 写直达 + 写不分配",
+    "difficulty_level": 4
+  },
+  {
+    "subject_id": 1,
+    "front_content": "什么是虚拟存储器？",
+    "back_content": "**虚拟存储器的定义：**\n\n虚拟存储器是将主存和辅存统一编址，形成一个大范围的虚拟地址空间。\n\n**基本原理：**\n- 程序使用虚拟地址\n- 通过地址转换映射到物理地址\n- 暂时不用的部分放在辅存\n\n**实现方式：**\n\n**1. 页式虚拟存储**\n- 按页划分\n- 页表记录映射\n\n**2. 段式虚拟存储**\n- 按逻辑段划分\n- 段表记录映射\n\n**3. 段页式虚拟存储**\n- 先分段，再分页",
+    "difficulty_level": 4
+  },
+  {
+    "subject_id": 1,
+    "front_content": "什么是TLB（快表）？TLB的作用是什么？",
+    "back_content": "**TLB（Translation Lookaside Buffer）：**\n\nTLB是专门存放页表项的高速缓存，也叫快表。\n\n**作用：**\n- 加速虚拟地址到物理地址的转换\n- 避免每次访问都查主存中的页表\n\n**TLB与Cache的区别：**\n- TLB缓存的是页表项（地址映射）\n- Cache缓存的是数据内容\n\n**地址转换流程：**\n1. 查TLB\n2. TLB命中：直接得到物理地址\n3. TLB缺失：查主存页表\n\n**平均访存时间：**\n$$t = TLB命中率 \\times (TLB时间 + Cache时间) + ...$$",
+    "difficulty_level": 4
+  }
+]

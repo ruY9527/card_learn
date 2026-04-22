@@ -1,11 +1,11 @@
 <!--pages/index/index.wxml-->
 <view class="container">
   <!-- 考研倒计时 -->
-  <view class="countdown-bar">
+  <view class="countdown-bar" wx:if="{{countdownDays > 0 || sprintConfig.enabled}}">
     <view class="countdown-content">
       <view class="countdown-left">
         <text class="countdown-label">{{countdownText}}</text>
-        <text class="countdown-desc">距离考研还有</text>
+        <text class="countdown-desc">{{sprintConfig.examName || '距离考研还有'}}</text>
       </view>
       <view class="countdown-right">
         <text class="countdown-days">{{countdownDays}}</text>
@@ -71,6 +71,9 @@
         data-card-id="{{item.cardId}}"
         bindtap="handleCardClick"
       >
+        <view class="card-header">
+          <text class="subject-tag">{{item.subjectName}}</text>
+        </view>
         <view class="card-content">
           <text>{{item.frontContent}}</text>
         </view>

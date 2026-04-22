@@ -15,7 +15,8 @@ Page({
     pageSize: 20,
     hasMore: true,
     loading: false,
-    isSingleMode: false, // 单卡模式（从首页推荐进入）
+    isSingleMode: false,
+    appUserId: null,
 
     // 滑动相关
     startX: 0,
@@ -27,6 +28,10 @@ Page({
 
   onLoad(options) {
     console.log('卡片页面参数:', options)
+
+    // 获取用户信息
+    const userInfo = wx.getStorageSync('userInfo')
+    const appUserId = userInfo ? userInfo.userId : null
 
     const subjectId = parseInt(options.subjectId) || 0
     const cardId = parseInt(options.cardId) || 0
@@ -40,22 +45,22 @@ Page({
       }
     }
 
-    // 如果没有 subjectId，说明是从首页推荐进入，使用单卡模式
+    this.setData({ appUserId })
+
     if (!subjectId && cardId) {
       this.setData({ isSingleMode: true })
-      this.loadSingleCard(cardId)
+      this.loadSingleCard(cardId, appUserId)
     } else {
-      // 从学习页进入，加载整个科目卡片列表
       this.setData({ subjectId, subjectName, isSingleMode: false })
-      this.loadCards(cardId)
+      this.loadCards(cardId, appUserId)
     }
   },
 
   // 单卡模式：只加载单个卡片
-  loadSingleCard(cardId) {
+  loadSingleCard(cardId, appUserId) {
     this.setData({ loading: true })
 
-    getCardById(cardId).then(res => {
+    getCardById(cardId, appUserId).then(res => {
       console.log('单卡详情:', res)
 
       if (res.data) {
@@ -86,7 +91,7 @@ Page({
   },
 
   // 加载卡片列表（从学习页进入）
-  loadCards(startCardId = 0) {
+  loadCards(startCardId = 0, appUserId) {
     if (this.data.loading) return
 
     this.setData({ loading: true })
@@ -94,14 +99,14 @@ Page({
     getCardPage({
       subjectId: this.data.subjectId,
       pageNum: this.data.pageNum,
-      pageSize: this.data.pageSize
+      pageSize: this.data.pageSize,
+      appUserId: appUserId
     }).then(res => {
       console.log('卡片列表响应:', res)
 
       const cards = res.data && res.data.records ? res.data.records : []
       const total = res.data && res.data.total ? res.data.total : 0
 
-      // 查找起始卡片位置
       let startIndex = 0
       if (startCardId > 0) {
         const idx = cards.findIndex(c => c.cardId === startCardId)
@@ -131,6 +136,8 @@ Page({
   loadMoreCards() {
     if (!this.data.hasMore || this.data.loading) return
 
+    const prevLength = this.data.cardList.length
+
     this.setData({
       pageNum: this.data.pageNum + 1,
       loading: true
@@ -139,7 +146,8 @@ Page({
     getCardPage({
       subjectId: this.data.subjectId,
       pageNum: this.data.pageNum,
-      pageSize: this.data.pageSize
+      pageSize: this.data.pageSize,
+      appUserId: this.data.appUserId
     }).then(res => {
       const newCards = res.data && res.data.records ? res.data.records : []
       const total = res.data && res.data.total ? res.data.total : 0
@@ -147,12 +155,20 @@ Page({
       this.setData({
         cardList: [...this.data.cardList, ...newCards],
         totalCount: total,
-        hasMore: this.data.cardList.length + newCards.length < total,
-        loading: false
+        hasMore: this.data.cardList.length < total,
+        loading: false,
+        // 设置当前卡片为加载后的第一张新卡片
+        currentIndex: prevLength,
+        currentCard: newCards[0] || this.data.cardList[prevLength],
+        isFlipped: false
       })
     }).catch(error => {
       console.error('加载更多失败:', error)
       this.setData({ loading: false })
+      wx.showToast({
+        title: '加载失败',
+        icon: 'none'
+      })
     })
   },
 
@@ -172,6 +188,7 @@ Page({
 
     updateProgress({
       cardId: card.cardId,
+      appUserId: this.data.appUserId,
       status: status
     }).then(() => {
       wx.showToast({
@@ -187,23 +204,27 @@ Page({
         this.setData({ cardList })
       }
 
+      // 更新当前卡片状态
+      const currentCard = this.data.currentCard
+      currentCard.status = status
+      this.setData({ currentCard })
+
       // 保存到本地存储
       this.saveProgressLocal(status)
 
-      // 单卡模式不自动跳转，列表模式自动下一张
+      // 单卡模式不自动跳转
       if (!this.data.isSingleMode) {
         setTimeout(() => {
           this.goToNext()
-        }, 800)
+        }, 1000)
       }
     }).catch(error => {
       console.error('更新进度失败:', error)
-      // 即使失败也保存本地
       this.saveProgressLocal(status)
       if (!this.data.isSingleMode) {
         setTimeout(() => {
           this.goToNext()
-        }, 800)
+        }, 1000)
       }
     })
   },
@@ -212,16 +233,32 @@ Page({
   getStatusToast(status) {
     if (status === 2) return '已掌握 ✓'
     if (status === 1) return '继续加油 ~'
-    return '需要复习 ✗'
+    return '需要复习'
   },
 
   // 保存进度到本地
   saveProgressLocal(status) {
     let stats = wx.getStorageSync('stats') || { learned: 0, mastered: 0, review: 0 }
 
-    if (status >= 1) stats.learned++
-    if (status === 2) stats.mastered++
-    if (status === 1) stats.review++
+    // 防止重复计数
+    const prevStatus = this.data.currentCard.status || 0
+    
+    // 调整计数
+    if (prevStatus === 0 && status >= 1) stats.learned++
+    if (prevStatus === 1 && status === 2) {
+      stats.mastered++
+      stats.review--
+    }
+    if (prevStatus === 0 && status === 1) stats.review++
+    if (prevStatus === 2 && status === 1) {
+      stats.mastered--
+      stats.review++
+    }
+
+    // 确保数值不为负
+    stats.learned = Math.max(0, stats.learned)
+    stats.mastered = Math.max(0, stats.mastered)
+    stats.review = Math.max(0, stats.review)
 
     wx.setStorageSync('stats', stats)
     console.log('保存本地统计:', stats)
@@ -245,7 +282,6 @@ Page({
     const moveX = e.touches[0].clientX - this.data.startX
     const moveY = e.touches[0].clientY - this.data.startY
 
-    // 判断滑动方向（水平优先）
     if (!this.data.swipeDirection) {
       if (Math.abs(moveX) > Math.abs(moveY) && Math.abs(moveX) > 10) {
         this.setData({ swipeDirection: 'horizontal' })
@@ -254,7 +290,6 @@ Page({
       }
     }
 
-    // 只处理水平滑动
     if (this.data.swipeDirection === 'horizontal') {
       this.setData({ moveX })
     }
@@ -266,17 +301,15 @@ Page({
 
     const { moveX, swipeDirection, isSingleMode } = this.data
 
-    // 重置状态
     this.setData({
       isSwiping: false,
       moveX: 0,
       swipeDirection: ''
     })
 
-    // 单卡模式下不支持滑动切换
     if (isSingleMode || swipeDirection !== 'horizontal') return
 
-    const threshold = 80 // 滑动阈值
+    const threshold = 80
 
     if (moveX > threshold) {
       this.goToPrev()
@@ -289,7 +322,7 @@ Page({
   goToPrev() {
     if (this.data.currentIndex <= 0) {
       wx.showToast({
-        title: '已经是第一张了',
+        title: '已经是第一张',
         icon: 'none',
         duration: 1000
       })
@@ -297,19 +330,20 @@ Page({
     }
 
     const newIndex = this.data.currentIndex - 1
+    const newCard = this.data.cardList[newIndex]
     this.setData({
       currentIndex: newIndex,
-      currentCard: this.data.cardList[newIndex],
+      currentCard: newCard,
       isFlipped: false,
       progress: Math.round(((newIndex + 1) / this.data.totalCount) * 100)
     })
+    console.log('切换到上一张:', newIndex, newCard)
   },
 
   // 下一张
   goToNext() {
     const { currentIndex, cardList, totalCount, hasMore, isSingleMode } = this.data
 
-    // 单卡模式提示
     if (isSingleMode) {
       wx.showToast({
         title: '点击返回继续学习',
@@ -331,7 +365,7 @@ Page({
       }
 
       wx.showToast({
-        title: '恭喜！已学习完成',
+        title: '恭喜！已完成学习',
         icon: 'success',
         duration: 2000
       })
@@ -339,12 +373,14 @@ Page({
     }
 
     const newIndex = currentIndex + 1
+    const newCard = cardList[newIndex]
     this.setData({
       currentIndex: newIndex,
-      currentCard: cardList[newIndex],
+      currentCard: newCard,
       isFlipped: false,
       progress: Math.round(((newIndex + 1) / totalCount) * 100)
     })
+    console.log('切换到下一张:', newIndex, newCard)
   },
 
   // 按钮点击上一张
@@ -360,5 +396,25 @@ Page({
   // 返回上一页
   handleBack() {
     wx.navigateBack()
+  },
+
+  // 去反馈页面
+  goFeedback() {
+    const card = this.data.currentCard
+    if (!card) return
+
+    // 跳转到反馈页面，携带卡片ID和正面内容
+    wx.navigateTo({
+      url: `/pages/feedback/feedback?cardId=${card.cardId}&content=${encodeURIComponent(card.frontContent.substring(0, 50))}`
+    })
+  },
+
+  // 分享功能
+  onShareAppMessage() {
+    return {
+      title: `${this.data.subjectName} - 知识点卡片`,
+      path: `/pages/card/card?cardId=${this.data.currentCard.cardId}&subjectId=${this.data.subjectId}&subjectName=${encodeURIComponent(this.data.subjectName)}`,
+      imageUrl: '' // 可自定义分享图片
+    }
   }
 })

@@ -34,10 +34,13 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     }
 
     @Override
-    public Page<SysUser> pageUsers(String username, Integer pageNum, Integer pageSize) {
+    public Page<SysUser> pageUsers(String username, String status, Integer pageNum, Integer pageSize) {
         LambdaQueryWrapper<SysUser> wrapper = new LambdaQueryWrapper<>();
         if (username != null && !username.isEmpty()) {
             wrapper.like(SysUser::getUsername, username);
+        }
+        if (status != null && !status.isEmpty()) {
+            wrapper.eq(SysUser::getStatus, status);
         }
         wrapper.orderByDesc(SysUser::getCreateTime);
         return page(new Page<>(pageNum, pageSize), wrapper);

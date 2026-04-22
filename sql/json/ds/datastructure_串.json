@@ -1,0 +1,73 @@
+[
+  {
+    "id": 35,
+    "subject_id": 1,
+    "chapter": "串",
+    "front_content": "什么是串（String）？",
+    "back_content": "**定义**：串是由零个或多个字符组成的有限序列。\n\n**表示**：\n$$S = \"a_1 a_2 \\ldots a_n\"$$\n- $n$：串的长度，$n=0$ 时为空串\n- $a_i$：字符，可以是字母、数字或其他字符\n\n**术语**：\n- **空串**：长度为 0 的串，记为 `\"\"`\n- **空格串**：由空格字符组成的串，如 `\" \"`（长度为 1）\n- **子串**：串中任意连续字符组成的子序列\n- **主串**：包含子串的串\n- **位置**：字符在串中的序号（从 1 开始）\n\n**基本操作**：\n- `StrAssign(S, chars)`：赋值\n- `StrCopy(S, T)`：复制\n- `StrLength(S)`：求长度\n- `StrCompare(S, T)`：比较\n- `Concat(S, T)`：连接\n- `SubString(S, pos, len)`：求子串\n- `Index(S, T, pos)`：定位（模式匹配）",
+    "difficulty_level": 1,
+    "tags": [
+      "串",
+      "定义",
+      "子串",
+      "空串"
+    ]
+  },
+  {
+    "id": 36,
+    "subject_id": 1,
+    "chapter": "串",
+    "front_content": "串的存储结构有哪些？",
+    "back_content": "**顺序存储**：\n\n**定长顺序存储**：\n```c\n#define MAXLEN 255\ntypedef struct {\n    char ch[MAXLEN];\n    int length;\n} SString;\n```\n\n**堆分配存储**（动态分配）：\n```c\ntypedef struct {\n    char *ch;\n    int length;\n} HString;\n```\n\n**链式存储**：\n- 每个结点可存储一个或多个字符\n- 存储密度问题：一个字符时密度低，多个字符时操作复杂\n\n```c\ntypedef struct Chunk {\n    char ch[4];  // 每个结点存4个字符\n    struct Chunk *next;\n} Chunk;\n\ntypedef struct {\n    Chunk *head, *tail;\n    int curlen;\n} LString;\n```",
+    "difficulty_level": 2,
+    "tags": [
+      "串",
+      "顺序存储",
+      "链式存储",
+      "堆分配"
+    ]
+  },
+  {
+    "id": 37,
+    "subject_id": 1,
+    "chapter": "串",
+    "front_content": "什么是朴素模式匹配算法（BF算法）？",
+    "back_content": "**定义**：从主串第一个字符开始，逐个字符与模式串匹配。\n\n**算法思想**：\n- 主串指针 `i`，模式串指针 `j`\n- 匹配成功：两指针同时后移\n- 匹配失败：`i` 回退到起始位置+1，`j` 回退到 0\n\n**时间复杂度**：\n- 最好情况：$O(m)$（模式串长度，第一次就匹配成功）\n- 最坏情况：$O(n \\times m)$（主串长度 $n$，模式串长度 $m$）\n- 平均情况：$O(n \\times m)$\n\n**示例**：\n主串 `\"ababcabcacbab\"`，模式串 `\"abcac\"`\n最坏情况需要多次回溯",
+    "difficulty_level": 2,
+    "tags": [
+      "串",
+      "BF算法",
+      "朴素模式匹配",
+      "时间复杂度"
+    ]
+  },
+  {
+    "id": 38,
+    "subject_id": 1,
+    "chapter": "串",
+    "front_content": "什么是KMP算法？",
+    "back_content": "**定义**：KMP算法利用已匹配信息，避免主串指针回溯。\n\n**核心思想**：\n- 主串指针 `i` 不回溯\n- 模式串指针 `j` 回溯到适当位置\n- 利用 `next` 数组决定 `j` 的回溯位置\n\n**next 数组**：\n- `next[j]`：模式串第 $j$ 个字符失配时，$j$ 应回溯的位置\n- 含义：模式串前 $j-1$ 个字符中，最长相等前后缀的长度\n\n**next 数组计算规则**：\n$$next[j] = \\begin{cases} 0 & j=1 \\ \\max\\{k | p_1\\ldots p_{k-1} = p_{j-k+1}\\ldots p_{j-1}\\} & 存在相等前后缀 \\ 1 & 否则 \\end{cases}$$\n\n**时间复杂度**：$O(n + m)$\n\n**next 数组示例**：\n模式串 `\"abaabc\"` 的 next 数组：\n| j | 模式串 | next[j] |\n|---|--------|---------|\n| 1 | a | 0 |\n| 2 | b | 1 |\n| 3 | a | 1 |\n| 4 | a | 2 |\n| 5 | b | 3 |\n| 6 | c | 1 |",
+    "difficulty_level": 4,
+    "tags": [
+      "串",
+      "KMP算法",
+      "next数组",
+      "模式匹配"
+    ]
+  },
+  {
+    "id": 39,
+    "subject_id": 1,
+    "chapter": "串",
+    "front_content": "next数组与nextval数组的区别",
+    "back_content": "**next数组的问题**：\n- 若 `p[j] == p[next[j]]`，失配后回溯到 `next[j]` 仍会失配\n- 造成不必要的比较\n\n**nextval数组优化**：\n- 若 `p[j] == p[next[j]]`，则 `nextval[j] = nextval[next[j]]`\n- 否则 `nextval[j] = next[j]`\n\n**计算方法**：\n```c\nvoid get_nextval(String P, int nextval[]) {\n    int j = 1, k = 0;\n    nextval[1] = 0;\n    while (j < P.length) {\n        if (k == 0 || P.ch[j] == P.ch[k]) {\n            j++; k++;\n            if (P.ch[j] != P.ch[k]) nextval[j] = k;\n            else nextval[j] = nextval[k];\n        } else {\n            k = nextval[k];\n        }\n    }\n}\n```\n\n**示例对比**：\n模式串 `\"abaabc\"`：\n| j | 模式串 | next[j] | nextval[j] |\n|---|--------|---------|-------------|\n| 1 | a | 0 | 0 |\n| 2 | b | 1 | 1 |\n| 3 | a | 1 | 0 |\n| 4 | a | 2 | 2 |\n| 5 | b | 3 | 1 |\n| 6 | c | 1 | 1 |",
+    "difficulty_level": 4,
+    "tags": [
+      "串",
+      "KMP算法",
+      "next数组",
+      "nextval数组",
+      "优化"
+    ]
+  }
+]

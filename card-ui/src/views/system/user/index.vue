@@ -12,7 +12,12 @@
           <el-input v-model="queryParams.username" placeholder="请输入用户名" clearable />
         </el-form-item>
         <el-form-item label="状态">
-          <el-select v-model="queryParams.status" placeholder="请选择状态" clearable>
+          <el-select
+            v-model="queryParams.status"
+            placeholder="请选择状态"
+            clearable
+            class="status-select"
+          >
             <el-option label="正常" value="0" />
             <el-option label="停用" value="1" />
           </el-select>
@@ -23,9 +28,22 @@
       </el-form>
       <el-table :data="tableData" border stripe v-loading="loading">
         <el-table-column prop="userId" label="用户ID" width="80" />
-        <el-table-column prop="username" label="用户名" />
+        <el-table-column prop="username" label="用户名">
+          <template #default="{ row }">
+            <div class="username-cell">
+              <span>{{ row.username }}</span>
+              <el-tag
+                :type="row.status === '0' ? 'success' : 'danger'"
+                size="small"
+                class="mobile-status-tag"
+              >
+                {{ row.status === '0' ? '正常' : '停用' }}
+              </el-tag>
+            </div>
+          </template>
+        </el-table-column>
         <el-table-column prop="nickname" label="昵称" />
-        <el-table-column prop="status" label="状态" width="80">
+        <el-table-column prop="status" label="状态" width="80" class-name="status-column">
           <template #default="{ row }">
             <el-tag :type="row.status === '0' ? 'success' : 'danger'">
               {{ row.status === '0' ? '正常' : '停用' }}
@@ -75,10 +93,16 @@
           <el-input v-model="formData.nickname" placeholder="请输入昵称" />
         </el-form-item>
         <el-form-item label="状态" prop="status">
-          <el-radio-group v-model="formData.status">
-            <el-radio label="正常" value="0" />
-            <el-radio label="停用" value="1" />
+          <!-- 大屏幕：使用单选按钮组 -->
+          <el-radio-group v-model="formData.status" class="status-radio-group">
+            <el-radio value="0">正常</el-radio>
+            <el-radio value="1">停用</el-radio>
           </el-radio-group>
+          <!-- 小屏幕：使用下拉框 -->
+          <el-select v-model="formData.status" class="status-select-mobile">
+            <el-option label="正常" value="0" />
+            <el-option label="停用" value="1" />
+          </el-select>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -157,6 +181,7 @@ const formData = reactive<SysUser>({
 
 const rules: FormRules = {
   username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
+  password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
   nickname: [{ required: true, message: '请输入昵称', trigger: 'blur' }]
 }
 
@@ -298,6 +323,92 @@ onMounted(() => {
   .el-pagination {
     margin-top: 16px;
     justify-content: flex-end;
+  }
+
+  .username-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .mobile-status-tag {
+      display: none;
+    }
+  }
+
+  // 搜索表单状态下拉框固定宽度
+  .status-select {
+    width: 120px;
+  }
+}
+
+// 对话框中的状态组件响应式
+.status-radio-group {
+  display: inline-flex;
+}
+
+.status-select-mobile {
+  display: none;
+  width: 100%;
+}
+
+@media screen and (max-width: 576px) {
+  // 小屏幕下对话框：隐藏单选按钮，显示下拉框
+  .status-radio-group {
+    display: none;
+  }
+
+  .status-select-mobile {
+    display: inline-flex;
+  }
+}
+
+// 响应式布局：小屏幕隐藏状态列，显示用户名旁的状态标签
+@media screen and (max-width: 768px) {
+  .user-page {
+    // 隐藏状态列（td 单元格）
+    :deep(.status-column) {
+      display: none;
+    }
+
+    // 隐藏状态列的表头（第4列：状态）
+    :deep(.el-table__header-wrapper th:nth-child(4)) {
+      display: none;
+    }
+
+    // 显示用户名旁的移动端状态标签
+    .username-cell .mobile-status-tag {
+      display: inline-flex;
+    }
+
+    // 搜索表单响应式
+    .search-form .el-form-item {
+      margin-bottom: 12px;
+    }
+  }
+}
+
+// 超小屏幕优化
+@media screen and (max-width: 576px) {
+  .user-page {
+    .card-header {
+      flex-direction: column;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .search-form {
+      .el-form-item {
+        width: 100%;
+        .el-input, .el-select {
+          width: 100%;
+        }
+      }
+
+      // 状态下拉框自适应
+      .status-select {
+        width: 100%;
+      }
+    }
   }
 }
 </style>

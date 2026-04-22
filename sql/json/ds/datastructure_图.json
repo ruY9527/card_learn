@@ -1,0 +1,122 @@
+[
+  {
+    "id": 48,
+    "subject_id": 1,
+    "chapter": "图",
+    "front_content": "什么是图？",
+    "back_content": "**定义**：G=(V, E)，顶点集V和边集E。\n\n**基本概念**：\n- 有向图：边有方向 <v,w>\n- 无向图：边无方向 (v,w)\n- 完全图：任意两顶点都有边\n  - 有向完全图：n(n-1)条边\n  - 无向完全图：n(n-1)/2条边",
+    "difficulty_level": 2,
+    "tags": [
+      "图",
+      "有向图",
+      "无向图",
+      "完全图"
+    ]
+  },
+  {
+    "id": 49,
+    "subject_id": 1,
+    "chapter": "图",
+    "front_content": "图的度数与边数关系",
+    "back_content": "**无向图**：Σd(v) = 2|E|（所有度数之和=边数×2）\n\n**有向图**：Σ入度 = Σ出度 = |E|\n\n**结论**：无向图所有顶点度数之和一定是偶数。",
+    "difficulty_level": 2,
+    "tags": [
+      "度数",
+      "边数",
+      "入度",
+      "出度"
+    ]
+  },
+  {
+    "id": 50,
+    "subject_id": 1,
+    "chapter": "图",
+    "front_content": "图的连通性概念",
+    "back_content": "**连通**：两顶点间存在路径。\n\n**连通分量**：无向图的极大连通子图。\n\n**强连通**：有向图中两顶点双向连通。\n\n**强连通分量**：有向图的极大强连通子图。\n\n**生成树**：连通图的极小连通子图（n顶点n-1边）。",
+    "difficulty_level": 2,
+    "tags": [
+      "连通",
+      "连通分量",
+      "强连通",
+      "生成树"
+    ]
+  },
+  {
+    "id": 51,
+    "subject_id": 1,
+    "chapter": "图",
+    "front_content": "图的存储结构",
+    "back_content": "**邻接矩阵**：二维数组，空间O(n²)，判断有无边O(1)，适合稠密图。\n\n**邻接表**：链表数组，空间O(n+e)，适合稀疏图。\n\n**对比**：\n- 邻接矩阵：随机访问快，空间大\n- 邻接表：空间省，求入度需遍历",
+    "difficulty_level": 3,
+    "tags": [
+      "邻接矩阵",
+      "邻接表",
+      "存储结构"
+    ]
+  },
+  {
+    "id": 52,
+    "subject_id": 1,
+    "chapter": "图",
+    "front_content": "图的遍历：DFS和BFS",
+    "back_content": "**DFS（深度优先）**：递归/栈，邻接矩阵O(n²)，邻接表O(n+e)。\n\n**BFS（广度优先）**：队列，同DFS时间复杂度。\n\n**应用**：\n- DFS：拓扑排序、检测环\n- BFS：最短路径（无权）",
+    "difficulty_level": 2,
+    "tags": [
+      "DFS",
+      "BFS",
+      "遍历"
+    ]
+  },
+  {
+    "id": 53,
+    "subject_id": 1,
+    "chapter": "图",
+    "front_content": "最小生成树算法",
+    "back_content": "**定义**：边权值之和最小的生成树。\n\n**Prim算法**：顶点扩张，O(n²)，适合稠密图。\n\n**Kruskal算法**：边扩张，O(e log e)，适合稀疏图。\n\n**性质**：MST包含n顶点n-1边，权值唯一但树不唯一。",
+    "difficulty_level": 3,
+    "tags": [
+      "最小生成树",
+      "Prim",
+      "Kruskal"
+    ]
+  },
+  {
+    "id": 54,
+    "subject_id": 1,
+    "chapter": "图",
+    "front_content": "最短路径算法",
+    "back_content": "**Dijkstra**：单源最短路径，贪心，O(n²)，不适用负权边。\n\n**Floyd**：各顶点间最短路径，动态规划，O(n³)，可处理负权边。\n\n**选择**：单源用Dijkstra，多源用Floyd。",
+    "difficulty_level": 3,
+    "tags": [
+      "最短路径",
+      "Dijkstra",
+      "Floyd"
+    ]
+  },
+  {
+    "id": 55,
+    "subject_id": 1,
+    "chapter": "图",
+    "front_content": "什么是拓扑排序？",
+    "back_content": "**定义**：DAG的顶点排序，每个顶点在前驱之后出现。\n\n**算法**：选择入度为0的顶点输出，删除其出边，重复。\n\n**时间复杂度**：O(n+e)\n\n**判断环**：输出顶点数<总顶点数则存在环。",
+    "difficulty_level": 2,
+    "tags": [
+      "拓扑排序",
+      "DAG",
+      "入度"
+    ]
+  },
+  {
+    "id": 56,
+    "subject_id": 1,
+    "chapter": "图",
+    "front_content": "什么是关键路径？",
+    "back_content": "**定义**：AOE网中从源点到汇点的最长路径。\n\n**关键概念**：\n- ve(v)：事件最早发生时间\n- vl(v)：事件最迟发生时间\n- 关键活动：e(a)=l(a)的活动\n\n**关键路径**：所有关键活动构成的路径。",
+    "difficulty_level": 4,
+    "tags": [
+      "关键路径",
+      "AOE网",
+      "关键活动"
+    ]
+  }
+]

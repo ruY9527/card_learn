@@ -50,9 +50,18 @@ public class SecurityConfig {
                 "/v2/api-docs/**",
                 "/v3/api-docs/**"
             ).permitAll()
-            // 放行接口 - 小程序公开API（无需登录验证）
+            // 放行接口 - 小程序公开API（无需登录验证，但反馈接口需要认证）
             .antMatchers(
-                "/api/miniprogram/**"
+                "/api/miniprogram/majors",
+                "/api/miniprogram/subjects",
+                "/api/miniprogram/cards",
+                "/api/miniprogram/cards/**",
+                "/api/miniprogram/progress",
+                "/api/miniprogram/stats",
+                "/api/miniprogram/subjects/**/stats",
+                "/api/miniprogram/review",
+                "/api/miniprogram/recommend",
+                "/api/miniprogram/sprint-config"
             ).permitAll()
             // 其他请求需要认证
             .anyRequest().authenticated()

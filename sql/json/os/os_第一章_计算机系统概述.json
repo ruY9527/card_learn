@@ -1,0 +1,128 @@
+[
+  {
+    "subject_id": 1,
+    "front_content": "什么是操作系统？",
+    "back_content": "操作系统（Operating System, OS）是计算机系统中最基本的系统软件，是管理和控制计算机硬件与软件资源的程序集合。\n\n**主要功能：**\n- 管理硬件资源（CPU、内存、I/O设备）\n- 提供用户接口\n- 为应用程序提供运行环境",
+    "difficulty_level": 2
+  },
+  {
+    "subject_id": 1,
+    "front_content": "操作系统的主要功能有哪些？",
+    "back_content": "**操作系统的四大基本功能：**\n\n1. **处理机管理**：进程控制、进程同步、进程通信、调度\n2. **存储器管理**：内存分配与回收、地址映射、内存保护、内存扩充\n3. **设备管理**：缓冲管理、设备分配、设备处理\n4. **文件管理**：文件存储空间管理、目录管理、文件读写管理与保护",
+    "difficulty_level": 3
+  },
+  {
+    "subject_id": 1,
+    "front_content": "操作系统的特征有哪些？",
+    "back_content": "**操作系统的四大特征：**\n\n1. **并发性**：两个或多个事件在同一时间间隔内发生\n2. **共享性**：系统资源可供内存中多个并发执行的进程共同使用\n3. **虚拟性**：将一个物理实体映射为若干个逻辑实体\n4. **异步性**：进程执行具有不确定性，执行顺序和速度不可预知",
+    "difficulty_level": 3
+  },
+  {
+    "subject_id": 1,
+    "front_content": "并发和并行有什么区别？",
+    "back_content": "**并发（Concurrency）：**\n- 单核CPU环境下，宏观上同时执行，微观上交替执行\n- 时间片轮转实现\n\n**并行（Parallelism）：**\n- 多核CPU环境下，多个程序真正同时执行\n- 需要硬件支持\n\n**关键区别：**\n- 并发是逻辑上的同时\n- 并行是物理上的同时",
+    "difficulty_level": 3
+  },
+  {
+    "subject_id": 1,
+    "front_content": "操作系统的发展经历了哪些阶段？",
+    "back_content": "**操作系统发展阶段：**\n\n1. **手工操作阶段**：无OS，用户直接操作硬件\n2. **批处理阶段**：单道批处理→多道批处理\n3. **分时操作系统**：时间片轮转，交互性强\n4. **实时操作系统**：实时响应，可靠性高\n5. **现代操作系统**：网络OS、分布式OS、嵌入式OS等",
+    "difficulty_level": 3
+  },
+  {
+    "subject_id": 1,
+    "front_content": "什么是批处理操作系统？有什么特点？",
+    "back_content": "**批处理操作系统：**\n\n将一批作业提交给操作系统，由操作系统控制自动运行。\n\n**单道批处理特点：**\n- 内存中只保持一道作业\n- 作业自动顺序执行\n- CPU与I/O串行，利用率低\n\n**多道批处理特点：**\n- 内存中同时保持多道作业\n- CPU与I/O并行，利用率高\n- 无交互能力",
+    "difficulty_level": 3
+  },
+  {
+    "subject_id": 1,
+    "front_content": "分时操作系统有什么特点？",
+    "back_content": "**分时操作系统特点：**\n\n1. **多路性**：多个用户同时使用一台计算机\n2. **独立性**：各用户独立操作，互不干扰\n3. **及时性**：用户请求能在短时间内得到响应\n4. **交互性**：用户可以进行人机对话\n\n**关键：** 时间片轮转技术实现",
+    "difficulty_level": 3
+  },
+  {
+    "subject_id": 1,
+    "front_content": "实时操作系统与分时操作系统有什么区别？",
+    "back_content": "**实时操作系统 vs 分时操作系统：**\n\n| 特性 | 实时OS | 分时OS |\n|------|--------|--------|\n| 响应时间 | 毫秒/微秒级 | 秒级 |\n| 可靠性 | 极高 | 一般 |\n| 交互性 | 弱 | 强 |\n| 应用场景 | 工业/军事控制 | 办公/学习 |\n\n**实时OS特点：**\n- 实时响应\n- 高可靠性\n- 时限约束",
+    "difficulty_level": 4
+  },
+  {
+    "subject_id": 1,
+    "front_content": "操作系统的运行机制有哪些？",
+    "back_content": "**操作系统的运行机制：**\n\n1. **特权指令**：只能由操作系统内核使用的指令（如I/O指令、置中断指令）\n2. **非特权指令**：用户程序可以使用的指令\n\n**处理器状态：**\n- **核心态（管态）**：可执行所有指令\n- **用户态（目态）**：只能执行非特权指令\n\n**状态切换：**\n- 用户态→核心态：通过中断/异常\n- 核心态→用户态：通过特权指令",
+    "difficulty_level": 4
+  },
+  {
+    "subject_id": 1,
+    "front_content": "什么是中断？中断的作用是什么？",
+    "back_content": "**中断的定义：**\n中断是指CPU对系统中或系统外发生的异步事件的响应。\n\n**中断的作用：**\n1. 实现多道程序并发执行\n2. 实现用户态与核心态的转换\n3. 实现I/O操作与CPU操作并行\n4. 实现人机交互\n\n**中断类型：**\n- **外中断（中断）**：来自CPU外部的事件\n- **内中断（异常）**：来自CPU内部的事件",
+    "difficulty_level": 4
+  },
+  {
+    "subject_id": 1,
+    "front_content": "中断和异常有什么区别？",
+    "back_content": "**中断 vs 异常：**\n\n| 特性 | 中断 | 异常 |\n|------|------|------|\n| 来源 | CPU外部 | CPU内部 |\n| 时机 | 异步 | 同步 |\n| 处理 | 返回下一条指令 | 可能返回当前指令 |\n\n**常见例子：**\n- **中断**：I/O中断、时钟中断\n- **异常**：除零错误、缺页异常、非法操作码",
+    "difficulty_level": 4
+  },
+  {
+    "subject_id": 1,
+    "front_content": "中断处理的过程是怎样的？",
+    "back_content": "**中断处理过程：**\n\n1. **中断请求**：外部设备向CPU发出中断信号\n2. **中断判优**：如果有多个中断，选择优先级最高的\n3. **中断响应**：\n   - 保存断点（PC）\n   - 保存程序状态字（PSW）\n   - 找到中断服务程序入口地址\n4. **中断处理**：执行中断服务程序\n5. **中断返回**：恢复现场，返回断点",
+    "difficulty_level": 4
+  },
+  {
+    "subject_id": 1,
+    "front_content": "什么是系统调用？",
+    "back_content": "**系统调用的定义：**\n系统调用是操作系统提供给应用程序的编程接口，是用户程序获得操作系统服务的唯一途径。\n\n**系统调用的过程：**\n1. 用户程序执行系统调用指令（如int 0x80）\n2. 从用户态切换到核心态\n3. 执行相应的系统调用处理程序\n4. 返回用户态\n\n**常见系统调用：**\n- 进程控制：fork, exec, exit\n- 文件操作：open, read, write\n- 进程通信：pipe, shmget",
+    "difficulty_level": 4
+  },
+  {
+    "subject_id": 1,
+    "front_content": "生产者-消费者问题如何解决？",
+    "back_content": "**生产者-消费者问题：**\n\n```c\nsemaphore mutex = 1;    // 互斥信号量\nsemaphore empty = n;    // 空缓冲区数量\nsemaphore full = 0;     // 满缓冲区数量\n\nProducer() {\n    while (true) {\n        生产一个产品;\n        P(empty);\n        P(mutex);\n        将产品放入缓冲区;\n        V(mutex);\n        V(full);\n    }\n}\n\nConsumer() {\n    while (true) {\n        P(full);\n        P(mutex);\n        从缓冲区取出产品;\n        V(mutex);\n        V(empty);\n        消费产品;\n    }\n}\n```\n\n**注意：** P(empty/full) 和 P(mutex) 的顺序不能颠倒，否则会死锁！",
+    "difficulty_level": 5
+  },
+  {
+    "subject_id": 1,
+    "front_content": "读者-写者问题如何解决？",
+    "back_content": "**读者-写者问题（读者优先）：**\n\n```c\nsemaphore mutex = 1;    // 保护readcount\nsemaphore wrt = 1;      // 写者互斥\nint readcount = 0;      // 读者计数\n\nReader() {\n    P(mutex);\n    readcount++;\n    if (readcount == 1)\n        P(wrt);         // 第一个读者阻塞写者\n    V(mutex);\n    \n    读取数据;\n    \n    P(mutex);\n    readcount--;\n    if (readcount == 0)\n        V(wrt);         // 最后一个读者唤醒写者\n    V(mutex);\n}\n\nWriter() {\n    P(wrt);\n    写入数据;\n    V(wrt);\n}\n```\n\n**问题：** 读者优先可能导致写者饥饿",
+    "difficulty_level": 5
+  },
+  {
+    "subject_id": 1,
+    "front_content": "哲学家进餐问题如何解决？",
+    "back_content": "**哲学家进餐问题：**\n\n五个哲学家围坐，每人左右各一根筷子。\n\n**解决方案（限制同时就餐人数）：**\n\n```c\nsemaphore chopstick[5] = {1, 1, 1, 1, 1};\nsemaphore mutex = 1;    // 限制同时就餐人数\n\nPhilosopher(int i) {\n    while (true) {\n        思考;\n        \n        P(mutex);        // 限制就餐人数\n        P(chopstick[i]);      // 拿左筷子\n        P(chopstick[(i+1)%5]); // 拿右筷子\n        \n        进餐;\n        \n        V(chopstick[i]);\n        V(chopstick[(i+1)%5]);\n        V(mutex);\n    }\n}\n```\n\n**其他方案：**\n- 奇数号先拿左，偶数号先拿右\n- 同时拿两根筷子",
+    "difficulty_level": 5
+  },
+  {
+    "subject_id": 1,
+    "front_content": "银行家算法的原理是什么？",
+    "back_content": "**银行家算法：**\n\n**核心数据结构：**\n- Available[]：可用资源向量\n- Max[][]：最大需求矩阵\n- Allocation[][]：已分配矩阵\n- Need[][]：需求矩阵 = Max - Allocation\n\n**安全性算法：**\n1. 初始化 Work = Available, Finish[i] = false\n2. 找一个满足 Need[i] ≤ Work 且 Finish[i] = false 的进程\n3. 执行进程：Work += Allocation[i], Finish[i] = true\n4. 若所有 Finish[i] = true，则安全\n\n**请求算法：**\n1. 若 Request[i] ≤ Need[i] 且 Request[i] ≤ Available\n2. 试探分配，检查是否安全\n3. 安全则真正分配，否则等待",
+    "difficulty_level": 5
+  },
+  {
+    "subject_id": 1,
+    "front_content": "连续分配方式有哪些？",
+    "back_content": "**连续分配方式：**\n\n1. **单一连续分配**\n   - 内存分为系统区、用户区\n   - 单道程序环境\n   - 简单，但内存利用率低\n\n2. **固定分区分配**\n   - 预先将内存划分为固定大小的分区\n   - 分区大小相等或不等\n   - 内部碎片问题\n\n3. **动态分区分配**\n   - 按进程需要动态划分\n   - 外部碎片问题\n   - 需要内存紧凑\n\n**碎片类型：**\n- **内部碎片**：分配给进程的内存中，未被使用的部分\n- **外部碎片**：内存中存在的无法利用的小空闲区",
+    "difficulty_level": 4
+  },
+  {
+    "subject_id": 1,
+    "front_content": "动态分区分配算法有哪些？",
+    "back_content": "**动态分区分配算法：**\n\n1. **首次适应算法（First Fit）**\n   - 从头开始找，第一个足够大的空闲区\n   - 简单高效，产生大碎片在后面\n\n2. **最佳适应算法（Best Fit）**\n   - 找最小的足够大的空闲区\n   - 产生最多外部碎片\n\n3. **最坏适应算法（Worst Fit）**\n   - 找最大的空闲区\n   - 避免产生小碎片，但大进程可能无空间\n\n4. **临近适应算法（Next Fit）**\n   - 从上次分配位置开始找\n   - 分配均匀，但大碎片会被分散\n\n**推荐：首次适应算法（综合性能最好）**",
+    "difficulty_level": 4
+  },
+  {
+    "subject_id": 1,
+    "front_content": "什么是缺页中断？缺页中断处理过程是什么？",
+    "back_content": "**缺页中断的定义：**\n进程访问的页面不在内存中时，产生缺页中断。\n\n**缺页中断处理过程：**\n\n1. **检查**：检查页表，发现页面不在内存\n2. **中断**：产生缺页中断，转操作系统处理\n3. **查找**：在外存找到所需页面\n4. **分配**：在内存中找空闲页框\n   - 有空闲：直接分配\n   - 无空闲：执行页面置换算法\n5. **调入**：将页面从外存调入内存\n6. **更新**：更新页表\n7. **返回**：重新执行引起缺页的指令\n\n**注意：** 缺页中断属于内中断（异常）",
+    "difficulty_level": 4
+  },
+  {
+    "subject_id": 1,
+    "front_content": "什么是Belady异常？",
+    "back_content": "**Belady异常：**\n\n在采用FIFO页面置换算法时，有时会出现：**分配的页框数增加，缺页次数反而增加**的现象。\n\n**原因：**\nFIFO算法忽略了页面的使用情况，仅按进入顺序淘汰。\n\n**示例：**\n访问串：1, 2, 3, 4, 1, 2, 5, 1, 2, 3, 4, 5\n\n| 页框数 | 缺页次数 |\n|--------|----------|\n| 3      | 9        |\n| 4      | 10       |\n\n**注意：** LRU和OPT不会出现Belady异常。",
+    "difficulty_level": 4
+  }
+]

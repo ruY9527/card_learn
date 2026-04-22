@@ -1,0 +1,32 @@
+[
+  {
+    "subject_id": 1,
+    "front_content": "DNS的作用是什么？DNS的查询过程是怎样的？",
+    "back_content": "**DNS（域名系统）：**\n\n**作用：**\n将域名解析为IP地址。\n\n**DNS层次结构：**\n```\n根域名服务器\n  ↓\n顶级域名服务器（.com, .edu等）\n  ↓\n权威域名服务器\n```\n\n**查询过程：**\n\n1. 查本地DNS缓存\n2. 无记录则向本地DNS服务器查询\n3. 本地DNS服务器递归或迭代查询：\n   - **递归查询**：服务器代为查询\n   - **迭代查询**：服务器返回下一级服务器地址\n\n**DNS报文：**\n- UDP端口53（或TCP）",
+    "difficulty_level": 4
+  },
+  {
+    "subject_id": 1,
+    "front_content": "HTTP协议的特点是什么？",
+    "back_content": "**HTTP（超文本传输协议）：**\n\n**特点：**\n\n1. **无状态**\n   - 服务器不保存客户状态\n   - 每次请求独立\n\n2. **基于TCP**\n   - 端口80\n   - 可靠传输\n\n**HTTP版本：**\n\n- **HTTP/1.0**：非持久连接\n- **HTTP/1.1**：持久连接（Keep-Alive）、流水线\n- **HTTP/2**：多路复用、头部压缩\n\n**请求方法：**\nGET、POST、PUT、DELETE等",
+    "difficulty_level": 3
+  },
+  {
+    "subject_id": 1,
+    "front_content": "HTTP请求报文和响应报文的格式是怎样的？",
+    "back_content": "**HTTP报文格式：**\n\n**请求报文：**\n- 请求行：方法 URL 版本\n- 首部行：Header字段\n- 空行\n- 实体主体（可选）\n\n**响应报文：**\n- 状态行：版本 状态码 短语\n- 首部行：Header字段\n- 空行\n- 实体主体\n\n**常见状态码：**\n\n- **200**：成功\n- **301/302**：重定向\n- **404**：资源不存在\n- **500**：服务器内部错误",
+    "difficulty_level": 4
+  },
+  {
+    "subject_id": 1,
+    "front_content": "FTP协议的工作原理是什么？",
+    "back_content": "**FTP（文件传输协议）：**\n\n**特点：**\n- 使用两个TCP连接\n\n**控制连接：**\n- 端口21\n- 传输FTP命令和响应\n- 整个会话期间保持\n\n**数据连接：**\n- 端口20（主动模式）或客户端口（被动模式）\n- 传输文件数据\n- 每传输一个文件建立一次\n\n**工作模式：**\n\n- **主动模式**：服务器主动连接客户\n- **被动模式**：客户连接服务器",
+    "difficulty_level": 4
+  },
+  {
+    "subject_id": 1,
+    "front_content": "电子邮件系统的工作原理是什么？",
+    "back_content": "**电子邮件协议：**\n\n**发送邮件：SMTP**\n- 端口25\n- 从客户到服务器\n- 从服务器到服务器\n\n**接收邮件：**\n\n**POP3**\n- 端口110\n- 下载并删除（或保留）\n\n**IMAP**\n- 端口143\n- 在服务器管理邮件\n\n**邮件格式：**\n\n**MIME**：多用途互联网邮件扩展\n- 支持多媒体内容\n- 扩展SMTP",
+    "difficulty_level": 4
+  }
+]

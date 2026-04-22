@@ -19,7 +19,7 @@ public interface ISysUserService extends IService<SysUser> {
     /**
      * 分页查询用户
      */
-    Page<SysUser> pageUsers(String username, Integer pageNum, Integer pageSize);
+    Page<SysUser> pageUsers(String username, String status, Integer pageNum, Integer pageSize);
 
     /**
      * 分配角色

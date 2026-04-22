@@ -1,4 +1,4 @@
-/* pages/study/study.wxss - 增强版学习页面样式 */
+/* pages/study/study.wxss */
 
 .container {
   min-height: 100vh;
@@ -51,23 +51,27 @@
 }
 
 .stat-value {
-  font-size: 36rpx;
+  font-size: 32rpx;
   font-weight: 600;
   color: #fff;
 }
 
-.stat-value.text-warning {
+.stat-value.success {
+  color: #43e97b;
+}
+
+.stat-value.warning {
   color: #ffd700;
 }
 
-.stat-value.text-muted {
+.stat-value.muted {
   color: rgba(255, 255, 255, 0.8);
 }
 
 .stat-label {
-  font-size: 24rpx;
+  font-size: 22rpx;
   color: rgba(255, 255, 255, 0.7);
-  margin-top: 8rpx;
+  margin-top: 6rpx;
 }
 
 /* 错误状态 */
@@ -160,11 +164,11 @@
 }
 
 .tab-item {
-  padding: 16rpx 32rpx;
+  padding: 16rpx 24rpx;
   border-radius: 12rpx;
   background-color: #f5f7fa;
   color: #606266;
-  font-size: 28rpx;
+  font-size: 26rpx;
   transition: all 0.3s ease;
 }
 
@@ -212,12 +216,11 @@
   padding: 24rpx;
   margin-bottom: 20rpx;
   box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease;
 }
 
 .card-item:active {
   transform: scale(0.98);
-  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
 }
 
 .card-header {
@@ -230,7 +233,7 @@
 .difficulty-badge {
   padding: 8rpx 16rpx;
   border-radius: 8rpx;
-  font-size: 24rpx;
+  font-size: 22rpx;
 }
 
 .difficulty-badge.easy {
@@ -251,7 +254,7 @@
 .status-badge {
   padding: 8rpx 16rpx;
   border-radius: 8rpx;
-  font-size: 24rpx;
+  font-size: 22rpx;
 }
 
 .status-badge.mastered {
@@ -274,9 +277,13 @@
 }
 
 .card-text {
-  font-size: 32rpx;
+  font-size: 30rpx;
   line-height: 1.6;
   color: #303133;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .card-footer {
@@ -288,14 +295,44 @@
   border-top: 1rpx solid #ebeef5;
 }
 
+.card-info {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.card-subject {
+  font-size: 22rpx;
+  color: #667eea;
+  background-color: #f0f5ff;
+  padding: 4rpx 12rpx;
+  border-radius: 6rpx;
+}
+
 .card-id {
-  font-size: 24rpx;
+  font-size: 22rpx;
   color: #909399;
 }
 
 .view-hint {
   font-size: 24rpx;
   color: #667eea;
+}
+
+/* 标签 */
+.card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8rpx;
+  margin-top: 16rpx;
+}
+
+.tag {
+  font-size: 22rpx;
+  color: #909399;
+  background-color: #f5f7fa;
+  padding: 4rpx 12rpx;
+  border-radius: 6rpx;
 }
 
 /* 加载更多 */

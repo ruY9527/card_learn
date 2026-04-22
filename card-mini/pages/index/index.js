@@ -1,5 +1,5 @@
 // pages/index/index.js
-const { getMajorList, getSubjectList, getCardPage } = require('../../utils/request')
+const { getMajorList, getSubjectList, getSprintConfig, getRecommendCards } = require('../../utils/request')
 
 Page({
   data: {
@@ -9,37 +9,83 @@ Page({
     recommendCards: [],
     loading: false,
     countdownDays: 0,
-    countdownText: ''
+    countdownText: '',
+    sprintConfig: {
+      enabled: false,
+      examName: '',
+      examDate: '',
+      daysRemaining: 0,
+      isExpired: false
+    }
   },
 
   onLoad() {
-    this.calculateCountdown()
+    this.fetchSprintConfig()
     this.fetchData()
   },
 
   onShow() {
-    this.calculateCountdown()
+    this.fetchSprintConfig()
     this.fetchData()
   },
 
-  // 计算考研倒计时
-  calculateCountdown() {
-    // 考研日期：每年12月最后一个周六
-    // 2025年考研日期约为12月20日左右（具体以官方公告为准）
+  // 获取冲刺配置（从后端获取）
+  fetchSprintConfig() {
+    getSprintConfig().then(res => {
+      console.log('冲刺配置:', res)
+      if (res && res.data) {
+        const config = res.data
+        let countdownText = ''
+        
+        if (config.enabled && !config.isExpired) {
+          const days = config.daysRemaining
+          if (days > 365) {
+            countdownText = '备战考研'
+          } else if (days > 100) {
+            countdownText = '冲刺阶段'
+          } else if (days > 30) {
+            countdownText = '考前冲刺'
+          } else if (days > 7) {
+            countdownText = '最后冲刺'
+          } else if (days > 0) {
+            countdownText = '考前一周'
+          } else {
+            countdownText = '考试进行中'
+          }
+          
+          this.setData({
+            countdownDays: days,
+            countdownText: countdownText,
+            sprintConfig: {
+              enabled: config.enabled,
+              examName: config.examName || '',
+              examDate: config.examDate || '',
+              daysRemaining: config.daysRemaining || 0,
+              isExpired: config.isExpired || false
+            }
+          })
+        } else {
+          // 冲刺模式未启用或已过期，使用默认值
+          this.calculateDefaultCountdown()
+        }
+      } else {
+        this.calculateDefaultCountdown()
+      }
+    }).catch(err => {
+      console.error('获取冲刺配置失败:', err)
+      // API失败时使用默认计算
+      this.calculateDefaultCountdown()
+    })
+  },
+
+  // 默认倒计时计算（API失败时的备用方案）
+  calculateDefaultCountdown() {
     const now = new Date()
     const currentYear = now.getFullYear()
-
-    // 计算2026年考研日期（默认设置12月21日）
-    let examDate = new Date(currentYear + 1, 11, 21) // 12月21日
-
-    // 如果当前已超过今年的考研日期，则计算下一年的
-    const thisYearExamDate = new Date(currentYear, 11, 21)
-    if (now > thisYearExamDate) {
-      examDate = new Date(currentYear + 1, 11, 21)
-    } else {
-      examDate = thisYearExamDate
-    }
-
+    
+    // 默认使用12月21日
+    let examDate = new Date(currentYear, 11, 21)
+    
     const diffTime = examDate - now
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
 
@@ -58,7 +104,14 @@ Page({
 
     this.setData({
       countdownDays: diffDays > 0 ? diffDays : 0,
-      countdownText: countdownText
+      countdownText: countdownText,
+      sprintConfig: {
+        enabled: false,
+        examName: '',
+        examDate: '',
+        daysRemaining: 0,
+        isExpired: true
+      }
     })
   },
 
@@ -84,11 +137,11 @@ Page({
       this.setData({ loading: false, majorList: [] })
     })
 
-    // 加载推荐卡片
-    getCardPage({ pageNum: 1, pageSize: 5 }).then(cardRes => {
-      console.log('推荐卡片:', cardRes)
+    // 加载推荐卡片（每个科目2条，共8条）
+    getRecommendCards().then(cardRes => {
+      console.log('今日推荐卡片:', cardRes)
       this.setData({
-        recommendCards: cardRes.data && cardRes.data.records ? cardRes.data.records : []
+        recommendCards: cardRes.data || []
       })
     }).catch(error => {
       console.error('获取推荐卡片失败:', error)
@@ -153,7 +206,7 @@ Page({
 
   // 下拉刷新
   onPullDownRefresh() {
-    this.calculateCountdown()
+    this.fetchSprintConfig()
     this.setData({
       majorList: [],
       subjectList: [],

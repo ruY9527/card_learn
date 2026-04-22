@@ -1,0 +1,85 @@
+<!--pages/progress-cards/progress-cards.wxml-->
+<view class="container">
+  <!-- 统计信息 -->
+  <view class="stats-bar">
+    <text class="stats-text">共 {{total}} 张卡片</text>
+  </view>
+
+  <!-- 卡片列表 -->
+  <view class="card-list" wx:if="{{cardList.length > 0}}">
+    <view 
+      class="card-item" 
+      wx:for="{{cardList}}" 
+      wx:key="cardId"
+      bindtap="onCardTap"
+      data-card="{{item}}"
+    >
+      <view class="card-header">
+        <view class="card-subject" wx:if="{{item.subjectName}}">
+          <text class="subject-icon">📚</text>
+          <text class="subject-name">{{item.subjectName}}</text>
+        </view>
+        <view class="card-status status-{{item.status === 2 ? 'mastered' : item.status === 1 ? 'review' : 'unlearned'}}">
+          <text>{{item.status === 2 ? '已掌握' : item.status === 1 ? '待复习' : '未学习'}}</text>
+        </view>
+      </view>
+
+      <!-- 学习时间 -->
+      <view class="card-time" wx:if="{{item.formattedTime}}">
+        <text class="time-icon">🕐</text>
+        <text class="time-text">{{item.formattedTime}}</text>
+        <text class="time-label">{{statusType === 'mastered' ? '掌握于' : '学习于'}}</text>
+      </view>
+
+      <view class="card-content">
+        <view class="content-label">
+          <text class="label-icon">❓</text>
+          <text class="label-text">问题</text>
+        </view>
+        <text class="content-text">{{item.frontContent.length > 80 ? item.frontContent.substring(0, 80) + '...' : item.frontContent}}</text>
+      </view>
+
+      <view class="card-footer">
+        <view class="card-tags" wx:if="{{item.tags && item.tags.length > 0}}">
+          <view class="tag-item" wx:for="{{item.tags}}" wx:key="*this" wx:for-item="tag">
+            <text>{{tag}}</text>
+          </view>
+        </view>
+        <view class="card-difficulty" wx:if="{{item.difficultyLevel}}">
+          <text class="difficulty-label">难度</text>
+          <view class="difficulty-stars">
+            <text class="star {{item.difficultyLevel >= 1 ? 'active' : ''}}">★</text>
+            <text class="star {{item.difficultyLevel >= 2 ? 'active' : ''}}">★</text>
+            <text class="star {{item.difficultyLevel >= 3 ? 'active' : ''}}">★</text>
+            <text class="star {{item.difficultyLevel >= 4 ? 'active' : ''}}">★</text>
+            <text class="star {{item.difficultyLevel >= 5 ? 'active' : ''}}">★</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="card-action">
+        <text class="action-text">点击查看详情 →</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading-container" wx:if="{{loading}}">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <!-- 无更多数据 -->
+  <view class="no-more" wx:if="{{!hasMore && cardList.length > 0}}">
+    <text>— 已加载全部 —</text>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{!loading && cardList.length === 0}}">
+    <view class="empty-icon">
+      <text>📭</text>
+    </view>
+    <text class="empty-text">暂无相关卡片</text>
+    <text class="empty-tip">快去学习更多卡片吧！</text>
+  </view>
+</view>

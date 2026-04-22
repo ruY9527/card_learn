@@ -6,6 +6,7 @@ import com.card.learn.dto.MiniCardDTO;
 import com.card.learn.dto.MiniProgressDTO;
 import com.card.learn.dto.MiniSubjectDTO;
 import com.card.learn.dto.MiniMajorDTO;
+import com.card.learn.dto.SprintConfigDTO;
 import com.card.learn.entity.BizCard;
 import com.card.learn.entity.BizMajor;
 import com.card.learn.entity.BizSubject;
@@ -20,6 +21,7 @@ import com.card.learn.service.IBizTagService;
 import com.card.learn.service.IBizCardTagService;
 import com.card.learn.service.IBizUserProgressService;
 import com.card.learn.service.ISysUserService;
+import com.card.learn.service.ISysConfigService;
 import com.card.learn.util.JwtUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -66,7 +68,26 @@ public class MiniProgramController {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Autowired
+    private ISysConfigService configService;
+
     private static final String CAPTCHA_PREFIX = "captcha:";
+
+    /**
+     * 解析用户ID，处理 null、"null"、空字符串等无效值
+     * @param appUserId 用户ID字符串
+     * @return 用户ID Long类型，无效时返回 null
+     */
+    private Long parseUserId(String appUserId) {
+        if (appUserId == null || appUserId.trim().isEmpty() || "null".equalsIgnoreCase(appUserId.trim())) {
+            return null;
+        }
+        try {
+            return Long.parseLong(appUserId.trim());
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
 
     /**
      * 小程序用户登录
@@ -117,7 +138,7 @@ public class MiniProgramController {
         }
 
         // 生成token
-        String token = jwtUtil.generateToken(user.getUserId(), user.getUsername());
+        String token = jwtUtil.generateToken(user.getUsername());
 
         Map<String, Object> data = new HashMap<>();
         data.put("token", token);
@@ -176,14 +197,81 @@ public class MiniProgramController {
     }
 
     /**
+     * 获取科目学习统计
+     */
+    @GetMapping("/subjects/{subjectId}/stats")
+    @ApiOperation("获取科目学习统计")
+    public Result<Map<String, Object>> getSubjectStats(
+            @PathVariable Long subjectId,
+            @RequestParam(required = false) String appUserId) {
+        Long userId = parseUserId(appUserId);
+        Map<String, Object> stats = new HashMap<>();
+
+        // 获取该科目下的所有卡片ID
+        List<Long> cardIds = cardService.lambdaQuery()
+                .eq(BizCard::getSubjectId, subjectId)
+                .list()
+                .stream()
+                .map(BizCard::getCardId)
+                .collect(Collectors.toList());
+
+        if (cardIds.isEmpty()) {
+            stats.put("total", 0);
+            stats.put("learned", 0);
+            stats.put("mastered", 0);
+            stats.put("review", 0);
+            return Result.success(stats);
+        }
+
+        // 统计总数
+        long total = cardIds.size();
+
+        // 统计已学习（状态>=1）
+        long learned = progressService.lambdaQuery()
+                .eq(userId != null, BizUserProgress::getAppUserId, userId)
+                .isNull(userId == null, BizUserProgress::getAppUserId)
+                .in(BizUserProgress::getCardId, cardIds)
+                .ge(BizUserProgress::getStatus, 1)
+                .count();
+
+        // 统计已掌握（状态=2）
+        long mastered = progressService.lambdaQuery()
+                .eq(userId != null, BizUserProgress::getAppUserId, userId)
+                .isNull(userId == null, BizUserProgress::getAppUserId)
+                .in(BizUserProgress::getCardId, cardIds)
+                .eq(BizUserProgress::getStatus, 2)
+                .count();
+
+        // 统计待复习（状态=1且需要复习）
+        long review = progressService.lambdaQuery()
+                .eq(userId != null, BizUserProgress::getAppUserId, userId)
+                .isNull(userId == null, BizUserProgress::getAppUserId)
+                .in(BizUserProgress::getCardId, cardIds)
+                .eq(BizUserProgress::getStatus, 1)
+                .count();
+
+        stats.put("total", total);
+        stats.put("learned", learned);
+        stats.put("mastered", mastered);
+        stats.put("review", review);
+
+        return Result.success(stats);
+    }
+
+    /**
      * 分页获取卡片列表
      */
     @GetMapping("/cards")
     @ApiOperation("分页获取卡片")
     public Result<Map<String, Object>> getCards(
             @RequestParam(required = false) Long subjectId,
+            @RequestParam(required = false) String appUserId,
+            @RequestParam(required = false) String status,
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize) {
+
+        // 解析用户ID
+        final Long userId = parseUserId(appUserId);
 
         Page<BizCard> page = cardService.pageCards(subjectId, pageNum, pageSize);
 
@@ -215,7 +303,7 @@ public class MiniProgramController {
         }
 
         // 获取科目名称
-        Map<Long, String> subjectNameMap = new HashMap<>();
+        final Map<Long, String> subjectNameMap;
         Set<Long> subjectIds = page.getRecords().stream()
                 .map(BizCard::getSubjectId)
                 .filter(Objects::nonNull)
@@ -224,6 +312,8 @@ public class MiniProgramController {
             List<BizSubject> subjects = subjectService.listByIds(subjectIds);
             subjectNameMap = subjects.stream()
                     .collect(Collectors.toMap(BizSubject::getSubjectId, BizSubject::getSubjectName));
+        } else {
+            subjectNameMap = new HashMap<>();
         }
 
         // 转换为DTO
@@ -238,6 +328,49 @@ public class MiniProgramController {
             dto.setTags(cardTagsMap.get(c.getCardId()));
             return dto;
         }).collect(Collectors.toList());
+
+        // 获取用户学习进度状态和时间
+        if (!cardIds.isEmpty()) {
+            List<BizUserProgress> progressList = progressService.lambdaQuery()
+                    .in(BizUserProgress::getCardId, cardIds)
+                    .eq(userId != null, BizUserProgress::getAppUserId, userId)
+                    .isNull(userId == null, BizUserProgress::getAppUserId)
+                    .list();
+            
+            Map<Long, BizUserProgress> progressMap = progressList.stream()
+                    .collect(Collectors.toMap(BizUserProgress::getCardId, p -> p, (p1, p2) -> p1));
+            
+            cardDTOs.forEach(dto -> {
+                BizUserProgress progress = progressMap.get(dto.getCardId());
+                if (progress != null) {
+                    dto.setStatus(progress.getStatus() != null ? progress.getStatus() : 0);
+                    dto.setUpdateTime(progress.getUpdateTime());
+                }
+            });
+        }
+
+        // 根据状态筛选
+        if (status != null && !status.isEmpty() && !status.equals("all")) {
+            cardDTOs = cardDTOs.stream().filter(dto -> {
+                Integer cardStatus = dto.getStatus();
+                switch (status) {
+                    case "learned":
+                        // 已学习：状态 >= 1（包括模糊和掌握）
+                        return cardStatus != null && cardStatus >= 1;
+                    case "mastered":
+                        // 已掌握：状态 == 2
+                        return cardStatus != null && cardStatus == 2;
+                    case "review":
+                        // 待复习：状态 == 1（模糊状态）
+                        return cardStatus != null && cardStatus == 1;
+                    case "unlearned":
+                        // 未学习：状态 == 0 或 null
+                        return cardStatus == null || cardStatus == 0;
+                    default:
+                        return true;
+                }
+            }).collect(Collectors.toList());
+        }
 
         Map<String, Object> result = new HashMap<>();
         result.put("records", cardDTOs);
@@ -402,6 +535,65 @@ public class MiniProgramController {
         }).collect(Collectors.toList());
 
         return Result.success(dtoList);
+    }
+
+    /**
+     * 获取今日推荐卡片（每个科目随机2条，共8条）
+     */
+    @GetMapping("/recommend")
+    @ApiOperation("获取今日推荐卡片")
+    public Result<List<MiniCardDTO>> getRecommendCards() {
+        List<MiniCardDTO> recommendList = new ArrayList<>();
+        
+        // 获取所有科目
+        List<BizSubject> subjects = subjectService.list();
+        
+        // 从每个科目中随机抽取2条卡片
+        for (BizSubject subject : subjects) {
+            // 获取该科目下的所有卡片
+            List<BizCard> cards = cardService.lambdaQuery()
+                    .eq(BizCard::getSubjectId, subject.getSubjectId())
+                    .list();
+            
+            if (cards.size() <= 2) {
+                // 如果卡片数少于等于2条，全部加入
+                for (BizCard card : cards) {
+                    MiniCardDTO dto = new MiniCardDTO();
+                    dto.setCardId(card.getCardId());
+                    dto.setSubjectId(card.getSubjectId());
+                    dto.setSubjectName(subject.getSubjectName());
+                    dto.setFrontContent(card.getFrontContent());
+                    dto.setBackContent(card.getBackContent());
+                    dto.setDifficultyLevel(card.getDifficultyLevel());
+                    recommendList.add(dto);
+                }
+            } else {
+                // 随机抽取2条（使用Collections.shuffle实现随机）
+                Collections.shuffle(cards);
+                for (int i = 0; i < 2; i++) {
+                    BizCard card = cards.get(i);
+                    MiniCardDTO dto = new MiniCardDTO();
+                    dto.setCardId(card.getCardId());
+                    dto.setSubjectId(card.getSubjectId());
+                    dto.setSubjectName(subject.getSubjectName());
+                    dto.setFrontContent(card.getFrontContent());
+                    dto.setBackContent(card.getBackContent());
+                    dto.setDifficultyLevel(card.getDifficultyLevel());
+                    recommendList.add(dto);
+                }
+            }
+        }
+        
+        return Result.success(recommendList);
+    }
+
+    /**
+     * 获取冲刺配置（倒计时）
+     */
+    @GetMapping("/sprint-config")
+    @ApiOperation("获取冲刺配置")
+    public Result<SprintConfigDTO> getSprintConfig() {
+        return Result.success(configService.getSprintConfig());
     }
 
 }

@@ -67,6 +67,24 @@ const routes: RouteRecordRaw[] = [
         name: 'Menu',
         component: () => import('@/views/system/menu/index.vue'),
         meta: { title: '菜单管理' }
+      },
+      {
+        path: 'system/feedback',
+        name: 'Feedback',
+        component: () => import('@/views/system/feedback/index.vue'),
+        meta: { title: '反馈管理' }
+      },
+      {
+        path: 'system/log',
+        name: 'Log',
+        component: () => import('@/views/system/log/index.vue'),
+        meta: { title: '日志管理' }
+      },
+      {
+        path: 'system/sprint',
+        name: 'Sprint',
+        component: () => import('@/views/system/sprint/index.vue'),
+        meta: { title: '冲刺配置' }
       }
     ]
   }
