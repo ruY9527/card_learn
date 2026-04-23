@@ -1,0 +1,496 @@
+import SwiftUI
+
+struct StudyView: View {
+    @EnvironmentObject var appState: AppState
+    let subjectId: Int
+    let subjectName: String
+    
+    @State private var cardList: [Card] = []
+    @State private var totalCount: Int = 0
+    @State private var learnedCount: Int = 0
+    @State private var masteredCount: Int = 0
+    @State private var reviewCount: Int = 0
+    @State private var currentTab: String = "all"
+    @State private var pageNum: Int = 1
+    @State private var hasMore: Bool = true
+    @State private var isLoading: Bool = false
+    
+    @State private var navigateToCardDetail: Bool = false
+    @State private var selectedCard: Card?
+    @State private var selectedCardIndex: Int = 0
+    
+    private let apiService = APIService.shared
+    
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 0) {
+                // 头部统计区域
+                HeaderSection(
+                    subjectName: subjectName,
+                    learned: learnedCount,
+                    mastered: masteredCount,
+                    review: reviewCount,
+                    total: totalCount
+                )
+                
+                ScrollView {
+                    VStack(spacing: 16) {
+                        // 快速开始按钮
+                        if !cardList.isEmpty && !isLoading {
+                            QuickStartButton {
+                                startStudy()
+                            }
+                        }
+                        
+                        // 筛选标签
+                        FilterTabs(
+                            currentTab: currentTab,
+                            total: totalCount,
+                            learned: learnedCount,
+                            onChange: { tab in
+                                currentTab = tab
+                                pageNum = 1
+                                cardList = []
+                                fetchCards()
+                            }
+                        )
+                        
+                        // 卡片列表
+                        if !isLoading || !cardList.isEmpty {
+                            LazyVStack(spacing: 12) {
+                                ForEach(Array(cardList.enumerated()), id: \.element.cardId) { index, card in
+                                    CardListItem(card: card)
+                                        .onTapGesture {
+                                            selectedCard = card
+                                            selectedCardIndex = index
+                                            navigateToCardDetail = true
+                                        }
+                                }
+                                
+                                // 加载更多
+                                if hasMore && !isLoading {
+                                    LoadMoreButton {
+                                        loadMore()
+                                    }
+                                }
+                                
+                                // 已加载全部
+                                if !hasMore && !cardList.isEmpty {
+                                    AllLoadedText(total: totalCount)
+                                }
+                            }
+                            .padding(.horizontal, 16)
+                        }
+                        
+                        // 加载状态
+                        if isLoading && cardList.isEmpty {
+                            LoadingSection()
+                        }
+                        
+                        // 空状态
+                        if cardList.isEmpty && !isLoading {
+                            EmptyState(tab: currentTab)
+                        }
+                    }
+                    .padding(.top, 16)
+                    .padding(.bottom, 80)
+                }
+            }
+            .navigationTitle(subjectName)
+            .navigationBarTitleDisplayMode(.inline)
+            .navigationDestination(isPresented: $navigateToCardDetail) {
+                if selectedCard != nil {
+                    CardDetailView(
+                        cardList: cardList,
+                        currentIndex: selectedCardIndex,
+                        subjectId: subjectId,
+                        subjectName: subjectName
+                    )
+                }
+            }
+        }
+        .onAppear {
+            fetchCards()
+            fetchStats()
+        }
+    }
+    
+    private func fetchCards() {
+        guard !isLoading else { return }
+        
+        Task {
+            isLoading = true
+            
+            do {
+                let userId = appState.userInfo?.userId
+                let pageData = try await apiService.getCardPage(
+                    subjectId: subjectId,
+                    appUserId: userId,
+                    status: currentTab,
+                    pageNum: pageNum,
+                    pageSize: 20
+                )
+                
+                let cards = pageData.records
+                let total = pageData.total
+                
+                if pageNum == 1 {
+                    cardList = cards
+                } else {
+                    cardList.append(contentsOf: cards)
+                }
+                
+                totalCount = total
+                hasMore = cardList.count < total
+            } catch {
+                cardList = []
+            }
+            
+            isLoading = false
+        }
+    }
+    
+    private func fetchStats() {
+        Task {
+            do {
+                let userId = appState.userInfo?.userId
+                let stats = try await apiService.getSubjectStats(subjectId: subjectId, appUserId: userId)
+                
+                learnedCount = stats.learned ?? 0
+                masteredCount = stats.mastered ?? 0
+                reviewCount = stats.review ?? 0
+                totalCount = stats.total ?? 0
+            } catch {
+                // 使用默认值
+            }
+        }
+    }
+    
+    private func loadMore() {
+        guard hasMore && !isLoading else { return }
+        pageNum += 1
+        fetchCards()
+    }
+    
+    private func startStudy() {
+        // 找到第一个未学习的卡片
+        let firstUnlearned = cardList.first { ($0.status ?? 0) == 0 }
+        selectedCard = firstUnlearned ?? cardList.first
+        selectedCardIndex = cardList.firstIndex(of: selectedCard!) ?? 0
+        navigateToCardDetail = true
+    }
+}
+
+// 头部统计区域
+struct HeaderSection: View {
+    let subjectName: String
+    let learned: Int
+    let mastered: Int
+    let review: Int
+    let total: Int
+    
+    var body: some View {
+        ZStack {
+            LinearGradient(
+                colors: [Color(hex: "667eea"), Color(hex: "764ba2")],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            
+            VStack(alignment: .leading, spacing: 12) {
+                Text(subjectName)
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundColor(.white)
+                
+                HStack(spacing: 0) {
+                    StatBox(value: learned, label: "已学习", color: .white)
+                    StatBox(value: mastered, label: "已掌握", color: Color(hex: "43e97b"))
+                    StatBox(value: review, label: "待复习", color: Color(hex: "FFD700"))
+                    StatBox(value: total, label: "总卡片", color: .white.opacity(0.8))
+                }
+                .padding(8)
+                .background(Color.white.opacity(0.15))
+                .cornerRadius(12)
+            }
+            .padding(20)
+        }
+        .frame(height: 140)
+        .cornerRadius(20, corners: [.bottomLeft, .bottomRight])
+        .padding(.bottom, -20)
+    }
+}
+
+struct StatBox: View {
+    let value: Int
+    let label: String
+    let color: Color
+    
+    var body: some View {
+        VStack(spacing: 4) {
+            Text("\(value)")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(color)
+            
+            Text(label)
+                .font(.system(size: 11))
+                .foregroundColor(.white.opacity(0.7))
+        }
+        .frame(maxWidth: .infinity)
+    }
+}
+
+// 快速开始按钮
+struct QuickStartButton: View {
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 8) {
+                Text("📖")
+                    .font(.system(size: 24))
+                
+                Text("开始学习")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.white)
+                
+                Text("左右滑动切换卡片")
+                    .font(.system(size: 12))
+                    .foregroundColor(.white.opacity(0.8))
+            }
+            .frame(maxWidth: .infinity)
+            .padding(16)
+            .background(
+                LinearGradient(
+                    colors: [Color(hex: "43e97b"), Color(hex: "38f9d7")],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            .cornerRadius(16)
+            .shadow(color: Color(hex: "43e97b").opacity(0.3), radius: 10, x: 0, y: 5)
+        }
+        .padding(.horizontal, 16)
+    }
+}
+
+// 筛选标签
+struct FilterTabs: View {
+    let currentTab: String
+    let total: Int
+    let learned: Int
+    let onChange: (String) -> Void
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            FilterTabItem(
+                title: "全部(\(total))",
+                isSelected: currentTab == "all",
+                action: { onChange("all") }
+            )
+            
+            FilterTabItem(
+                title: "已学(\(learned))",
+                isSelected: currentTab == "learned",
+                action: { onChange("learned") }
+            )
+            
+            FilterTabItem(
+                title: "未学(\(total - learned))",
+                isSelected: currentTab == "unlearned",
+                action: { onChange("unlearned") }
+            )
+        }
+        .padding(12)
+        .background(Color.white)
+        .cornerRadius(16)
+        .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+        .padding(.horizontal, 16)
+    }
+}
+
+struct FilterTabItem: View {
+    let title: String
+    let isSelected: Bool
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .font(.system(size: 13, weight: isSelected ? .medium : .regular))
+                .foregroundColor(isSelected ? .white : Color(hex: "606266"))
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(isSelected ?
+                              LinearGradient(colors: [Color(hex: "667eea"), Color(hex: "764ba2")], startPoint: .topLeading, endPoint: .bottomTrailing) :
+                              LinearGradient(colors: [Color(hex: "F5F7FA"), Color(hex: "F5F7FA")], startPoint: .topLeading, endPoint: .bottomTrailing)
+                        )
+                )
+        }
+    }
+}
+
+// 卡片列表项
+struct CardListItem: View {
+    let card: Card
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                DifficultyBadge(level: card.difficultyLevel ?? 1)
+                
+                Spacer()
+                
+                StatusBadge(status: card.status ?? 0)
+            }
+            
+            Text(card.frontContent)
+                .font(.system(size: 15))
+                .foregroundColor(Color(hex: "303133"))
+                .lineLimit(3)
+            
+            HStack {
+                if let subjectName = card.subjectName {
+                    Text(subjectName)
+                        .font(.system(size: 11))
+                        .foregroundColor(Color(hex: "667eea"))
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(Color(hex: "F0F5FF"))
+                        .cornerRadius(4)
+                }
+                
+                Text("#\(card.cardId)")
+                    .font(.system(size: 11))
+                    .foregroundColor(Color(hex: "909399"))
+                
+                Spacer()
+                
+                Text("点击查看 →")
+                    .font(.system(size: 12))
+                    .foregroundColor(Color(hex: "667eea"))
+            }
+            
+            if let tags = card.tags, !tags.isEmpty {
+                HStack(spacing: 6) {
+                    ForEach(tags, id: \.self) { tag in
+                        Text(tag)
+                            .font(.system(size: 11))
+                            .foregroundColor(Color(hex: "909399"))
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color(hex: "F5F7FA"))
+                            .cornerRadius(4)
+                    }
+                }
+            }
+        }
+        .padding(12)
+        .background(Color.white)
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+    }
+}
+
+struct DifficultyBadge: View {
+    let level: Int
+    
+    var body: some View {
+        Text("难度 \(level)")
+            .font(.system(size: 11))
+            .foregroundColor(level <= 2 ? Color(hex: "4CAF50") :
+                             level == 3 ? Color(hex: "FF9800") :
+                             Color(hex: "F44336"))
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(level <= 2 ? Color(hex: "E8F5E9") :
+                        level == 3 ? Color(hex: "FFF3E0") :
+                        Color(hex: "FFEBEE"))
+            .cornerRadius(4)
+    }
+}
+
+struct StatusBadge: View {
+    let status: Int
+    
+    var body: some View {
+        Text(status == 2 ? "✓ 掌握" : status == 1 ? "~ 模糊" : "✗ 未学")
+            .font(.system(size: 11))
+            .foregroundColor(status == 2 ? Color(hex: "4CAF50") :
+                             status == 1 ? Color(hex: "FFC107") :
+                             Color(hex: "9E9E9E"))
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(status == 2 ? Color(hex: "E8F5E9") :
+                        status == 1 ? Color(hex: "FFF8E1") :
+                        Color(hex: "F5F5F5"))
+            .cornerRadius(4)
+    }
+}
+
+// 加载更多按钮
+struct LoadMoreButton: View {
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            Text("加载更多")
+                .font(.system(size: 14))
+                .foregroundColor(Color(hex: "667eea"))
+        }
+        .padding(.vertical, 16)
+    }
+}
+
+// 已加载全部提示
+struct AllLoadedText: View {
+    let total: Int
+    
+    var body: some View {
+        Text("已加载全部 \(total) 张卡片")
+            .font(.system(size: 13))
+            .foregroundColor(Color(hex: "909399"))
+            .padding(.vertical, 16)
+    }
+}
+
+// 加载状态
+struct LoadingSection: View {
+    var body: some View {
+        VStack(spacing: 12) {
+            ProgressView()
+                .progressViewStyle(CircularProgressViewStyle(tint: Color(hex: "667eea")))
+            
+            Text("加载中...")
+                .font(.system(size: 14))
+                .foregroundColor(Color(hex: "909399"))
+        }
+        .padding(.vertical, 50)
+    }
+}
+
+// 空状态
+struct EmptyState: View {
+    let tab: String
+    
+    var body: some View {
+        VStack(spacing: 12) {
+            Text("📚")
+                .font(.system(size: 40))
+            
+            Text(tab == "all" ? "该科目暂无卡片数据" :
+                 tab == "learned" ? "还没有学习过的卡片" :
+                 "所有卡片都已学习")
+                .font(.system(size: 16))
+                .foregroundColor(Color(hex: "606266"))
+            
+            if tab == "all" {
+                Text("请通过管理后台添加知识点卡片")
+                    .font(.system(size: 13))
+                    .foregroundColor(Color(hex: "909399"))
+            }
+        }
+        .padding(.vertical, 50)
+    }
+}
