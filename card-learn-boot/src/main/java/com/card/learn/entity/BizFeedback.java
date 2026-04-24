@@ -24,6 +24,12 @@ public class BizFeedback implements Serializable {
     /** 关联的卡片ID（若是对具体卡片的纠错） */
     private Long cardId;
 
+    /** 所属专业ID */
+    private Long majorId;
+
+    /** 所属科目ID */
+    private Long subjectId;
+
     /** 反馈类型: SUGGESTION(建议), ERROR(纠错), FUNCTION(功能问题), OTHER(其他) */
     private String type;
 
@@ -51,5 +57,8 @@ public class BizFeedback implements Serializable {
 
     /** 处理时间 */
     private LocalDateTime updateTime;
+
+    /** 更新人ID */
+    private Long updateUserId;
 
 }

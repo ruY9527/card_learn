@@ -61,16 +61,20 @@ export interface Major {
   majorName: string
   description?: string
   status?: string
+  createTime?: string
+  updateTime?: string
 }
 
 // 科目
 export interface Subject {
   subjectId?: number
-  majorId: number
+  majorId?: number
   majorName?: string
   subjectName: string
   icon?: string
   orderNum?: number
+  createTime?: string
+  updateTime?: string
 }
 
 // 知识点卡片
@@ -89,6 +93,8 @@ export interface Card {
 export interface Tag {
   tagId?: number
   tagName: string
+  subjectId?: number  // 所属科目ID，null表示通用标签
+  subjectName?: string // 科目名称（用于显示）
 }
 
 // 系统用户
@@ -214,4 +220,43 @@ export interface SprintConfig {
   daysRemaining: number
   isExpired: boolean
   enabled: boolean
+}
+
+// 卡片审批视图对象
+export interface CardAuditVO {
+  cardId?: number  // 实际是draftId
+  subjectId?: number
+  subjectName?: string
+  frontContent: string
+  backContent: string
+  difficultyLevel?: number
+  auditStatus?: string
+  auditStatusText?: string
+  createUserId?: number
+  createUserNickname?: string
+  auditUserId?: number
+  auditUserNickname?: string
+  auditTime?: string
+  auditRemark?: string
+  createTime?: string
+  updateTime?: string
+  tags?: string[]
+}
+
+// 卡片创建DTO（用户录入）
+export interface CardCreateDTO {
+  subjectId: number
+  frontContent: string
+  backContent: string
+  difficultyLevel?: number
+  createUserId?: number
+  tagIds?: number[]
+}
+
+// 卡片审批DTO
+export interface CardAuditDTO {
+  cardId: number
+  auditStatus: string  // 1通过 2拒绝
+  auditUserId?: number
+  auditRemark?: string
 }

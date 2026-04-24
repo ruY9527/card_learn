@@ -30,6 +30,18 @@ public class CardVO implements Serializable {
     /** 难度系数(1-5) */
     private Integer difficultyLevel;
 
+    /** 审批状态（0待审批 1已通过 2已拒绝） */
+    private String auditStatus;
+
+    /** 审批状态文本 */
+    private String auditStatusText;
+
+    /** 创建用户ID */
+    private Long createUserId;
+
+    /** 创建用户昵称 */
+    private String createUserNickname;
+
     private LocalDateTime createTime;
 
     private LocalDateTime updateTime;

@@ -3,6 +3,7 @@ package com.card.learn.vo;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  * 科目视图对象（包含专业名称）
@@ -26,5 +27,7 @@ public class SubjectVO implements Serializable {
 
     /** 排序 */
     private Integer orderNum;
+
+    private LocalDateTime createTime;
 
 }

@@ -1,5 +1,5 @@
 // pages/feedback/feedback.js
-const { submitFeedback } = require('../../utils/request')
+const { submitFeedback, getMajorList, getSubjectList } = require('../../utils/request')
 
 Page({
   data: {
@@ -10,6 +10,14 @@ Page({
     // 卡片纠错模式
     cardId: null,
     cardFrontContent: '',
+
+    // 专业和科目选择
+    majorList: [],
+    majorIndex: 0,
+    subjectList: [],
+    subjectIndex: 0,
+    selectedMajorId: null,
+    selectedSubjectId: null,
 
     // 反馈类型选项
     typeOptions: [
@@ -61,6 +69,9 @@ Page({
 
     // 检查登录状态
     this.checkLoginStatus()
+    
+    // 加载专业列表
+    this.loadMajorList()
   },
 
   onShow() {
@@ -101,10 +112,73 @@ Page({
     this.checkCanSubmit()
   },
 
+  // 加载专业列表
+  async loadMajorList() {
+    try {
+      const res = await getMajorList()
+      const majorList = res.data || []
+      this.setData({
+        majorList,
+        majorIndex: 0,
+        selectedMajorId: majorList.length > 0 ? majorList[0].majorId : null
+      })
+      
+      // 加载第一个专业的科目列表
+      if (majorList.length > 0) {
+        this.loadSubjectList(majorList[0].majorId)
+      }
+    } catch (error) {
+      console.error('加载专业列表失败', error)
+    }
+  },
+
+  // 加载科目列表（根据专业ID）
+  async loadSubjectList(majorId) {
+    try {
+      const res = await getSubjectList(majorId)
+      const subjectList = res.data || []
+      this.setData({
+        subjectList,
+        subjectIndex: 0,
+        selectedSubjectId: subjectList.length > 0 ? subjectList[0].subjectId : null
+      })
+    } catch (error) {
+      console.error('加载科目列表失败', error)
+    }
+  },
+
+  // 专业选择变化
+  onMajorChange(e) {
+    const index = parseInt(e.detail.value)
+    const major = this.data.majorList[index]
+    this.setData({
+      majorIndex: index,
+      selectedMajorId: major ? major.majorId : null,
+      subjectIndex: 0,
+      selectedSubjectId: null
+    })
+    
+    // 根据选中的专业重新加载科目列表
+    if (major) {
+      this.loadSubjectList(major.majorId)
+    }
+  },
+
+  // 科目选择变化
+  onSubjectChange(e) {
+    const index = parseInt(e.detail.value)
+    const subject = this.data.subjectList[index]
+    this.setData({
+      subjectIndex: index,
+      selectedSubjectId: subject ? subject.subjectId : null
+    })
+  },
+
   // 去登录
   goLogin() {
     // 设置标志，告诉 profile 页面需要显示登录弹窗
     wx.setStorageSync('need_show_login', true)
+    wx.setStorageSync('login_redirect_url', '/pages/feedback/feedback')
     wx.switchTab({
       url: '/pages/profile/profile'
     })
@@ -173,7 +247,10 @@ Page({
 
   // 检查是否可以提交
   checkCanSubmit() {
-    const canSubmit = this.data.content.trim().length > 0 && this.data.isLoggedIn
+    const canSubmit = this.data.content.trim().length > 0 && 
+                      this.data.isLoggedIn &&
+                      this.data.selectedMajorId &&
+                      this.data.selectedSubjectId
     this.setData({ canSubmit })
   },
 
@@ -187,6 +264,8 @@ Page({
       const feedbackData = {
         appUserId: this.data.appUserId,
         cardId: this.data.cardId,
+        majorId: this.data.selectedMajorId,
+        subjectId: this.data.selectedSubjectId,
         type: this.data.typeOptions[this.data.typeIndex].value,
         rating: this.data.rating,
         content: this.data.content.trim(),

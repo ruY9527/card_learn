@@ -33,14 +33,30 @@ Page({
     captchaKey: '',
     captchaImage: '',
     needNavigateBack: false,  // 是否需要在登录成功后返回上一页
+    loginRedirectUrl: '',     // 登录成功后的跳转地址
     showPassword: false,      // 是否显示密码
     canSubmit: false          // 是否可以提交登录
   },
 
+  getStoredLoginState() {
+    const userInfo = wx.getStorageSync('userInfo')
+    const token = wx.getStorageSync('token')
+    const isLoggedIn = !!(userInfo && userInfo.userId && token)
+
+    if (!isLoggedIn) {
+      wx.removeStorageSync('userInfo')
+      wx.removeStorageSync('token')
+    }
+
+    return {
+      isLoggedIn,
+      userInfo: isLoggedIn ? userInfo : { nickname: '游客', avatar: '' }
+    }
+  },
+
   onLoad(options) {
     // 先检查本地存储的登录状态（同步）
-    const userInfo = wx.getStorageSync('userInfo')
-    const isLoggedIn = userInfo && userInfo.userId
+    const { isLoggedIn, userInfo } = this.getStoredLoginState()
 
     this.setData({
       isLoggedIn,
@@ -54,9 +70,14 @@ Page({
     // 检查是否需要显示登录弹窗（从反馈页面跳转过来）
     const needShowLogin = wx.getStorageSync('need_show_login')
     if (needShowLogin && !isLoggedIn) {
+      const loginRedirectUrl = wx.getStorageSync('login_redirect_url') || ''
       wx.removeStorageSync('need_show_login')
-      this.setData({ needNavigateBack: true })
-      this.showLoginModal()
+      wx.removeStorageSync('login_redirect_url')
+      this.setData({
+        needNavigateBack: !!loginRedirectUrl,
+        loginRedirectUrl
+      })
+      this.showLoginModal(loginRedirectUrl)
     }
   },
 
@@ -71,16 +92,20 @@ Page({
     // 检查是否需要显示登录弹窗（从反馈页面跳转过来）
     const needShowLogin = wx.getStorageSync('need_show_login')
     if (needShowLogin && !this.data.isLoggedIn) {
+      const loginRedirectUrl = wx.getStorageSync('login_redirect_url') || ''
       wx.removeStorageSync('need_show_login')
-      this.setData({ needNavigateBack: true })
-      this.showLoginModal()
+      wx.removeStorageSync('login_redirect_url')
+      this.setData({
+        needNavigateBack: !!loginRedirectUrl,
+        loginRedirectUrl
+      })
+      this.showLoginModal(loginRedirectUrl)
     }
   },
 
   // 检查登录状态
   checkLoginStatus() {
-    const userInfo = wx.getStorageSync('userInfo')
-    const isLoggedIn = userInfo && userInfo.userId
+    const { isLoggedIn, userInfo } = this.getStoredLoginState()
 
     this.setData({
       isLoggedIn,
@@ -140,15 +165,24 @@ Page({
     }
   },
 
+  openLoginFor(redirectUrl = '') {
+    this.setData({
+      needNavigateBack: !!redirectUrl,
+      loginRedirectUrl: redirectUrl
+    })
+    this.showLoginModal(redirectUrl)
+  },
+
   // 显示登录弹窗
-  showLoginModal() {
+  showLoginModal(redirectUrl = '') {
     this.setData({
       showLoginModal: true,
       username: '',
       password: '',
       captcha: '',
       showPassword: false,
-      canSubmit: false
+      canSubmit: false,
+      loginRedirectUrl: redirectUrl || this.data.loginRedirectUrl || ''
     })
     this.fetchCaptcha()
   },
@@ -163,7 +197,8 @@ Page({
       captchaImage: '',
       showPassword: false,
       canSubmit: false,
-      needNavigateBack: false
+      needNavigateBack: false,
+      loginRedirectUrl: ''
     })
   },
 
@@ -271,11 +306,15 @@ Page({
       this.loadHistory()
 
       // 如果是从反馈页面跳转过来登录的，重新跳转到反馈页面
-      if (this.data.needNavigateBack) {
-        this.setData({ needNavigateBack: false })
+      if (this.data.needNavigateBack && this.data.loginRedirectUrl) {
+        const redirectUrl = this.data.loginRedirectUrl
+        this.setData({
+          needNavigateBack: false,
+          loginRedirectUrl: ''
+        })
         setTimeout(() => {
           wx.navigateTo({
-            url: '/pages/feedback/feedback'
+            url: redirectUrl
           })
         }, 1000)
       }
@@ -357,6 +396,27 @@ Page({
     })
   },
 
+  // 去我的添加记录
+  goMyCards() {
+    if (!this.data.isLoggedIn) {
+      wx.showModal({
+        title: '提示',
+        content: '登录后才能查看我的添加记录',
+        confirmText: '去登录',
+        success: (res) => {
+          if (res.confirm) {
+            this.openLoginFor('/pages/my-cards/my-cards')
+          }
+        }
+      })
+      return
+    }
+
+    wx.navigateTo({
+      url: '/pages/my-cards/my-cards'
+    })
+  },
+
   // 去进度卡片列表页面
   goToProgressCards(e) {
     const type = e.currentTarget.dataset.type
@@ -370,8 +430,7 @@ Page({
         confirmText: '去登录',
         success: (res) => {
           if (res.confirm) {
-            this.setData({ needNavigateBack: true })
-            this.showLoginModal()
+            this.openLoginFor(`/pages/progress-cards/progress-cards?type=${type}`)
           }
         }
       })
@@ -380,6 +439,27 @@ Page({
 
     wx.navigateTo({
       url: `/pages/progress-cards/progress-cards?type=${type}`
+    })
+  },
+
+  // 去添加卡片页面
+  goAddCard() {
+    if (!this.data.isLoggedIn) {
+      wx.showModal({
+        title: '提示',
+        content: '登录后才能添加卡片',
+        confirmText: '去登录',
+        success: (res) => {
+          if (res.confirm) {
+            this.openLoginFor('/pages/add-card/add-card')
+          }
+        }
+      })
+      return
+    }
+
+    wx.navigateTo({
+      url: '/pages/add-card/add-card'
     })
   },
 

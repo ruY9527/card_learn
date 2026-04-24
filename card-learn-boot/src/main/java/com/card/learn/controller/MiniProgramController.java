@@ -207,7 +207,7 @@ public class MiniProgramController {
         Long userId = parseUserId(appUserId);
         Map<String, Object> stats = new HashMap<>();
 
-        // 获取该科目下的所有卡片ID
+        // 获取该科目下的所有卡片（只查询已通过审批的）ID
         List<Long> cardIds = cardService.lambdaQuery()
                 .eq(BizCard::getSubjectId, subjectId)
                 .list()
@@ -265,6 +265,7 @@ public class MiniProgramController {
     @ApiOperation("分页获取卡片")
     public Result<Map<String, Object>> getCards(
             @RequestParam(required = false) Long subjectId,
+            @RequestParam(required = false) String frontContent,
             @RequestParam(required = false) String appUserId,
             @RequestParam(required = false) String status,
             @RequestParam(defaultValue = "1") Integer pageNum,
@@ -273,7 +274,7 @@ public class MiniProgramController {
         // 解析用户ID
         final Long userId = parseUserId(appUserId);
 
-        Page<BizCard> page = cardService.pageCards(subjectId, pageNum, pageSize);
+        Page<BizCard> page = cardService.pageCards(subjectId, frontContent, pageNum, pageSize);
 
         // 获取卡片标签关联
         List<Long> cardIds = page.getRecords().stream()
@@ -538,21 +539,30 @@ public class MiniProgramController {
     }
 
     /**
-     * 获取今日推荐卡片（每个科目随机2条，共8条）
+     * 获取今日推荐卡片（每个科目随机2条）
+     * @param majorId 专业ID（可选，不传则获取所有专业的推荐）
      */
     @GetMapping("/recommend")
     @ApiOperation("获取今日推荐卡片")
-    public Result<List<MiniCardDTO>> getRecommendCards() {
+    public Result<List<MiniCardDTO>> getRecommendCards(@RequestParam(required = false) Long majorId) {
         List<MiniCardDTO> recommendList = new ArrayList<>();
         
-        // 获取所有科目
-        List<BizSubject> subjects = subjectService.list();
+        // 获取科目列表（根据专业筛选或获取全部）
+        List<BizSubject> subjects;
+        if (majorId != null) {
+            subjects = subjectService.lambdaQuery()
+                    .eq(BizSubject::getMajorId, majorId)
+                    .list();
+        } else {
+            subjects = subjectService.list();
+        }
         
         // 从每个科目中随机抽取2条卡片
         for (BizSubject subject : subjects) {
-            // 获取该科目下的所有卡片
+            // 获取该科目下的所有卡片（只查询已通过审批的）
             List<BizCard> cards = cardService.lambdaQuery()
                     .eq(BizCard::getSubjectId, subject.getSubjectId())
+                    .eq(BizCard::getAuditStatus, "1") // 只查询已通过的卡片
                     .list();
             
             if (cards.size() <= 2) {

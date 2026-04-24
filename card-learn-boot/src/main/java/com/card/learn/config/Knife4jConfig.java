@@ -32,7 +32,7 @@ public class Knife4jConfig {
 
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
-                .title("408知识点学习卡片系统API文档")
+                .title("考研知识点学习卡片系统API文档")
                 .description("Card Learn Boot RESTful API")
                 .contact(new Contact("Card Learn", "", ""))
                 .version("1.0.0")

@@ -1,6 +1,7 @@
 // utils/request.js - 小程序API请求工具
 
-const BASE_URL = 'http://localhost:8080'
+const envConfig = require('../config/env.js')
+const BASE_URL = envConfig.BASE_URL
 
 /**
  * 过滤无效参数（null、undefined、空字符串）
@@ -37,9 +38,18 @@ const request = (options) => {
     // 如果需要认证，添加 token
     if (options.needAuth) {
       const token = wx.getStorageSync('token')
-      if (token) {
-        header['Authorization'] = 'Bearer ' + token
+      if (!token) {
+        const authError = { code: 401, message: '请先登录后再操作' }
+        if (options.showError !== false) {
+          wx.showToast({
+            title: authError.message,
+            icon: 'none'
+          })
+        }
+        reject(authError)
+        return
       }
+      header['Authorization'] = 'Bearer ' + token
     }
 
     console.log('请求:', BASE_URL + options.url, options.method || 'GET', options.data)
@@ -51,6 +61,22 @@ const request = (options) => {
       header,
       success: (res) => {
         console.log('响应:', options.url, res.statusCode, res.data)
+        if (res.statusCode === 401 || res.statusCode === 403) {
+          const authError = {
+            code: res.statusCode,
+            message: '登录已失效，请重新登录'
+          }
+          wx.removeStorageSync('token')
+          wx.removeStorageSync('userInfo')
+          if (options.showError !== false) {
+            wx.showToast({
+              title: authError.message,
+              icon: 'none'
+            })
+          }
+          reject(authError)
+          return
+        }
         const data = res.data
         if (data.code === 200) {
           resolve(data)
@@ -179,6 +205,7 @@ const getSubjectList = (majorId) =>
  * 分页获取卡片列表
  * @param {Object} params - 参数
  * @param {number} params.subjectId - 科目ID（可选）
+ * @param {string} params.frontContent - 正面内容关键词（可选）
  * @param {number} params.appUserId - 用户ID（可选）
  * @param {string} params.status - 状态筛选：all/learned/unlearned/mastered/review
  * @param {number} params.pageNum - 页码
@@ -293,10 +320,43 @@ const getSprintConfig = () =>
   request({ url: '/api/miniprogram/sprint-config' })
 
 /**
- * 获取今日推荐卡片（每个科目2条，共8条）
+ * 获取今日推荐卡片（每个科目2条）
+ * @param {number} majorId - 专业ID（可选，不传则获取所有专业的推荐）
  */
-const getRecommendCards = () =>
-  request({ url: '/api/miniprogram/recommend' })
+const getRecommendCards = (majorId) =>
+  request({ url: '/api/miniprogram/recommend', data: { majorId } })
+
+// ==================== 用户录入卡片API ====================
+
+/**
+ * 用户录入卡片
+ * @param {Object} data - 卡片数据
+ */
+const createCardByUser = (data) =>
+  request({ url: '/api/miniprogram/card/create', method: 'POST', data, needAuth: true })
+
+/**
+ * 获取我的卡片列表
+ * @param {Object} params - 参数
+ * @param {number} params.pageNum - 页码
+ * @param {number} params.pageSize - 每页数量
+ * @param {string} params.auditStatus - 审核状态 0待审批 1已通过 2已拒绝
+ */
+const getMyCards = (params) =>
+  request({ url: '/api/miniprogram/card/my', data: params, needAuth: true })
+
+/**
+ * 获取我的卡片统计
+ */
+const getMyCardStats = () =>
+  request({ url: '/api/miniprogram/card/my/stats', needAuth: true })
+
+/**
+ * 删除我的卡片
+ * @param {number} id - 草稿ID
+ */
+const deleteMyCard = (id) =>
+  request({ url: `/api/miniprogram/card/my/${id}`, method: 'DELETE', needAuth: true })
 
 // 导出API方法
 module.exports = {
@@ -318,5 +378,9 @@ module.exports = {
   getUserFeedbackList,
   getFeedbackById,
   getSprintConfig,
-  getRecommendCards
+  getRecommendCards,
+  createCardByUser,
+  getMyCards,
+  getMyCardStats,
+  deleteMyCard
 }

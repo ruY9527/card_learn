@@ -30,6 +30,21 @@ public class BizCard implements Serializable {
     /** 难度系数(1-5) */
     private Integer difficultyLevel;
 
+    /** 审批状态（0待审批 1已通过 2已拒绝） */
+    private String auditStatus;
+
+    /** 创建用户ID（系统创建为NULL，用户录入则有值） */
+    private Long createUserId;
+
+    /** 审批人ID */
+    private Long auditUserId;
+
+    /** 审批时间 */
+    private LocalDateTime auditTime;
+
+    /** 审批备注（拒绝原因等） */
+    private String auditRemark;
+
     /** 删除标志 */
     @TableLogic
     private String delFlag;
@@ -39,5 +54,8 @@ public class BizCard implements Serializable {
 
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updateTime;
+
+    /** 更新人ID */
+    private Long updateUserId;
 
 }

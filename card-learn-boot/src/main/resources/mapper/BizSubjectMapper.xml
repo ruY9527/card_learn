@@ -9,6 +9,7 @@
         <result property="subjectName" column="subject_name"/>
         <result property="icon" column="icon"/>
         <result property="orderNum" column="order_num"/>
+        <result property="createTime" column="create_time"/>
     </resultMap>
 
     <select id="selectSubjectsWithMajorName" resultMap="SubjectVOResultMap">
@@ -18,12 +19,35 @@
             m.major_name,
             s.subject_name,
             s.icon,
-            s.order_num
+            s.order_num,
+            s.create_time
         FROM biz_subject s
         LEFT JOIN biz_major m ON s.major_id = m.major_id
         <if test="majorId != null">
             WHERE s.major_id = #{majorId}
         </if>
+        ORDER BY s.order_num ASC, s.subject_id ASC
+    </select>
+
+    <select id="selectSubjectsPage" resultMap="SubjectVOResultMap">
+        SELECT
+            s.subject_id,
+            s.major_id,
+            m.major_name,
+            s.subject_name,
+            s.icon,
+            s.order_num,
+            s.create_time
+        FROM biz_subject s
+        LEFT JOIN biz_major m ON s.major_id = m.major_id
+        <where>
+            <if test="majorId != null">
+                AND s.major_id = #{majorId}
+            </if>
+            <if test="subjectName != null and subjectName != ''">
+                AND s.subject_name LIKE CONCAT('%', #{subjectName}, '%')
+            </if>
+        </where>
         ORDER BY s.order_num ASC, s.subject_id ASC
     </select>
 

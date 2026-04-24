@@ -36,7 +36,7 @@
           <text class="label-icon">❓</text>
           <text class="label-text">问题</text>
         </view>
-        <text class="content-text">{{item.frontContent.length > 80 ? item.frontContent.substring(0, 80) + '...' : item.frontContent}}</text>
+        <markdown-render content="{{item.frontContent.length > 100 ? item.frontContent.substring(0, 100) + '...' : item.frontContent}}"></markdown-render>
       </view>
 
       <view class="card-footer">

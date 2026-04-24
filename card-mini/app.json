@@ -6,11 +6,13 @@
     "pages/profile/profile",
     "pages/feedback/feedback",
     "pages/feedback-list/feedback-list",
-    "pages/progress-cards/progress-cards"
+    "pages/my-cards/my-cards",
+    "pages/progress-cards/progress-cards",
+    "pages/add-card/add-card"
   ],
   "window": {
     "navigationBarTextStyle": "black",
-    "navigationBarTitleText": "408知识点学习卡片",
+    "navigationBarTitleText": "考研知识点学习卡片",
     "navigationBarBackgroundColor": "#F8F8F8",
     "backgroundColor": "#F8F8F8"
   },

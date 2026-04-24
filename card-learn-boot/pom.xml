@@ -16,7 +16,7 @@
     <version>1.0.0</version>
     <packaging>jar</packaging>
     <name>card-learn-boot</name>
-    <description>408知识点学习卡片系统后端</description>
+    <description>考研知识点学习卡片系统后端</description>
 
     <properties>
         <java.version>1.8</java.version>

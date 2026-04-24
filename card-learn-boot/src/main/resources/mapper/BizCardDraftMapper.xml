@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.card.learn.mapper.BizCardDraftMapper">
+
+    <resultMap id="CardAuditVOResultMap" type="com.card.learn.vo.CardAuditVO">
+        <id property="cardId" column="draft_id"/>
+        <result property="subjectId" column="subject_id"/>
+        <result property="subjectName" column="subject_name"/>
+        <result property="frontContent" column="front_content"/>
+        <result property="backContent" column="back_content"/>
+        <result property="difficultyLevel" column="difficulty_level"/>
+        <result property="auditStatus" column="audit_status"/>
+        <result property="auditStatusText" column="audit_status_text"/>
+        <result property="createUserId" column="create_user_id"/>
+        <result property="createUserNickname" column="create_user_nickname"/>
+        <result property="auditUserId" column="audit_user_id"/>
+        <result property="auditUserNickname" column="audit_user_nickname"/>
+        <result property="auditTime" column="audit_time"/>
+        <result property="auditRemark" column="audit_remark"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <resultMap id="MyCardVOResultMap" type="com.card.learn.vo.MyCardVO">
+        <id property="cardId" column="draft_id"/>
+        <result property="subjectId" column="subject_id"/>
+        <result property="subjectName" column="subject_name"/>
+        <result property="frontContent" column="front_content"/>
+        <result property="backContent" column="back_content"/>
+        <result property="difficultyLevel" column="difficulty_level"/>
+        <result property="auditStatus" column="audit_status"/>
+        <result property="auditStatusText" column="audit_status_text"/>
+        <result property="auditRemark" column="audit_remark"/>
+        <result property="createTime" column="create_time"/>
+        <result property="auditTime" column="audit_time"/>
+    </resultMap>
+
+    <select id="selectPendingDrafts" resultMap="CardAuditVOResultMap">
+        SELECT
+            d.draft_id,
+            d.subject_id,
+            s.subject_name,
+            d.front_content,
+            d.back_content,
+            d.difficulty_level,
+            d.audit_status,
+            CASE d.audit_status
+                WHEN '0' THEN '待审批'
+                WHEN '1' THEN '已通过'
+                WHEN '2' THEN '已拒绝'
+                ELSE '未知'
+            END AS audit_status_text,
+            d.create_user_id,
+            au.nickname AS create_user_nickname,
+            d.audit_user_id,
+            su.nickname AS audit_user_nickname,
+            d.audit_time,
+            d.audit_remark,
+            d.create_time
+        FROM biz_card_draft d
+        LEFT JOIN biz_subject s ON d.subject_id = s.subject_id
+        LEFT JOIN sys_app_user au ON d.create_user_id = au.app_user_id
+        LEFT JOIN sys_user su ON d.audit_user_id = su.user_id
+        <if test="auditStatus != null and auditStatus != ''">
+            WHERE d.audit_status = #{auditStatus}
+        </if>
+        ORDER BY d.create_time DESC
+    </select>
+
+    <select id="selectMyDrafts" resultMap="MyCardVOResultMap">
+        SELECT
+            d.draft_id,
+            d.subject_id,
+            s.subject_name,
+            d.front_content,
+            d.back_content,
+            d.difficulty_level,
+            d.audit_status,
+            CASE d.audit_status
+                WHEN '0' THEN '待审批'
+                WHEN '1' THEN '已通过'
+                WHEN '2' THEN '已拒绝'
+                ELSE '未知'
+            END AS audit_status_text,
+            d.audit_remark,
+            d.create_time,
+            d.audit_time
+        FROM biz_card_draft d
+        LEFT JOIN biz_subject s ON d.subject_id = s.subject_id
+        WHERE d.create_user_id = #{createUserId}
+        <if test="auditStatus != null and auditStatus != ''">
+            AND d.audit_status = #{auditStatus}
+        </if>
+        ORDER BY d.create_time DESC
+    </select>
+
+</mapper>

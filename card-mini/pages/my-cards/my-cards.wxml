@@ -1,0 +1,102 @@
+<view class="my-cards-page">
+  <view class="empty-tip" wx:if="{{!isLoggedIn}}">
+    <text class="empty-icon">🔒</text>
+    <text class="empty-text">请先登录后查看我的添加记录</text>
+    <button class="login-btn" bindtap="goLogin">去登录</button>
+  </view>
+
+  <view wx:if="{{isLoggedIn}}">
+    <view class="stats-panel">
+      <view class="stats-header">
+        <text class="panel-title">我的知识贡献</text>
+        <text class="panel-subtitle">记录会展示审核状态与处理结果</text>
+      </view>
+      <view class="stats-grid">
+        <view class="stat-card total">
+          <text class="stat-value">{{stats.total}}</text>
+          <text class="stat-label">全部记录</text>
+        </view>
+        <view class="stat-card pending">
+          <text class="stat-value">{{stats.pending}}</text>
+          <text class="stat-label">待审批</text>
+        </view>
+        <view class="stat-card passed">
+          <text class="stat-value">{{stats.passed}}</text>
+          <text class="stat-label">已通过</text>
+        </view>
+        <view class="stat-card rejected">
+          <text class="stat-value">{{stats.rejected}}</text>
+          <text class="stat-label">已拒绝</text>
+        </view>
+      </view>
+    </view>
+
+    <scroll-view class="status-tabs" scroll-x enable-flex>
+      <view
+        wx:for="{{statusTabs}}"
+        wx:key="value"
+        class="status-tab {{activeStatus === item.value ? 'active' : ''}}"
+        data-status="{{item.value}}"
+        bindtap="onStatusChange"
+      >
+        {{item.label}}
+      </view>
+    </scroll-view>
+
+    <view class="card-list" wx:if="{{cardList.length > 0}}">
+      <view
+        class="record-card"
+        wx:for="{{cardList}}"
+        wx:key="cardId"
+        data-card="{{item}}"
+        bindtap="viewCardDetail"
+      >
+        <view class="record-header">
+          <view class="subject-badge">{{item.subjectName || '未分类'}}</view>
+          <view class="status-badge status-{{item.auditStatus}}">
+            {{item.auditStatusText || '待审批'}}
+          </view>
+        </view>
+
+        <view class="record-title">{{item.frontContent}}</view>
+        <view class="record-answer">{{item.backContent}}</view>
+
+        <view class="record-meta">
+          <text class="meta-text">难度 {{item.difficultyLevel || 2}} 级</text>
+          <text class="meta-text">提交 {{item.createTime}}</text>
+        </view>
+
+        <view class="audit-remark" wx:if="{{item.auditRemark}}">
+          <text class="remark-label">审核备注：</text>
+          <text class="remark-text">{{item.auditRemark}}</text>
+        </view>
+
+        <view class="record-footer">
+          <text class="detail-tip">点击查看详情</text>
+          <text
+            class="delete-action"
+            wx:if="{{item.auditStatus === '0'}}"
+            catchtap="deleteCard"
+            data-id="{{item.cardId}}"
+            data-status="{{item.auditStatus}}"
+          >
+            删除
+          </text>
+        </view>
+      </view>
+    </view>
+
+    <view class="empty-state" wx:if="{{cardList.length === 0 && !loading}}">
+      <text class="empty-icon">📚</text>
+      <text class="empty-text">还没有添加记录</text>
+      <text class="empty-desc">你提交的学习卡片会在这里显示审核状态</text>
+      <button class="add-btn" bindtap="goAddCard">去添加卡片</button>
+    </view>
+
+    <view class="load-more" wx:if="{{cardList.length > 0}}">
+      <text wx:if="{{loading}}">加载中...</text>
+      <text wx:elif="{{hasMore}}" bindtap="loadMore">加载更多</text>
+      <text wx:else>没有更多记录了</text>
+    </view>
+  </view>
+</view>

@@ -1,9 +1,12 @@
 // app.js
+const envConfig = require('./config/env.js')
+
 App({
   globalData: {
     userInfo: null,
     token: '',
-    baseUrl: 'http://localhost:8080'
+    baseUrl: envConfig.BASE_URL,
+    env: envConfig.ENV
   },
 
   onLaunch() {

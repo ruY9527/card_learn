@@ -1,9 +1,13 @@
 import request from './request'
-import type { Major, Subject, Card, Tag, Feedback, FeedbackVO, PageResult } from './types'
+import type { Major, Subject, Card, Tag, Feedback, FeedbackVO, PageResult, CardAuditVO } from './types'
 
 // 专业相关
 export const getMajorList = () => {
   return request.get<any, { data: Major[] }>('/major/list')
+}
+
+export const getMajorPage = (params: { majorName?: string; status?: string; pageNum: number; pageSize: number }) => {
+  return request.get<any, PageResult<Major>>('/major/page', { params })
 }
 
 export const createMajor = (data: Major) => {
@@ -23,6 +27,10 @@ export const getSubjectList = (majorId?: number) => {
   return request.get<any, { data: Subject[] }>('/subject/list', { params: { majorId } })
 }
 
+export const getSubjectPage = (params: { majorId?: number; subjectName?: string; pageNum: number; pageSize: number }) => {
+  return request.get<any, PageResult<Subject>>('/subject/page', { params })
+}
+
 export const createSubject = (data: Subject) => {
   return request.post('/subject', data)
 }
@@ -36,7 +44,7 @@ export const deleteSubject = (id: number) => {
 }
 
 // 卡片相关
-export const getCardPage = (params: { subjectId?: number; pageNum: number; pageSize: number }) => {
+export const getCardPage = (params: { subjectId?: number; frontContent?: string; pageNum: number; pageSize: number }) => {
   return request.get<any, PageResult<Card>>('/card/page', { params })
 }
 
@@ -65,12 +73,20 @@ export const deleteCard = (id: number) => {
 }
 
 // 标签相关
-export const getTagList = () => {
-  return request.get<any, { data: Tag[] }>('/tag/list')
+export const getTagPage = (params: { tagName?: string; subjectId?: number; pageNum: number; pageSize: number }) => {
+  return request.get<any, { data: { records: Tag[]; total: number; pageNum: number; pageSize: number } }>('/tag/page', { params })
+}
+
+export const getTagList = (subjectId?: number) => {
+  return request.get<any, { data: Tag[] }>('/tag/list', { params: { subjectId } })
 }
 
 export const createTag = (data: Tag) => {
   return request.post('/tag', data)
+}
+
+export const updateTag = (data: Tag) => {
+  return request.put('/tag', data)
 }
 
 export const deleteTag = (id: number) => {
@@ -96,4 +112,48 @@ export const deleteFeedback = (id: number) => {
 
 export const getPendingFeedbackCount = () => {
   return request.get<any, { data: number }>('/feedback/pending/count')
+}
+
+// ==================== 卡片审批相关 ====================
+
+/**
+ * 分页查询待审批卡片列表
+ */
+export const getCardAuditPage = (params: { auditStatus?: string; pageNum: number; pageSize: number }) => {
+  return request.get<any, PageResult<CardAuditVO>>('/card/audit/page', { params })
+}
+
+/**
+ * 获取卡片详情（用于审批）
+ */
+export const getCardAuditById = (id: number) => {
+  return request.get<any, { data: CardAuditVO }>(`/card/audit/${id}`)
+}
+
+/**
+ * 审批卡片
+ */
+export const auditCard = (data: { cardId: number; auditStatus: string; auditUserId?: number; auditRemark?: string }) => {
+  return request.post<any, { data: { cardId: number | null; message: string } }>('/card/audit/process', data)
+}
+
+/**
+ * 获取待审批卡片数量
+ */
+export const getPendingCardCount = () => {
+  return request.get<any, { data: number }>('/card/audit/pending/count')
+}
+
+/**
+ * 批量审批通过
+ */
+export const batchApproveCards = (draftIds: number[], auditUserId: number) => {
+  return request.post<any, { data: string }>('/card/audit/batch/pass', draftIds, { params: { auditUserId } })
+}
+
+/**
+ * 批量审批拒绝
+ */
+export const batchRejectCards = (draftIds: number[], auditUserId: number, auditRemark?: string) => {
+  return request.post<any, { data: string }>('/card/audit/batch/reject', draftIds, { params: { auditUserId, auditRemark } })
 }

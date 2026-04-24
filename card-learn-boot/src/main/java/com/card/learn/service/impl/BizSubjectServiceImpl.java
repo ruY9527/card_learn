@@ -1,5 +1,6 @@
 package com.card.learn.service.impl;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.card.learn.entity.BizSubject;
 import com.card.learn.mapper.BizSubjectMapper;
@@ -22,6 +23,12 @@ public class BizSubjectServiceImpl extends ServiceImpl<BizSubjectMapper, BizSubj
     @Override
     public List<SubjectVO> listSubjectsWithMajorName(Long majorId) {
         return subjectMapper.selectSubjectsWithMajorName(majorId);
+    }
+
+    @Override
+    public Page<SubjectVO> pageSubjects(Long majorId, String subjectName, Integer pageNum, Integer pageSize) {
+        Page<SubjectVO> page = new Page<>(pageNum, pageSize);
+        return subjectMapper.selectSubjectsPage(page, majorId, subjectName);
     }
 
 }

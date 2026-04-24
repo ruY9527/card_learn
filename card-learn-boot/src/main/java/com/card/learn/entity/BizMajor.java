@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  * 专业信息表
@@ -23,5 +24,14 @@ public class BizMajor implements Serializable {
 
     /** 状态 */
     private String status;
+
+    @TableField(fill = FieldFill.INSERT)
+    private LocalDateTime createTime;
+
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private LocalDateTime updateTime;
+
+    /** 更新人ID */
+    private Long updateUserId;
 
 }

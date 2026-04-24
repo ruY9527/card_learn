@@ -54,8 +54,10 @@ Page({
 
   // 去登录
   goLogin() {
-    wx.navigateTo({
-      url: '/pages/profile/profile?action=login'
+    wx.setStorageSync('need_show_login', true)
+    wx.setStorageSync('login_redirect_url', '/pages/feedback-list/feedback-list')
+    wx.switchTab({
+      url: '/pages/profile/profile'
     })
   },
 

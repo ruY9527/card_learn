@@ -47,7 +47,7 @@
       </el-col>
     </el-row>
     <el-card class="welcome-card" style="margin-top: 20px">
-      <h3>欢迎使用408知识点学习卡片管理系统</h3>
+      <h3>欢迎使用考研知识点学习卡片管理系统</h3>
       <p>系统功能：</p>
       <ul>
         <li>专业管理：管理考研专业分类</li>
@@ -85,6 +85,10 @@ const fetchStats = async () => {
     ElMessage.error('获取统计数据失败')
   }
 }
+
+onMounted(() => {
+  fetchStats()
+})
 </script>
 
 <style scoped lang="scss">

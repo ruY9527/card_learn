@@ -67,7 +67,7 @@
           <!-- 正面内容区域 - 支持滚动 -->
           <scroll-view class="card-body" scroll-y="true" enhanced="true" show-scrollbar="false">
             <view class="card-content-wrapper">
-              <text class="card-content">{{currentCard.frontContent}}</text>
+              <markdown-render content="{{currentCard.frontContent}}"></markdown-render>
             </view>
           </scroll-view>
 
@@ -96,7 +96,7 @@
           <!-- 答案内容区域 - 支持滚动 -->
           <scroll-view class="card-body answer-body" scroll-y="true" enhanced="true" show-scrollbar="false">
             <view class="card-content-wrapper">
-              <text class="card-content">{{currentCard.backContent}}</text>
+              <markdown-render content="{{currentCard.backContent}}"></markdown-render>
             </view>
           </scroll-view>
 

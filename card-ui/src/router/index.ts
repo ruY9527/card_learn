@@ -69,12 +69,6 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '菜单管理' }
       },
       {
-        path: 'system/feedback',
-        name: 'Feedback',
-        component: () => import('@/views/system/feedback/index.vue'),
-        meta: { title: '反馈管理' }
-      },
-      {
         path: 'system/log',
         name: 'Log',
         component: () => import('@/views/system/log/index.vue'),
@@ -85,6 +79,18 @@ const routes: RouteRecordRaw[] = [
         name: 'Sprint',
         component: () => import('@/views/system/sprint/index.vue'),
         meta: { title: '冲刺配置' }
+      },
+      {
+        path: 'feedback',
+        name: 'Feedback',
+        component: () => import('@/views/feedback/index.vue'),
+        meta: { title: '反馈管理' }
+      },
+      {
+        path: 'card-audit',
+        name: 'CardAudit',
+        component: () => import('@/views/feedback/card-audit/index.vue'),
+        meta: { title: '卡片审批' }
       }
     ]
   }
@@ -97,7 +103,7 @@ const router = createRouter({
 
 // 路由守卫
 router.beforeEach((to, _from, next) => {
-  document.title = `${to.meta.title || '首页'} - 408知识点学习卡片管理系统`
+  document.title = `${to.meta.title || '首页'} - 考研知识点学习卡片管理系统`
   const token = localStorage.getItem('token')
   if (!token && to.path !== '/login') {
     next('/login')

@@ -34,7 +34,15 @@
       "Bash(git tag *)",
       "Bash(ls *)",
       "Bash(./card-learn.sh *)",
-      "Bash(/users/baoyang/documents/coding/github_self/card_learn/card-learn-boot/card-learn.sh *)"
+      "Bash(/users/baoyang/documents/coding/github_self/card_learn/card-learn-boot/card-learn.sh *)",
+      "Bash(curl *)",
+      "Bash(xcodebuild *)",
+      "Bash(swift *)",
+      "Bash(swiftc *)",
+      "Bash(pip3 show *)",
+      "Bash(pip3 install *)",
+      "Bash(mv *)",
+      "Bash(od *)"
     ]
   },
   "$version": 3

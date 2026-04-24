@@ -32,9 +32,10 @@ public class BizCardController {
     @ApiOperation("分页查询卡片")
     public Result<Page<CardVO>> page(
             @RequestParam(required = false) Long subjectId,
+            @RequestParam(required = false) String frontContent,
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize) {
-        return Result.success(cardService.pageCardsWithSubjectName(subjectId, pageNum, pageSize));
+        return Result.success(cardService.pageCardsWithSubjectName(subjectId, frontContent, pageNum, pageSize));
     }
 
     @GetMapping("/{id}")

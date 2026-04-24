@@ -1,5 +1,6 @@
 package com.card.learn.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.card.learn.common.Result;
 import com.card.learn.entity.BizSubject;
 import com.card.learn.service.IBizSubjectService;
@@ -28,6 +29,17 @@ public class BizSubjectController {
         return Result.success(subjectService.listSubjectsWithMajorName(majorId));
     }
 
+    @GetMapping("/page")
+    @ApiOperation("分页查询科目列表")
+    public Result<Page<SubjectVO>> page(
+            @RequestParam(required = false) Long majorId,
+            @RequestParam(required = false) String subjectName,
+            @RequestParam(defaultValue = "1") Integer pageNum,
+            @RequestParam(defaultValue = "10") Integer pageSize) {
+        Page<SubjectVO> page = subjectService.pageSubjects(majorId, subjectName, pageNum, pageSize);
+        return Result.success(page);
+    }
+
     @PostMapping
     @ApiOperation("新增科目")
     public Result<Void> save(@RequestBody BizSubject subject) {
@@ -42,7 +54,7 @@ public class BizSubjectController {
         return Result.success();
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id:\\d+}")
     @ApiOperation("删除科目")
     public Result<Void> delete(@PathVariable Long id) {
         subjectService.removeById(id);

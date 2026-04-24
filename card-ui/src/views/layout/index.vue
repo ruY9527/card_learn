@@ -30,9 +30,16 @@
           <el-menu-item index="/system/user">用户管理</el-menu-item>
           <el-menu-item index="/system/role">角色管理</el-menu-item>
           <el-menu-item index="/system/menu">菜单管理</el-menu-item>
-          <el-menu-item index="/system/feedback">反馈管理</el-menu-item>
           <el-menu-item index="/system/log">日志管理</el-menu-item>
           <el-menu-item index="/system/sprint">冲刺配置</el-menu-item>
+        </el-sub-menu>
+        <el-sub-menu index="feedback">
+          <template #title>
+            <el-icon><ChatDotRound /></el-icon>
+            <span>用户反馈</span>
+          </template>
+          <el-menu-item index="/feedback">反馈管理</el-menu-item>
+          <el-menu-item index="/card-audit">卡片审批</el-menu-item>
         </el-sub-menu>
         <el-menu-item index="/ai">
           <el-icon><MagicStick /></el-icon>
@@ -43,7 +50,7 @@
     <el-container>
       <el-header>
         <div class="header-content">
-          <span class="title">408知识点学习卡片管理系统</span>
+          <span class="title">考研知识点学习卡片管理系统</span>
           <el-dropdown @command="handleCommand">
             <span class="user-info">
               <el-avatar :size="32" :src="userStore.userInfo?.avatar || ''">

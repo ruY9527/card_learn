@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  * 科目信息表
@@ -26,5 +27,14 @@ public class BizSubject implements Serializable {
 
     /** 排序 */
     private Integer orderNum;
+
+    @TableField(fill = FieldFill.INSERT)
+    private LocalDateTime createTime;
+
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private LocalDateTime updateTime;
+
+    /** 更新人ID */
+    private Long updateUserId;
 
 }

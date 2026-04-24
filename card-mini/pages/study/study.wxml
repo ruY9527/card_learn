@@ -38,8 +38,28 @@
 
   <!-- 正常内容区域 -->
   <block wx:if="{{!error}}">
-    <!-- 快速开始按钮 -->
+    <!-- 快速开始区域 -->
     <view class="quick-start" wx:if="{{cardList.length > 0 && !loading}}">
+      <!-- 正面内容搜索 -->
+      <view class="search-section">
+        <view class="search-input-wrapper">
+          <text class="search-icon">🔍</text>
+          <input
+            class="search-input"
+            type="text"
+            placeholder="搜索正面内容"
+            value="{{searchKeyword}}"
+            bindinput="onSearchInput"
+            bindconfirm="handleSearch"
+            confirm-type="search"
+          />
+          <text class="clear-icon" wx:if="{{searchKeyword}}" bindtap="clearSearch">✕</text>
+        </view>
+        <view class="search-btn" bindtap="handleSearch">
+          <text>搜索</text>
+        </view>
+      </view>
+      <!-- 开始学习按钮 -->
       <view class="start-btn" bindtap="handleStartStudy">
         <text class="start-icon">📖</text>
         <text class="start-text">开始学习</text>
@@ -98,7 +118,7 @@
           </view>
         </view>
         <view class="card-content">
-          <text class="card-text">{{item.frontContent || '暂无内容'}}</text>
+          <markdown-render content="{{item.frontContent || '暂无内容'}}"></markdown-render>
         </view>
         <view class="card-footer">
           <view class="card-info">

@@ -121,9 +121,12 @@ class APIService {
     }
 
     // 获取推荐卡片
-    func getRecommendCards() async throws -> [Card] {
-        let url = URL(string: config.getApiUrl(path: "/api/miniprogram/recommend"))!
-        let (data, _) = try await session.data(from: url)
+    func getRecommendCards(majorId: Int?) async throws -> [Card] {
+        var urlComponents = URLComponents(string: config.getApiUrl(path: "/api/miniprogram/recommend"))!
+        if let majorId = majorId {
+            urlComponents.queryItems = [URLQueryItem(name: "majorId", value: String(majorId))]
+        }
+        let (data, _) = try await session.data(from: urlComponents.url!)
         let response = try JSONDecoder().decode(APIResponse<[Card]>.self, from: data)
         if response.code == 200, let cards = response.data {
             return cards
@@ -184,7 +187,7 @@ class APIService {
     // MARK: - 反馈相关 API
     
     // 提交反馈
-    func submitFeedback(appUserId: Int, cardId: Int?, type: String, rating: Int?, content: String, contact: String?, images: [String]?, token: String) async throws -> Bool {
+    func submitFeedback(appUserId: Int, cardId: Int?, majorId: Int?, subjectId: Int?, type: String, rating: Int?, content: String, contact: String?, images: [String]?, token: String) async throws -> Bool {
         let url = URL(string: config.getApiUrl(path: "/api/miniprogram/feedback"))!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -197,6 +200,8 @@ class APIService {
             "content": content
         ]
         if let cardId = cardId { body["cardId"] = cardId }
+        if let majorId = majorId { body["majorId"] = majorId }
+        if let subjectId = subjectId { body["subjectId"] = subjectId }
         if let rating = rating { body["rating"] = rating }
         if let contact = contact { body["contact"] = contact }
         if let images = images, !images.isEmpty { body["images"] = images }

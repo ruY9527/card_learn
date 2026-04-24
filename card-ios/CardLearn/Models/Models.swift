@@ -92,6 +92,8 @@ struct Feedback: Codable, Identifiable {
     let id: Int
     let appUserId: Int?
     let cardId: Int?
+    let majorId: Int?
+    let subjectId: Int?
     let type: String
     let rating: Int?
     let content: String

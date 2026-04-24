@@ -25,7 +25,7 @@ FROM nginx:alpine
 
 LABEL maintainer="card-learn"
 LABEL version="1.0.0"
-LABEL description="408知识点学习卡片管理系统前端"
+LABEL description="考研知识点学习卡片管理系统前端"
 
 # 安装 tzdata 设置时区
 RUN apk add --no-cache tzdata \

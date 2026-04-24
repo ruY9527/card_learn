@@ -1,0 +1,4 @@
+<!--components/markdown-render/markdown-render.wxml-->
+<view class="markdown-container">
+  <text class="markdown-text">{{displayContent || content}}</text>
+</view>

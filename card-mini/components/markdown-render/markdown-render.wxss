@@ -1,0 +1,14 @@
+/* components/markdown-render/markdown-render.wxss */
+
+.markdown-container {
+  width: 100%;
+}
+
+.markdown-text {
+  font-size: 28rpx;
+  color: #303133;
+  line-height: 1.8;
+  word-wrap: break-word;
+  word-break: break-all;
+  white-space: pre-wrap;
+}

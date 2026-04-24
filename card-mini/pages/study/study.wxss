@@ -121,6 +121,50 @@
   padding: 20rpx 30rpx;
 }
 
+/* 搜索区域 */
+.search-section {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-bottom: 20rpx;
+}
+
+.search-input-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  background-color: #fff;
+  border-radius: 16rpx;
+  padding: 16rpx 20rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+.search-icon {
+  font-size: 28rpx;
+  margin-right: 12rpx;
+}
+
+.search-input {
+  flex: 1;
+  font-size: 28rpx;
+  color: #303133;
+}
+
+.clear-icon {
+  font-size: 28rpx;
+  color: #909399;
+  padding: 4rpx;
+}
+
+.search-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  padding: 16rpx 32rpx;
+  border-radius: 16rpx;
+  font-size: 28rpx;
+  box-shadow: 0 4rpx 12rpx rgba(102, 126, 234, 0.3);
+}
+
 .start-btn {
   display: flex;
   flex-direction: column;

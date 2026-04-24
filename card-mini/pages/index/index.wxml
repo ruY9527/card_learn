@@ -14,21 +14,62 @@
     </view>
   </view>
 
-  <!-- 专业分类 -->
+  <!-- 专业分类 - 搜索下拉选择 -->
   <view class="section">
     <view class="section-title">专业分类</view>
-    <view class="major-list">
-      <view
-        class="major-item card {{currentMajor === item.majorId ? 'active' : ''}}"
-        wx:for="{{majorList}}"
-        wx:key="majorId"
-        data-major-id="{{item.majorId}}"
-        bindtap="handleMajorClick"
-      >
-        <view class="major-content">
-          <text class="major-name">{{item.majorName}}</text>
-          <text class="major-desc">{{item.description || '点击查看科目'}}</text>
+    <view class="major-select-container">
+      <!-- 选择器触发区域 -->
+      <view class="major-select-box" bindtap="toggleMajorPicker">
+        <view class="select-content">
+          <text class="select-value">{{selectedMajorName || '请选择专业'}}</text>
+          <view class="select-arrow {{showMajorPicker ? 'arrow-up' : 'arrow-down'}}">
+            <text class="arrow-icon">▼</text>
+          </view>
         </view>
+      </view>
+
+      <!-- 下拉搜索面板 -->
+      <view class="major-picker-panel" wx:if="{{showMajorPicker}}">
+        <!-- 搜索输入框 -->
+        <view class="search-box">
+          <view class="search-input-wrapper">
+            <text class="search-icon">🔍</text>
+            <input
+              class="search-input"
+              type="text"
+              placeholder="搜索专业名称"
+              value="{{majorSearchKeyword}}"
+              bindinput="onMajorSearchInput"
+              confirm-type="search"
+            />
+            <text class="clear-icon" wx:if="{{majorSearchKeyword}}" bindtap="clearMajorSearch">✕</text>
+          </view>
+        </view>
+
+        <!-- 搜索结果列表 -->
+        <scroll-view class="major-options-list" scroll-y="true">
+          <view
+            class="major-option-item {{currentMajor === item.majorId ? 'selected' : ''}}"
+            wx:for="{{filteredMajorList}}"
+            wx:key="majorId"
+            data-major-id="{{item.majorId}}"
+            data-major-name="{{item.majorName}}"
+            bindtap="selectMajor"
+          >
+            <view class="option-content">
+              <text class="option-name">{{item.majorName}}</text>
+              <text class="option-desc" wx:if="{{item.description}}">{{item.description}}</text>
+            </view>
+            <view class="option-check" wx:if="{{currentMajor === item.majorId}}">
+              <text class="check-icon">✓</text>
+            </view>
+          </view>
+
+          <!-- 无搜索结果提示 -->
+          <view class="no-result-tip" wx:if="{{filteredMajorList.length === 0 && majorSearchKeyword}}">
+            <text>未找到匹配的专业</text>
+          </view>
+        </scroll-view>
       </view>
     </view>
   </view>
@@ -54,7 +95,7 @@
   </view>
 
   <!-- 无科目提示 -->
-  <view class="section" wx:if="{{subjectList.length === 0 && currentMajor}}">
+  <view class="section" wx:if="{{subjectList.length === 0 && currentMajor && !loading}}">
     <view class="empty-tip">
       <text>该专业暂无科目数据</text>
     </view>

@@ -24,6 +24,14 @@
             />
           </el-select>
         </el-form-item>
+        <el-form-item label="正面内容">
+          <el-input
+            v-model="queryParams.frontContent"
+            placeholder="请输入正面内容"
+            clearable
+            style="width: 200px"
+          />
+        </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="fetchData">查询</el-button>
         </el-form-item>
@@ -210,6 +218,7 @@ const selectedTagIds = ref<number[]>([])
 
 const queryParams = reactive({
   subjectId: undefined as number | undefined,
+  frontContent: undefined as string | undefined,
   pageNum: 1,
   pageSize: 10
 })

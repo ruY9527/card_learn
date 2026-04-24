@@ -4,7 +4,11 @@ const { getMajorList, getSubjectList, getSprintConfig, getRecommendCards } = req
 Page({
   data: {
     majorList: [],
+    filteredMajorList: [], // 搜索过滤后的专业列表
     currentMajor: null,
+    selectedMajorName: '', // 当前选中的专业名称
+    majorSearchKeyword: '', // 搜索关键词
+    showMajorPicker: false, // 是否显示下拉面板
     subjectList: [],
     recommendCards: [],
     loading: false,
@@ -16,17 +20,114 @@ Page({
       examDate: '',
       daysRemaining: 0,
       isExpired: false
-    }
+    },
+    initialized: false // 是否已初始化
   },
 
   onLoad() {
     this.fetchSprintConfig()
-    this.fetchData()
+    this.initializePage()
   },
 
   onShow() {
+    // 只更新冲刺配置，不重新加载专业数据
     this.fetchSprintConfig()
-    this.fetchData()
+    
+    // 如果已初始化，恢复用户之前选择的专业
+    if (this.data.initialized) {
+      this.restoreSelectedMajor()
+    }
+  },
+
+  // 初始化页面（只在onLoad时调用一次）
+  initializePage() {
+    this.setData({ loading: true })
+
+    // 获取专业列表
+    getMajorList().then(majorRes => {
+      console.log('专业列表:', majorRes)
+      const majorList = majorRes.data || []
+      
+      this.setData({
+        majorList: majorList,
+        filteredMajorList: majorList,
+        initialized: true
+      })
+
+      // 尝试恢复用户之前选择的专业
+      const savedMajorId = wx.getStorageSync('selected_major_id')
+      const savedMajorName = wx.getStorageSync('selected_major_name')
+      
+      if (savedMajorId && savedMajorName) {
+        // 检查保存的专业是否在列表中
+        const majorExists = majorList.find(m => m.majorId === savedMajorId)
+        if (majorExists) {
+          console.log('恢复用户选择的专业:', savedMajorId, savedMajorName)
+          this.setData({
+            currentMajor: savedMajorId,
+            selectedMajorName: savedMajorName
+          })
+          this.fetchSubjects(savedMajorId)
+          this.fetchRecommendCards(savedMajorId)
+        } else {
+          // 如果保存的专业不存在，加载第一个专业
+          this.loadFirstMajor(majorList)
+        }
+      } else {
+        // 没有保存的专业，加载第一个专业
+        this.loadFirstMajor(majorList)
+      }
+    }).catch(error => {
+      console.error('获取专业失败:', error)
+      this.setData({ 
+        loading: false, 
+        majorList: [], 
+        filteredMajorList: [],
+        initialized: true
+      })
+    })
+  },
+
+  // 加载第一个专业
+  loadFirstMajor(majorList) {
+    if (majorList.length > 0) {
+      const firstMajor = majorList[0]
+      this.setData({
+        currentMajor: firstMajor.majorId,
+        selectedMajorName: firstMajor.majorName
+      })
+      this.saveSelectedMajor(firstMajor.majorId, firstMajor.majorName)
+      this.fetchSubjects(firstMajor.majorId)
+      this.fetchRecommendCards(firstMajor.majorId)
+    } else {
+      this.setData({ loading: false })
+    }
+  },
+
+  // 恢复用户选择的专业
+  restoreSelectedMajor() {
+    const savedMajorId = wx.getStorageSync('selected_major_id')
+    const savedMajorName = wx.getStorageSync('selected_major_name')
+    
+    if (savedMajorId && savedMajorName) {
+      // 检查是否需要更新（与当前不同）
+      if (this.data.currentMajor !== savedMajorId) {
+        console.log('onShow恢复专业:', savedMajorId, savedMajorName)
+        this.setData({
+          currentMajor: savedMajorId,
+          selectedMajorName: savedMajorName
+        })
+        this.fetchSubjects(savedMajorId)
+        this.fetchRecommendCards(savedMajorId)
+      }
+    }
+  },
+
+  // 保存用户选择的专业到本地存储
+  saveSelectedMajor(majorId, majorName) {
+    wx.setStorageSync('selected_major_id', majorId)
+    wx.setStorageSync('selected_major_name', majorName)
+    console.log('保存选择的专业:', majorId, majorName)
   },
 
   // 获取冲刺配置（从后端获取）
@@ -36,7 +137,7 @@ Page({
       if (res && res.data) {
         const config = res.data
         let countdownText = ''
-        
+
         if (config.enabled && !config.isExpired) {
           const days = config.daysRemaining
           if (days > 365) {
@@ -52,7 +153,7 @@ Page({
           } else {
             countdownText = '考试进行中'
           }
-          
+
           this.setData({
             countdownDays: days,
             countdownText: countdownText,
@@ -65,7 +166,6 @@ Page({
             }
           })
         } else {
-          // 冲刺模式未启用或已过期，使用默认值
           this.calculateDefaultCountdown()
         }
       } else {
@@ -73,19 +173,16 @@ Page({
       }
     }).catch(err => {
       console.error('获取冲刺配置失败:', err)
-      // API失败时使用默认计算
       this.calculateDefaultCountdown()
     })
   },
 
-  // 默认倒计时计算（API失败时的备用方案）
+  // 默认倒计时计算
   calculateDefaultCountdown() {
     const now = new Date()
     const currentYear = now.getFullYear()
-    
-    // 默认使用12月21日
     let examDate = new Date(currentYear, 11, 21)
-    
+
     const diffTime = examDate - now
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
 
@@ -115,40 +212,6 @@ Page({
     })
   },
 
-  // 获取初始数据
-  fetchData() {
-    this.setData({ loading: true })
-
-    // 获取专业列表
-    getMajorList().then(majorRes => {
-      console.log('专业列表:', majorRes)
-      this.setData({ majorList: majorRes.data || [] })
-
-      // 默认加载第一个专业的科目
-      if (majorRes.data && majorRes.data.length > 0) {
-        const majorId = majorRes.data[0].majorId
-        this.setData({ currentMajor: majorId })
-        this.fetchSubjects(majorId)
-      } else {
-        this.setData({ loading: false })
-      }
-    }).catch(error => {
-      console.error('获取专业失败:', error)
-      this.setData({ loading: false, majorList: [] })
-    })
-
-    // 加载推荐卡片（每个科目2条，共8条）
-    getRecommendCards().then(cardRes => {
-      console.log('今日推荐卡片:', cardRes)
-      this.setData({
-        recommendCards: cardRes.data || []
-      })
-    }).catch(error => {
-      console.error('获取推荐卡片失败:', error)
-      this.setData({ recommendCards: [] })
-    })
-  },
-
   // 获取科目列表
   fetchSubjects(majorId) {
     console.log('获取科目, majorId:', majorId)
@@ -168,17 +231,80 @@ Page({
     })
   },
 
-  // 点击专业
-  handleMajorClick(e) {
-    const majorId = e.currentTarget.dataset.majorId
-    console.log('点击专业, majorId:', majorId)
-
+  // 切换下拉面板显示状态
+  toggleMajorPicker() {
     this.setData({
-      currentMajor: majorId,
-      subjectList: []
+      showMajorPicker: !this.data.showMajorPicker
+    })
+  },
+
+  // 搜索输入事件
+  onMajorSearchInput(e) {
+    const keyword = e.detail.value.trim().toLowerCase()
+    this.setData({
+      majorSearchKeyword: keyword
     })
 
+    if (keyword) {
+      const filteredList = this.data.majorList.filter(major =>
+        major.majorName.toLowerCase().includes(keyword) ||
+        (major.description && major.description.toLowerCase().includes(keyword))
+      )
+      this.setData({
+        filteredMajorList: filteredList
+      })
+    } else {
+      this.setData({
+        filteredMajorList: this.data.majorList
+      })
+    }
+  },
+
+  // 清除搜索关键词
+  clearMajorSearch() {
+    this.setData({
+      majorSearchKeyword: '',
+      filteredMajorList: this.data.majorList
+    })
+  },
+
+  // 选择专业
+  selectMajor(e) {
+    const majorId = e.currentTarget.dataset.majorId
+    const majorName = e.currentTarget.dataset.majorName
+
+    console.log('选择专业, majorId:', majorId, 'majorName:', majorName)
+
+    // 保存用户选择的专业
+    this.saveSelectedMajor(majorId, majorName)
+
+    // 更新选中状态并关闭下拉面板
+    this.setData({
+      currentMajor: majorId,
+      selectedMajorName: majorName,
+      showMajorPicker: false,
+      majorSearchKeyword: '',
+      filteredMajorList: this.data.majorList,
+      subjectList: [],
+      recommendCards: []
+    })
+
+    // 加载对应专业的科目和推荐卡片
     this.fetchSubjects(majorId)
+    this.fetchRecommendCards(majorId)
+  },
+
+  // 获取推荐卡片
+  fetchRecommendCards(majorId) {
+    getRecommendCards(majorId).then(cardRes => {
+      console.log('今日推荐卡片:', cardRes)
+      this.setData({
+        recommendCards: cardRes.data || []
+      })
+    }).catch(error => {
+      console.error('获取推荐卡片失败:', error)
+      this.setData({ recommendCards: [] })
+    })
   },
 
   // 点击科目，跳转到学习页
@@ -204,17 +330,41 @@ Page({
     })
   },
 
+  // 页面隐藏时关闭下拉面板
+  onHide() {
+    this.setData({
+      showMajorPicker: false
+    })
+  },
+
   // 下拉刷新
   onPullDownRefresh() {
     this.fetchSprintConfig()
-    this.setData({
-      majorList: [],
-      subjectList: [],
-      recommendCards: [],
-      currentMajor: null
-    })
+    
+    // 刷新时重新获取数据
+    getMajorList().then(majorRes => {
+      const majorList = majorRes.data || []
+      this.setData({
+        majorList: majorList,
+        filteredMajorList: majorList
+      })
 
-    this.fetchData()
+      // 恢复之前选择的专业
+      const savedMajorId = wx.getStorageSync('selected_major_id')
+      if (savedMajorId) {
+        this.setData({
+          currentMajor: savedMajorId,
+          selectedMajorName: wx.getStorageSync('selected_major_name') || ''
+        })
+        this.fetchSubjects(savedMajorId)
+        this.fetchRecommendCards(savedMajorId)
+      } else if (majorList.length > 0) {
+        this.loadFirstMajor(majorList)
+      }
+    }).catch(error => {
+      console.error('刷新失败:', error)
+      this.setData({ loading: false })
+    })
 
     wx.stopPullDownRefresh()
   }

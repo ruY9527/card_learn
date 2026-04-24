@@ -1,8 +1,8 @@
 {
   "miniprogramRoot": "",
   "projectname": "card-mini",
-  "description": "408知识点学习卡片小程序",
-  "appid": "wx0105c8bf94ac641a",
+  "description": "考研知识点学习卡片小程序",
+  "appid": "wx7f8a8d31a88f7608",
   "setting": {
     "urlCheck": false,
     "es6": true,

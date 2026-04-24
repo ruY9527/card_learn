@@ -33,7 +33,7 @@ FROM eclipse-temurin:8-jre-alpine
 
 LABEL maintainer="card-learn"
 LABEL version="1.0.0"
-LABEL description="408知识点学习卡片系统后端"
+LABEL description="考研知识点学习卡片系统后端"
 
 WORKDIR /app
 

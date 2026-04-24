@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableAsync;
 
 /**
- * 408知识点学习卡片系统启动类
+ * 考研知识点学习卡片系统启动类
  */
 @SpringBootApplication
 @MapperScan("com.card.learn.mapper")

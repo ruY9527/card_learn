@@ -1,0 +1,134 @@
+<!--pages/add-card/add-card.wxml-->
+<view class="container">
+  <!-- 顶部提示 -->
+  <view class="header">
+    <view class="header-icon">✏️</view>
+    <text class="title">添加知识卡片</text>
+    <text class="subtitle">提交后需管理员审核通过才能展示</text>
+  </view>
+
+  <!-- 表单区域 -->
+  <view class="form-section">
+    <!-- 专业选择 -->
+    <view class="form-item">
+      <view class="form-label">
+        <text class="label-text">所属专业</text>
+        <text class="label-required">*</text>
+      </view>
+      <picker
+        mode="selector"
+        range="{{majorList}}"
+        range-key="majorName"
+        bindchange="onMajorChange"
+        value="{{majorIndex}}"
+      >
+        <view class="picker-box {{selectedMajor ? 'selected' : ''}}">
+          <text class="picker-text">{{selectedMajor ? selectedMajor.majorName : '请选择专业'}}</text>
+          <text class="picker-arrow">▼</text>
+        </view>
+      </picker>
+    </view>
+
+    <!-- 科目选择（依赖专业） -->
+    <view class="form-item">
+      <view class="form-label">
+        <text class="label-text">所属科目</text>
+        <text class="label-required">*</text>
+      </view>
+      <picker
+        mode="selector"
+        range="{{subjectList}}"
+        range-key="subjectName"
+        bindchange="onSubjectChange"
+        value="{{subjectIndex}}"
+        disabled="{{!selectedMajor}}"
+      >
+        <view class="picker-box {{selectedSubject ? 'selected' : ''}} {{!selectedMajor ? 'disabled' : ''}}">
+          <text class="picker-text">
+            {{!selectedMajor ? '请先选择专业' : (selectedSubject ? selectedSubject.subjectName : '请选择科目')}}
+          </text>
+          <text class="picker-arrow">▼</text>
+        </view>
+      </picker>
+      <view class="picker-tip" wx:if="{{selectedMajor && subjectList.length === 0}}">
+        <text class="tip-text">该专业下暂无科目</text>
+      </view>
+    </view>
+
+    <!-- 卡片正面内容 -->
+    <view class="form-item">
+      <view class="form-label">
+        <text class="label-text">卡片正面（问题/知识点）</text>
+        <text class="label-required">*</text>
+      </view>
+      <textarea
+        class="content-input {{frontContent ? 'has-content' : ''}}"
+        placeholder="请输入问题或知识点内容..."
+        placeholder-class="input-placeholder"
+        value="{{frontContent}}"
+        bindinput="onFrontInput"
+        maxlength="1000"
+        auto-height
+      ></textarea>
+      <view class="input-footer">
+        <text class="markdown-tip">支持Markdown格式，如 **加粗**、*斜体*、`代码`</text>
+        <text class="char-count">{{frontContent.length}}/1000</text>
+      </view>
+    </view>
+
+    <!-- 卡片反面内容 -->
+    <view class="form-item">
+      <view class="form-label">
+        <text class="label-text">卡片反面（答案/解析）</text>
+        <text class="label-required">*</text>
+      </view>
+      <textarea
+        class="content-input {{backContent ? 'has-content' : ''}}"
+        placeholder="请输入答案或解析内容..."
+        placeholder-class="input-placeholder"
+        value="{{backContent}}"
+        bindinput="onBackInput"
+        maxlength="2000"
+        auto-height
+      ></textarea>
+      <view class="input-footer">
+        <text class="markdown-tip">支持Markdown格式</text>
+        <text class="char-count">{{backContent.length}}/2000</text>
+      </view>
+    </view>
+
+    <!-- 难度选择（可选） -->
+    <view class="form-item">
+      <view class="form-label">
+        <text class="label-text">难度系数</text>
+        <text class="label-optional">（可选）</text>
+      </view>
+      <view class="difficulty-selector">
+        <view
+          class="difficulty-item {{difficultyLevel === item.value ? 'active' : ''}}"
+          wx:for="{{difficultyOptions}}"
+          wx:key="value"
+          bindtap="onDifficultyChange"
+          data-value="{{item.value}}"
+        >
+          <text class="difficulty-text">{{item.label}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 提交按钮 -->
+  <view class="submit-section">
+    <button
+      class="submit-btn {{canSubmit ? '' : 'disabled'}}"
+      bindtap="submitCard"
+      disabled="{{!canSubmit || submitting}}"
+    >
+      <view class="btn-content">
+        <view class="loading-icon" wx:if="{{submitting}}"></view>
+        <text>{{submitting ? '提交中...' : '提交卡片'}}</text>
+      </view>
+    </button>
+    <text class="submit-tip">提交后可在"我的"页面查看审核状态</text>
+  </view>
+</view>

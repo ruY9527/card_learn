@@ -18,7 +18,8 @@ Page({
     loading: false,
     error: false,
     errorMsg: '',
-    appUserId: null
+    appUserId: null,
+    searchKeyword: '' // 搜索关键词
   },
 
   onLoad(options) {
@@ -86,6 +87,7 @@ Page({
 
     const params = {
       subjectId: subjectId,
+      frontContent: this.data.searchKeyword || undefined,
       pageNum: this.data.pageNum,
       pageSize: this.data.pageSize,
       status: this.data.currentTab,
@@ -159,6 +161,33 @@ Page({
     console.log('切换标签:', tab)
     this.setData({
       currentTab: tab,
+      pageNum: 1,
+      cardList: []
+    })
+    this.fetchCards()
+  },
+
+  // 搜索输入事件
+  onSearchInput(e) {
+    this.setData({
+      searchKeyword: e.detail.value.trim()
+    })
+  },
+
+  // 执行搜索
+  handleSearch() {
+    console.log('搜索:', this.data.searchKeyword)
+    this.setData({
+      pageNum: 1,
+      cardList: []
+    })
+    this.fetchCards()
+  },
+
+  // 清除搜索
+  clearSearch() {
+    this.setData({
+      searchKeyword: '',
       pageNum: 1,
       cardList: []
     })

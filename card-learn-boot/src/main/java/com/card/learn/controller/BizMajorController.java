@@ -1,5 +1,6 @@
 package com.card.learn.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.card.learn.common.Result;
 import com.card.learn.entity.BizMajor;
 import com.card.learn.service.IBizMajorService;
@@ -27,6 +28,17 @@ public class BizMajorController {
         return Result.success(majorService.list());
     }
 
+    @GetMapping("/page")
+    @ApiOperation("分页查询专业列表")
+    public Result<Page<BizMajor>> page(
+            @RequestParam(required = false) String majorName,
+            @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "1") Integer pageNum,
+            @RequestParam(defaultValue = "10") Integer pageSize) {
+        Page<BizMajor> page = majorService.pageMajors(majorName, status, pageNum, pageSize);
+        return Result.success(page);
+    }
+
     @PostMapping
     @ApiOperation("新增专业")
     public Result<Void> save(@RequestBody BizMajor major) {
@@ -41,7 +53,7 @@ public class BizMajorController {
         return Result.success();
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id:\\d+}")
     @ApiOperation("删除专业")
     public Result<Void> delete(@PathVariable Long id) {
         majorService.removeById(id);

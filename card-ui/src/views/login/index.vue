@@ -2,7 +2,7 @@
   <div class="login-container">
     <el-card class="login-card">
       <template #header>
-        <h2>408知识点学习卡片管理系统</h2>
+        <h2>考研知识点学习卡片管理系统</h2>
       </template>
       <el-form ref="formRef" :model="loginForm" :rules="rules" label-width="80px">
         <el-form-item label="用户名" prop="username">

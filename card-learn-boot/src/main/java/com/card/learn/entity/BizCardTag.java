@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  * 卡片标签关联表
@@ -22,5 +23,14 @@ public class BizCardTag implements Serializable {
     private Long cardId;
 
     private Long tagId;
+
+    @TableField(fill = FieldFill.INSERT)
+    private LocalDateTime createTime;
+
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private LocalDateTime updateTime;
+
+    /** 更新人ID */
+    private Long updateUserId;
 
 }

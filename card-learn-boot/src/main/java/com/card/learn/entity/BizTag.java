@@ -19,4 +19,7 @@ public class BizTag implements Serializable {
 
     private String tagName;
 
+    /** 所属科目ID（null表示通用标签） */
+    private Long subjectId;
+
 }
