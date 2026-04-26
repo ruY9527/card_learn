@@ -91,6 +91,12 @@ const routes: RouteRecordRaw[] = [
         name: 'CardAudit',
         component: () => import('@/views/feedback/card-audit/index.vue'),
         meta: { title: '卡片审批' }
+      },
+      {
+        path: 'comment',
+        name: 'Comment',
+        component: () => import('@/views/comment/index.vue'),
+        meta: { title: '评论管理' }
       }
     ]
   }

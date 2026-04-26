@@ -358,6 +358,36 @@ const getMyCardStats = () =>
 const deleteMyCard = (id) =>
   request({ url: `/api/miniprogram/card/my/${id}`, method: 'DELETE', needAuth: true })
 
+// ==================== 评论相关API ====================
+
+/**
+ * 提交评论
+ * @param {Object} data - 评论数据
+ * @param {number} data.cardId - 卡片ID
+ * @param {number} data.appUserId - 用户ID
+ * @param {string} data.content - 评论内容
+ * @param {number} data.rating - 评分1-5
+ * @param {string} data.commentType - 评论类型：QUALITY/POOR/NEUTRAL
+ */
+const submitComment = (data) =>
+  request({ url: '/api/miniprogram/comment/submit', method: 'POST', data, needAuth: true })
+
+/**
+ * 获取卡片评论列表
+ * @param {number} cardId - 卡片ID
+ * @param {number} pageNum - 页码
+ * @param {number} pageSize - 每页数量
+ */
+const getCardComments = (cardId, pageNum = 1, pageSize = 10) =>
+  request({ url: `/api/miniprogram/comment/list/${cardId}`, data: { pageNum, pageSize } })
+
+/**
+ * 获取卡片评论统计
+ * @param {number} cardId - 卡片ID
+ */
+const getCommentStats = (cardId) =>
+  request({ url: `/api/miniprogram/comment/stats/${cardId}` })
+
 // 导出API方法
 module.exports = {
   request,
@@ -382,5 +412,8 @@ module.exports = {
   createCardByUser,
   getMyCards,
   getMyCardStats,
-  deleteMyCard
+  deleteMyCard,
+  submitComment,
+  getCardComments,
+  getCommentStats
 }

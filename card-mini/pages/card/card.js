@@ -1,5 +1,5 @@
 // pages/card/card.js
-const { getCardById, getCardPage, updateProgress } = require('../../utils/request')
+const { getCardById, getCardPage, updateProgress, getCommentStats, submitComment } = require('../../utils/request')
 
 Page({
   data: {
@@ -23,7 +23,15 @@ Page({
     startY: 0,
     moveX: 0,
     isSwiping: false,
-    swipeDirection: ''
+    swipeDirection: '',
+
+    // 评论相关
+    commentStats: {},
+    showCommentDialog: false,
+    commentType: 'NEUTRAL',
+    rating: 5,
+    commentContent: '',
+    canSubmit: true
   },
 
   onLoad(options) {
@@ -73,6 +81,7 @@ Page({
           loading: false,
           subjectName: res.data.subjectName || '知识点卡片'
         })
+        this.loadCommentStats()
       } else {
         this.setData({ loading: false })
         wx.showToast({
@@ -122,6 +131,7 @@ Page({
         loading: false,
         progress: total > 0 ? Math.round(((startIndex + 1) / total) * 100) : 0
       })
+      this.loadCommentStats()
     }).catch(error => {
       console.error('获取卡片失败:', error)
       this.setData({ loading: false })
@@ -406,6 +416,108 @@ Page({
     // 跳转到反馈页面，携带卡片ID和正面内容
     wx.navigateTo({
       url: `/pages/feedback/feedback?cardId=${card.cardId}&content=${encodeURIComponent(card.frontContent.substring(0, 50))}`
+    })
+  },
+
+  // 加载评论统计
+  loadCommentStats() {
+    const card = this.data.currentCard
+    if (!card) return
+
+    getCommentStats(card.cardId).then(res => {
+      this.setData({ commentStats: res.data || {} })
+    }).catch(err => {
+      console.error('获取评论统计失败:', err)
+    })
+  },
+
+  // 显示评论弹窗
+  showCommentModal() {
+    const userInfo = wx.getStorageSync('userInfo')
+    if (!userInfo || !userInfo.userId) {
+      wx.showToast({
+        title: '请先登录后再评价',
+        icon: 'none'
+      })
+      return
+    }
+
+    this.setData({
+      showCommentDialog: true,
+      commentType: 'NEUTRAL',
+      rating: 5,
+      commentContent: ''
+    })
+  },
+
+  // 隐藏评论弹窗
+  hideCommentModal() {
+    this.setData({ showCommentDialog: false })
+  },
+
+  // 选择评论类型
+  selectCommentType(e) {
+    const type = e.currentTarget.dataset.type
+    this.setData({ commentType: type })
+  },
+
+  // 设置评分
+  setRating(e) {
+    const rating = e.currentTarget.dataset.rating
+    this.setData({ rating })
+  },
+
+  // 输入评论内容
+  onCommentInput(e) {
+    this.setData({ commentContent: e.detail.value })
+  },
+
+  // 提交评论
+  submitComment() {
+    const userInfo = wx.getStorageSync('userInfo')
+    if (!userInfo || !userInfo.userId) {
+      wx.showToast({
+        title: '请先登录',
+        icon: 'none'
+      })
+      return
+    }
+
+    const card = this.data.currentCard
+    if (!card) return
+
+    this.setData({ canSubmit: false })
+
+    submitComment({
+      cardId: card.cardId,
+      appUserId: userInfo.userId,
+      content: this.data.commentContent,
+      rating: this.data.rating,
+      commentType: this.data.commentType
+    }).then(res => {
+      wx.showToast({
+        title: '评价成功',
+        icon: 'success'
+      })
+      this.hideCommentModal()
+      this.loadCommentStats()
+    }).catch(err => {
+      wx.showToast({
+        title: err.message || '评价失败',
+        icon: 'none'
+      })
+    }).finally(() => {
+      this.setData({ canSubmit: true })
+    })
+  },
+
+  // 显示评论列表
+  showComments() {
+    const card = this.data.currentCard
+    if (!card) return
+
+    wx.navigateTo({
+      url: `/pages/comment-list/comment-list?cardId=${card.cardId}`
     })
   },
 

@@ -38,7 +38,7 @@ class APIService {
     }
 
     // 分页获取卡片列表
-    func getCardPage(subjectId: Int?, appUserId: Int?, status: String?, pageNum: Int = 1, pageSize: Int = 20) async throws -> PageResponse<Card> {
+    func getCardPage(subjectId: Int?, frontContent: String?, appUserId: Int?, status: String?, pageNum: Int = 1, pageSize: Int = 20) async throws -> PageResponse<Card> {
         var urlComponents = URLComponents(string: config.getApiUrl(path: "/api/miniprogram/cards"))!
         var queryItems: [URLQueryItem] = [
             URLQueryItem(name: "pageNum", value: String(pageNum)),
@@ -46,6 +46,9 @@ class APIService {
         ]
         if let subjectId = subjectId {
             queryItems.append(URLQueryItem(name: "subjectId", value: String(subjectId)))
+        }
+        if let frontContent = frontContent, !frontContent.isEmpty {
+            queryItems.append(URLQueryItem(name: "frontContent", value: frontContent))
         }
         if let appUserId = appUserId {
             queryItems.append(URLQueryItem(name: "appUserId", value: String(appUserId)))
@@ -251,6 +254,138 @@ class APIService {
             return pageData
         }
         throw APIError.serverError(response.message ?? "获取进度卡片失败")
+    }
+
+    // MARK: - 用户卡片贡献 API
+
+    // 创建卡片（提交待审批）
+    func createCard(subjectId: Int, frontContent: String, backContent: String, difficultyLevel: Int, tagIds: [Int]?, token: String) async throws -> Int {
+        let url = URL(string: config.getApiUrl(path: "/api/miniprogram/card/create"))!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        var body: [String: Any] = [
+            "subjectId": subjectId,
+            "frontContent": frontContent,
+            "backContent": backContent,
+            "difficultyLevel": difficultyLevel
+        ]
+        if let tagIds = tagIds, !tagIds.isEmpty {
+            body["tagIds"] = tagIds
+        }
+
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+
+        let (data, _) = try await session.data(for: request)
+        let response = try JSONDecoder().decode(APIResponse<Int>.self, from: data)
+        if response.code == 200, let draftId = response.data {
+            return draftId
+        }
+        throw APIError.serverError(response.message ?? "创建卡片失败")
+    }
+
+    // 获取我的卡片列表
+    func getMyCards(auditStatus: String?, pageNum: Int = 1, pageSize: Int = 10, token: String) async throws -> PageResponse<MyCard> {
+        var urlComponents = URLComponents(string: config.getApiUrl(path: "/api/miniprogram/card/my"))!
+        var queryItems: [URLQueryItem] = [
+            URLQueryItem(name: "pageNum", value: String(pageNum)),
+            URLQueryItem(name: "pageSize", value: String(pageSize))
+        ]
+        if let auditStatus = auditStatus {
+            queryItems.append(URLQueryItem(name: "auditStatus", value: auditStatus))
+        }
+        urlComponents.queryItems = queryItems
+
+        var request = URLRequest(url: urlComponents.url!)
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        let (data, _) = try await session.data(for: request)
+        let response = try JSONDecoder().decode(APIResponse<PageResponse<MyCard>>.self, from: data)
+        if response.code == 200, let pageData = response.data {
+            return pageData
+        }
+        throw APIError.serverError(response.message ?? "获取我的卡片失败")
+    }
+
+    // 获取我的卡片统计
+    func getMyCardStats(token: String) async throws -> MyCardStats {
+        let url = URL(string: config.getApiUrl(path: "/api/miniprogram/card/my/stats"))!
+        var request = URLRequest(url: url)
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        let (data, _) = try await session.data(for: request)
+        let response = try JSONDecoder().decode(APIResponse<MyCardStats>.self, from: data)
+        if response.code == 200, let stats = response.data {
+            return stats
+        }
+        throw APIError.serverError(response.message ?? "获取我的卡片统计失败")
+    }
+
+    // 删除我的卡片
+    func deleteMyCard(draftId: Int, token: String) async throws -> Bool {
+        let url = URL(string: config.getApiUrl(path: "/api/miniprogram/card/my/\(draftId)"))!
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        let (data, _) = try await session.data(for: request)
+        let response = try JSONDecoder().decode(APIResponse<String>.self, from: data)
+        return response.code == 200
+    }
+
+    // MARK: - 评论 API
+
+    // 提交评论
+    func submitComment(cardId: Int, appUserId: Int, content: String, rating: Int, commentType: String) async throws -> Int {
+        let url = URL(string: config.getApiUrl(path: "/api/miniprogram/comment/submit"))!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        let body: [String: Any] = [
+            "cardId": cardId,
+            "appUserId": appUserId,
+            "content": content,
+            "rating": rating,
+            "commentType": commentType
+        ]
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+
+        let (data, _) = try await session.data(for: request)
+        let response = try JSONDecoder().decode(APIResponse<Int>.self, from: data)
+        if response.code == 200, let commentId = response.data {
+            return commentId
+        }
+        throw APIError.serverError(response.message ?? "提交评论失败")
+    }
+
+    // 获取卡片评论列表
+    func getCardComments(cardId: Int, pageNum: Int = 1, pageSize: Int = 10) async throws -> PageResponse<Comment> {
+        var urlComponents = URLComponents(string: config.getApiUrl(path: "/api/miniprogram/comment/list/\(cardId)"))!
+        urlComponents.queryItems = [
+            URLQueryItem(name: "pageNum", value: String(pageNum)),
+            URLQueryItem(name: "pageSize", value: String(pageSize))
+        ]
+
+        let (data, _) = try await session.data(from: urlComponents.url!)
+        let response = try JSONDecoder().decode(APIResponse<PageResponse<Comment>>.self, from: data)
+        if response.code == 200, let pageData = response.data {
+            return pageData
+        }
+        throw APIError.serverError(response.message ?? "获取评论失败")
+    }
+
+    // 获取卡片评论统计
+    func getCommentStats(cardId: Int) async throws -> CommentStats {
+        let url = URL(string: config.getApiUrl(path: "/api/miniprogram/comment/stats/\(cardId)"))!
+        let (data, _) = try await session.data(from: url)
+        let response = try JSONDecoder().decode(APIResponse<CommentStats>.self, from: data)
+        if response.code == 200, let stats = response.data {
+            return stats
+        }
+        throw APIError.serverError(response.message ?? "获取评论统计失败")
     }
 }
 

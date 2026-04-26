@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.card.learn.mapper.BizCardCommentMapper">
+
+    <!-- 评论统计结果类 -->
+    <resultMap id="CommentStatsResult" type="com.card.learn.mapper.CommentStats">
+        <result column="total_comments" property="totalComments"/>
+        <result column="quality_count" property="qualityCount"/>
+        <result column="poor_count" property="poorCount"/>
+        <result column="avg_rating" property="avgRating"/>
+    </resultMap>
+
+    <!-- 分页查询评论列表（关联卡片信息） -->
+    <select id="selectCommentsWithCardInfo" resultType="com.card.learn.vo.CommentVO">
+        SELECT
+            c.comment_id,
+            c.card_id,
+            c.app_user_id,
+            c.user_nickname,
+            c.content,
+            c.rating,
+            c.comment_type,
+            c.status,
+            c.admin_reply,
+            c.feedback_id,
+            c.create_time,
+            c.update_time,
+            card.front_content AS card_front_content,
+            sub.subject_name,
+            CASE c.comment_type
+                WHEN 'QUALITY' THEN '优质内容'
+                WHEN 'POOR' THEN '劣质内容'
+                ELSE '中性评价'
+            END AS comment_type_text,
+            CASE c.status
+                WHEN '0' THEN '正常'
+                WHEN '1' THEN '已处理'
+                WHEN '2' THEN '已隐藏'
+                ELSE '未知'
+            END AS status_text
+        FROM biz_card_comment c
+        LEFT JOIN biz_card card ON c.card_id = card.card_id
+        LEFT JOIN biz_subject sub ON card.subject_id = sub.subject_id
+        WHERE 1=1
+        <if test="cardId != null">
+            AND c.card_id = #{cardId}
+        </if>
+        <if test="commentType != null and commentType != ''">
+            AND c.comment_type = #{commentType}
+        </if>
+        <if test="status != null and status != ''">
+            AND c.status = #{status}
+        </if>
+        ORDER BY c.create_time DESC
+    </select>
+
+    <!-- 获取卡片评论统计 -->
+    <select id="selectCommentStats" resultType="com.card.learn.mapper.CommentStats">
+        SELECT
+            COUNT(*) AS totalComments,
+            SUM(CASE WHEN comment_type = 'QUALITY' THEN 1 ELSE 0 END) AS qualityCount,
+            SUM(CASE WHEN comment_type = 'POOR' THEN 1 ELSE 0 END) AS poorCount,
+            AVG(rating) AS avgRating
+        FROM biz_card_comment
+        WHERE card_id = #{cardId} AND status = '0'
+    </select>
+
+</mapper>

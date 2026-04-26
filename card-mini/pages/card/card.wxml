@@ -124,6 +124,27 @@
     </view>
   </view>
 
+  <!-- 评论入口 -->
+  <view class="comment-section" wx:if="{{currentCard}}">
+    <view class="comment-stats" bindtap="showComments">
+      <text class="comment-icon">💬</text>
+      <text class="comment-count">{{commentStats.totalComments || 0}}条评论</text>
+      <view class="quality-badge" wx:if="{{commentStats.qualityCount > 0}}">
+        <text class="quality-icon">👍</text>
+        <text class="quality-count">{{commentStats.qualityCount}}</text>
+      </view>
+      <view class="poor-badge" wx:if="{{commentStats.poorCount > 0}}">
+        <text class="poor-icon">👎</text>
+        <text class="poor-count">{{commentStats.poorCount}}</text>
+      </view>
+      <text class="comment-arrow">→</text>
+    </view>
+    <view class="add-comment-btn" bindtap="showCommentModal">
+      <text class="add-icon">✏️</text>
+      <text class="add-text">评价</text>
+    </view>
+  </view>
+
   <!-- 学习状态按钮 -->
   <view class="status-buttons" wx:if="{{isFlipped && currentCard}}">
     <view class="status-btn unlearned" data-status="0" bindtap="handleStatus">
@@ -156,6 +177,58 @@
     <view class="progress-labels">
       <text class="progress-percent">{{progress}}%</text>
       <text class="progress-remain">剩余 {{totalCount - currentIndex - 1}} 张</text>
+    </view>
+  </view>
+
+  <!-- 评论弹窗 -->
+  <view class="comment-modal" wx:if="{{showCommentDialog}}">
+    <view class="modal-mask" bindtap="hideCommentModal"></view>
+    <view class="modal-content">
+      <view class="modal-header">
+        <text class="modal-title">评价知识点</text>
+        <text class="modal-close" bindtap="hideCommentModal">✕</text>
+      </view>
+
+      <view class="modal-body">
+        <!-- 评论类型 -->
+        <view class="comment-type-section">
+          <text class="section-label">内容质量</text>
+          <view class="type-options">
+            <view class="type-option {{commentType === 'QUALITY' ? 'active quality' : ''}}" data-type="QUALITY" bindtap="selectCommentType">
+              <text class="type-icon">👍</text>
+              <text class="type-text">优质内容</text>
+            </view>
+            <view class="type-option {{commentType === 'NEUTRAL' ? 'active' : ''}}" data-type="NEUTRAL" bindtap="selectCommentType">
+              <text class="type-icon">😐</text>
+              <text class="type-text">一般</text>
+            </view>
+            <view class="type-option {{commentType === 'POOR' ? 'active poor' : ''}}" data-type="POOR" bindtap="selectCommentType">
+              <text class="type-icon">👎</text>
+              <text class="type-text">劣质内容</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 评分 -->
+        <view class="rating-section">
+          <text class="section-label">评分</text>
+          <view class="rating-stars">
+            <text class="rating-star {{index < rating ? 'active' : ''}}" wx:for="{{[1,2,3,4,5]}}" wx:key="*this" data-rating="{{item}}" bindtap="setRating">★</text>
+          </view>
+          <text class="rating-text">{{rating}}星</text>
+        </view>
+
+        <!-- 评论内容 -->
+        <view class="content-section">
+          <text class="section-label">评价内容（可选）</text>
+          <textarea class="comment-input" placeholder="请输入您的评价或建议..." value="{{commentContent}}" bindinput="onCommentInput" maxlength="200"></textarea>
+        </view>
+      </view>
+
+      <view class="modal-footer">
+        <view class="cancel-btn" bindtap="hideCommentModal">取消</view>
+        <view class="submit-btn {{canSubmit ? '' : 'disabled'}}" bindtap="submitComment">提交评价</view>
+      </view>
     </view>
   </view>
 </view>

@@ -157,3 +157,53 @@ export const batchApproveCards = (draftIds: number[], auditUserId: number) => {
 export const batchRejectCards = (draftIds: number[], auditUserId: number, auditRemark?: string) => {
   return request.post<any, { data: string }>('/card/audit/batch/reject', draftIds, { params: { auditUserId, auditRemark } })
 }
+
+// ==================== 评论管理 ====================
+
+/**
+ * 分页查询评论列表
+ */
+export const getCommentPage = (params: { cardId?: number; commentType?: string; status?: string; pageNum: number; pageSize: number }) => {
+  return request.get<any, PageResult<CommentVO>>('/admin/comment/page', { params })
+}
+
+/**
+ * 管理员回复评论
+ */
+export const replyComment = (commentId: number, reply: string) => {
+  return request.post(`/admin/comment/reply/${commentId}`, reply)
+}
+
+/**
+ * 处理评论
+ */
+export const handleComment = (commentId: number, status: string) => {
+  return request.post(`/admin/comment/handle/${commentId}`, null, { params: { status } })
+}
+
+/**
+ * 删除评论
+ */
+export const deleteComment = (commentId: number) => {
+  return request.delete(`/admin/comment/${commentId}`)
+}
+
+// 评论类型
+export interface CommentVO {
+  commentId: number
+  cardId: number
+  cardFrontContent: string
+  subjectName: string
+  appUserId: number
+  userNickname: string
+  content: string
+  rating: number
+  commentType: string
+  commentTypeText: string
+  status: string
+  statusText: string
+  adminReply: string
+  feedbackId: number
+  createTime: string
+  updateTime: string
+}

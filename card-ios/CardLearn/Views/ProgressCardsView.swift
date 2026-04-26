@@ -163,7 +163,7 @@ struct ProgressCardsView: View {
 struct ProgressCardItem: View {
     let card: Card
     let type: String
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             // 头部
@@ -173,7 +173,7 @@ struct ProgressCardItem: View {
                     HStack(spacing: 4) {
                         Text("📚")
                             .font(.system(size: 14))
-                        
+
                         Text(subjectName)
                             .font(.system(size: 12))
                             .foregroundColor(Color(hex: "667eea"))
@@ -183,9 +183,9 @@ struct ProgressCardItem: View {
                     .background(Color(hex: "F0F5FF"))
                     .cornerRadius(4)
                 }
-                
+
                 Spacer()
-                
+
                 // 状态标签
                 Text(card.status == 2 ? "已掌握" : card.status == 1 ? "待复习" : "未学习")
                     .font(.system(size: 12))
@@ -199,18 +199,37 @@ struct ProgressCardItem: View {
                                 Color(hex: "F5F5F5"))
                     .cornerRadius(4)
             }
-            
+
+            // 学习时间显示
+            if let timeStr = card.formattedTime, !timeStr.isEmpty {
+                HStack(spacing: 8) {
+                    Text("🕐")
+                        .font(.system(size: 14))
+
+                    Text(timeStr)
+                        .font(.system(size: 12))
+                        .foregroundColor(Color(hex: "606266"))
+
+                    Text(type == "mastered" ? "掌握于" : "学习于")
+                        .font(.system(size: 12))
+                        .foregroundColor(Color(hex: "909399"))
+                }
+                .padding(.vertical, 8)
+                .background(Color(hex: "F5F7FA"))
+                .cornerRadius(8)
+            }
+
             // 内容
             VStack(alignment: .leading, spacing: 8) {
                 HStack(spacing: 4) {
                     Text("❓")
                         .font(.system(size: 14))
-                    
+
                     Text("问题")
                         .font(.system(size: 12))
                         .foregroundColor(Color(hex: "909399"))
                 }
-                
+
                 Text(card.frontContent.count > 80 ?
                      String(card.frontContent.prefix(80)) + "..." :
                      card.frontContent)
@@ -218,7 +237,7 @@ struct ProgressCardItem: View {
                     .foregroundColor(Color(hex: "303133"))
                     .lineSpacing(4)
             }
-            
+
             // 底部
             HStack {
                 // 标签
@@ -235,15 +254,15 @@ struct ProgressCardItem: View {
                         }
                     }
                 }
-                
+
                 Spacer()
-                
+
                 // 难度
                 HStack(spacing: 4) {
                     Text("难度")
                         .font(.system(size: 12))
                         .foregroundColor(Color(hex: "909399"))
-                    
+
                     HStack(spacing: 2) {
                         ForEach(1..<6, id: \.self) { index in
                             Text("★")
@@ -253,11 +272,11 @@ struct ProgressCardItem: View {
                     }
                 }
             }
-            
+
             // 操作提示
             HStack {
                 Spacer()
-                
+
                 Text("点击查看详情 →")
                     .font(.system(size: 12))
                     .foregroundColor(Color(hex: "667eea"))

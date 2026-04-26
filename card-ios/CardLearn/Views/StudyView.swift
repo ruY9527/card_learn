@@ -14,7 +14,9 @@ struct StudyView: View {
     @State private var pageNum: Int = 1
     @State private var hasMore: Bool = true
     @State private var isLoading: Bool = false
-    
+    @State private var searchKeyword: String = ""
+    @FocusState private var isSearchFocused: Bool
+
     @State private var navigateToCardDetail: Bool = false
     @State private var selectedCard: Card?
     @State private var selectedCardIndex: Int = 0
@@ -35,6 +37,23 @@ struct StudyView: View {
                 
                 ScrollView {
                     VStack(spacing: 16) {
+                        // 搜索区域
+                        SearchSection(
+                            keyword: $searchKeyword,
+                            isFocused: $isSearchFocused,
+                            onSearch: {
+                                pageNum = 1
+                                cardList = []
+                                fetchCards()
+                            },
+                            onClear: {
+                                searchKeyword = ""
+                                pageNum = 1
+                                cardList = []
+                                fetchCards()
+                            }
+                        )
+
                         // 快速开始按钮
                         if !cardList.isEmpty && !isLoading {
                             QuickStartButton {
@@ -117,14 +136,15 @@ struct StudyView: View {
     
     private func fetchCards() {
         guard !isLoading else { return }
-        
+
         Task {
             isLoading = true
-            
+
             do {
                 let userId = appState.userInfo?.userId
                 let pageData = try await apiService.getCardPage(
                     subjectId: subjectId,
+                    frontContent: searchKeyword.isEmpty ? nil : searchKeyword,
                     appUserId: userId,
                     status: currentTab,
                     pageNum: pageNum,
@@ -178,6 +198,60 @@ struct StudyView: View {
         selectedCard = firstUnlearned ?? cardList.first
         selectedCardIndex = cardList.firstIndex(of: selectedCard!) ?? 0
         navigateToCardDetail = true
+    }
+}
+
+// 搜索区域
+struct SearchSection: View {
+    @Binding var keyword: String
+    var isFocused: FocusState<Bool>.Binding
+    let onSearch: () -> Void
+    let onClear: () -> Void
+
+    var body: some View {
+        HStack(spacing: 12) {
+            HStack(spacing: 8) {
+                Text("🔍")
+                    .font(.system(size: 14))
+
+                TextField("搜索正面内容", text: $keyword)
+                    .focused(isFocused)
+                    .font(.system(size: 14))
+                    .submitLabel(.search)
+                    .onSubmit {
+                        onSearch()
+                    }
+
+                if !keyword.isEmpty {
+                    Button(action: onClear) {
+                        Text("✕")
+                            .font(.system(size: 12))
+                            .foregroundColor(Color(hex: "909399"))
+                    }
+                }
+            }
+            .padding(12)
+            .background(Color.white)
+            .cornerRadius(12)
+            .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+
+            Button(action: onSearch) {
+                Text("搜索")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .background(
+                        LinearGradient(
+                            colors: [Color(hex: "667eea"), Color(hex: "764ba2")],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .cornerRadius(12)
+            }
+        }
+        .padding(.horizontal, 16)
     }
 }
 
