@@ -16,7 +16,7 @@ public class FeedbackVO implements Serializable {
     private Long id;
 
     /** 用户ID */
-    private Long appUserId;
+    private Long userId;
 
     /** 用户昵称 */
     private String userNickname;

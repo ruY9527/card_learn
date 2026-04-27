@@ -5,12 +5,18 @@ import com.card.learn.service.IBizMajorService;
 import com.card.learn.service.IBizSubjectService;
 import com.card.learn.service.IBizCardService;
 import com.card.learn.service.IBizTagService;
+import com.card.learn.service.ILearningStatsService;
+import com.card.learn.vo.DailyLearnTrendVO;
+import com.card.learn.vo.LearningStatsVO;
+import com.card.learn.vo.SubjectLearnStatsVO;
+import com.card.learn.vo.UserLearnRankVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -33,6 +39,9 @@ public class DashboardController {
     @Autowired
     private IBizTagService tagService;
 
+    @Autowired
+    private ILearningStatsService learningStatsService;
+
     @GetMapping("/stats")
     @ApiOperation("获取统计数据")
     public Result<Map<String, Object>> getStats() {
@@ -42,6 +51,35 @@ public class DashboardController {
         data.put("cardCount", cardService.count());
         data.put("tagCount", tagService.count());
         return Result.success(data);
+    }
+
+    @GetMapping("/learning-stats")
+    @ApiOperation("总体学习统计")
+    public Result<LearningStatsVO> getLearningStats(
+            @RequestParam(required = false) Long userId) {
+        return Result.success(learningStatsService.getOverallStats(userId));
+    }
+
+    @GetMapping("/learn-trend")
+    @ApiOperation("每日学习趋势")
+    public Result<List<DailyLearnTrendVO>> getLearnTrend(
+            @RequestParam(defaultValue = "30") Integer days,
+            @RequestParam(required = false) Long userId) {
+        return Result.success(learningStatsService.getDailyTrend(days, userId));
+    }
+
+    @GetMapping("/user-ranking")
+    @ApiOperation("用户学习排行榜")
+    public Result<List<UserLearnRankVO>> getUserRanking(
+            @RequestParam(defaultValue = "10") Integer limit) {
+        return Result.success(learningStatsService.getUserRanking(limit));
+    }
+
+    @GetMapping("/subject-stats")
+    @ApiOperation("科目学习统计")
+    public Result<List<SubjectLearnStatsVO>> getSubjectStats(
+            @RequestParam(required = false) Long userId) {
+        return Result.success(learningStatsService.getSubjectStats(userId));
     }
 
 }

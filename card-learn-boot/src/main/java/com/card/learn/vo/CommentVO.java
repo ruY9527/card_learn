@@ -25,7 +25,7 @@ public class CommentVO implements Serializable {
     private String subjectName;
 
     /** 用户ID */
-    private Long appUserId;
+    private Long userId;
 
     /** 用户昵称 */
     private String userNickname;

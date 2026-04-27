@@ -41,6 +41,13 @@
           <el-menu-item index="/feedback">反馈管理</el-menu-item>
           <el-menu-item index="/card-audit">卡片审批</el-menu-item>
         </el-sub-menu>
+        <el-sub-menu index="stats">
+          <template #title>
+            <el-icon><DataAnalysis /></el-icon>
+            <span>数据统计</span>
+          </template>
+          <el-menu-item index="/stats/learning">学习数据统计</el-menu-item>
+        </el-sub-menu>
         <el-menu-item index="/ai">
           <el-icon><MagicStick /></el-icon>
           <span>AI转化</span>

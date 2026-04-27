@@ -142,7 +142,7 @@ export interface AiCardDTO {
 // 用户反馈
 export interface Feedback {
   id?: number
-  appUserId?: number
+  userId?: number
   userNickname?: string
   cardId?: number
   cardFrontContent?: string
@@ -160,7 +160,7 @@ export interface Feedback {
 // 反馈视图对象（包含用户和卡片信息）
 export interface FeedbackVO {
   id?: number
-  appUserId?: number
+  userId?: number
   userNickname?: string
   cardId?: number
   cardFrontContent?: string
@@ -259,4 +259,42 @@ export interface CardAuditDTO {
   auditStatus: string  // 1通过 2拒绝
   auditUserId?: number
   auditRemark?: string
+}
+
+// 总体学习统计
+export interface LearningStats {
+  totalCards: number
+  learnDays: number
+  totalLearnRecords: number
+  unlearnedCount: number
+  fuzzyCount: number
+  masteredCount: number
+  learnedRate: number
+}
+
+// 每日学习趋势
+export interface DailyLearnTrend {
+  date: string
+  count: number
+}
+
+// 用户学习排行
+export interface UserLearnRank {
+  userId: number
+  nickname: string
+  avatar: string
+  totalCards: number
+  masteredCount: number
+  fuzzyCount: number
+}
+
+// 科目学习统计
+export interface SubjectLearnStats {
+  subjectId: number
+  subjectName: string
+  majorName: string
+  totalCards: number
+  unlearnedCount: number
+  fuzzyCount: number
+  masteredCount: number
 }

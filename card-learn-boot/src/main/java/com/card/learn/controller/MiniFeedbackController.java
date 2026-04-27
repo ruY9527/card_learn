@@ -26,7 +26,7 @@ public class MiniFeedbackController {
     @PostMapping
     @ApiOperation("提交反馈")
     public Result<Void> submitFeedback(@RequestBody BizFeedback feedback) {
-        if (feedback.getAppUserId() == null) {
+        if (feedback.getUserId() == null) {
             return Result.error("请先登录后再提交反馈");
         }
         if (feedback.getType() == null || feedback.getType().isEmpty()) {
@@ -46,10 +46,10 @@ public class MiniFeedbackController {
     @GetMapping("/list")
     @ApiOperation("获取用户反馈列表")
     public Result<Page<BizFeedback>> getUserFeedbackList(
-            @RequestParam Long appUserId,
+            @RequestParam Long userId,
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize) {
-        Page<BizFeedback> page = feedbackService.pageUserFeedback(appUserId, pageNum, pageSize);
+        Page<BizFeedback> page = feedbackService.pageUserFeedback(userId, pageNum, pageSize);
         return Result.success(page);
     }
 

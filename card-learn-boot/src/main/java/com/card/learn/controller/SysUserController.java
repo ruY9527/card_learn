@@ -43,7 +43,13 @@ public class SysUserController {
         return Result.success(userService.pageUsers(username, status, pageNum, pageSize));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/list")
+    @ApiOperation("获取全部用户列表")
+    public Result<List<SysUser>> list() {
+        return Result.success(userService.list());
+    }
+
+    @GetMapping("/detail/{id}")
     @ApiOperation("获取用户详情")
     public Result<Map<String, Object>> getById(@PathVariable Long id) {
         SysUser user = userService.getById(id);

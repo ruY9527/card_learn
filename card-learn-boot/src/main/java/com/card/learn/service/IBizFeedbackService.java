@@ -23,6 +23,6 @@ public interface IBizFeedbackService extends IService<BizFeedback> {
     /**
      * 获取用户提交的反馈列表
      */
-    Page<BizFeedback> pageUserFeedback(Long appUserId, Integer pageNum, Integer pageSize);
+    Page<BizFeedback> pageUserFeedback(Long userId, Integer pageNum, Integer pageSize);
 
 }

@@ -97,6 +97,12 @@ const routes: RouteRecordRaw[] = [
         name: 'Comment',
         component: () => import('@/views/comment/index.vue'),
         meta: { title: '评论管理' }
+      },
+      {
+        path: 'stats/learning',
+        name: 'LearningStats',
+        component: () => import('@/views/stats/learning/index.vue'),
+        meta: { title: '学习数据统计' }
       }
     ]
   }

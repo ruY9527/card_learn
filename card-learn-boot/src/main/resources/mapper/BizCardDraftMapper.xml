@@ -58,7 +58,7 @@
             d.create_time
         FROM biz_card_draft d
         LEFT JOIN biz_subject s ON d.subject_id = s.subject_id
-        LEFT JOIN sys_app_user au ON d.create_user_id = au.app_user_id
+        LEFT JOIN sys_user au ON d.create_user_id = au.user_id
         LEFT JOIN sys_user su ON d.audit_user_id = su.user_id
         <if test="auditStatus != null and auditStatus != ''">
             WHERE d.audit_status = #{auditStatus}

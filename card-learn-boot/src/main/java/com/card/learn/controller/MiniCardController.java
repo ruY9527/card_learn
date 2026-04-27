@@ -70,7 +70,7 @@ public class MiniCardController {
     @GetMapping("/my")
     @ApiOperation("获取我的卡片列表")
     public Result<Page<MyCardVO>> getMyCards(
-            @RequestParam(required = false) Long appUserId,
+            @RequestParam(required = false) Long userId,
             @RequestParam(required = false) String auditStatus,
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize) {
@@ -106,7 +106,7 @@ public class MiniCardController {
     @ApiOperation("删除我的卡片")
     public Result<Void> deleteMyCard(
             @PathVariable Long id,
-            @RequestParam(required = false) Long appUserId) {
+            @RequestParam(required = false) Long userId) {
         Long currentUserId = getCurrentUserId();
         if (currentUserId == null) {
             return Result.error(401, "请先登录后再删除卡片");
@@ -120,7 +120,7 @@ public class MiniCardController {
      */
     @GetMapping("/my/stats")
     @ApiOperation("获取我的卡片统计")
-    public Result<Map<String, Object>> getMyCardStats(@RequestParam(required = false) Long appUserId) {
+    public Result<Map<String, Object>> getMyCardStats(@RequestParam(required = false) Long userId) {
         Long currentUserId = getCurrentUserId();
         if (currentUserId == null) {
             return Result.error(401, "请先登录后再查看统计");

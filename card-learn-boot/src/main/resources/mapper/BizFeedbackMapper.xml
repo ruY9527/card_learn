@@ -4,7 +4,7 @@
 
     <resultMap id="FeedbackVOResultMap" type="com.card.learn.vo.FeedbackVO">
         <id property="id" column="id"/>
-        <result property="appUserId" column="app_user_id"/>
+        <result property="userId" column="user_id"/>
         <result property="userNickname" column="user_nickname"/>
         <result property="cardId" column="card_id"/>
         <result property="cardFrontContent" column="card_front_content"/>
@@ -22,7 +22,7 @@
     <select id="selectFeedbackWithDetails" resultMap="FeedbackVOResultMap">
         SELECT
             f.id,
-            f.app_user_id,
+            f.user_id,
             u.nickname as user_nickname,
             f.card_id,
             c.front_content as card_front_content,
@@ -36,7 +36,7 @@
             f.create_time,
             f.update_time
         FROM biz_feedback f
-        LEFT JOIN sys_app_user u ON f.app_user_id = u.app_user_id
+        LEFT JOIN sys_user u ON f.user_id = u.user_id
         LEFT JOIN biz_card c ON f.card_id = c.card_id
         <where>
             <if test="type != null and type != ''">

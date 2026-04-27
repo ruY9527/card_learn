@@ -41,9 +41,9 @@ public class BizFeedbackServiceImpl extends ServiceImpl<BizFeedbackMapper, BizFe
     }
 
     @Override
-    public Page<BizFeedback> pageUserFeedback(Long appUserId, Integer pageNum, Integer pageSize) {
+    public Page<BizFeedback> pageUserFeedback(Long userId, Integer pageNum, Integer pageSize) {
         LambdaQueryWrapper<BizFeedback> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(BizFeedback::getAppUserId, appUserId);
+        wrapper.eq(BizFeedback::getUserId, userId);
         wrapper.orderByDesc(BizFeedback::getCreateTime);
         return page(new Page<>(pageNum, pageSize), wrapper);
     }

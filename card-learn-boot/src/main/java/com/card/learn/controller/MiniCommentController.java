@@ -5,7 +5,6 @@ import com.card.learn.common.Result;
 import com.card.learn.entity.BizCardComment;
 import com.card.learn.mapper.CommentStats;
 import com.card.learn.service.IBizCardCommentService;
-import com.card.learn.service.IBizUserService;
 import com.card.learn.vo.CommentVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -23,19 +22,16 @@ public class MiniCommentController {
     @Autowired
     private IBizCardCommentService commentService;
 
-    @Autowired
-    private IBizUserService userService;
-
     /**
      * 提交评论
      */
     @PostMapping("/submit")
     @ApiOperation("提交评论")
-    public Result<Long> submit(@RequestBody BizCardComment comment, @RequestParam String appUserId) {
+    public Result<Long> submit(@RequestBody BizCardComment comment, @RequestParam String userId) {
         // 获取用户昵称
-        Long userId = parseUserId(appUserId);
-        if (userId != null) {
-            comment.setAppUserId(userId);
+        Long parsedUserId = parseUserId(userId);
+        if (parsedUserId != null) {
+            comment.setUserId(parsedUserId);
             // 可以从用户表获取昵称
         }
 
@@ -64,12 +60,12 @@ public class MiniCommentController {
         return Result.success(commentService.getCommentStats(cardId));
     }
 
-    private Long parseUserId(String appUserId) {
-        if (appUserId == null || appUserId.isEmpty()) {
+    private Long parseUserId(String userId) {
+        if (userId == null || userId.isEmpty()) {
             return null;
         }
         try {
-            return Long.parseLong(appUserId);
+            return Long.parseLong(userId);
         } catch (NumberFormatException e) {
             return null;
         }

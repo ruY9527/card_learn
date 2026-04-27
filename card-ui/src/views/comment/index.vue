@@ -123,14 +123,14 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import request from '@/utils/request'
+import request from '@/api/request'
 
 interface Comment {
   commentId: number
   cardId: number
   cardFrontContent: string
   subjectName: string
-  appUserId: number
+  userId: number
   userNickname: string
   content: string
   rating: number

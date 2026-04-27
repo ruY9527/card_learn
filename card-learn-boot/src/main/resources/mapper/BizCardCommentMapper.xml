@@ -15,7 +15,7 @@
         SELECT
             c.comment_id,
             c.card_id,
-            c.app_user_id,
+            c.user_id,
             c.user_nickname,
             c.content,
             c.rating,

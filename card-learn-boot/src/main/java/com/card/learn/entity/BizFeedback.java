@@ -19,7 +19,7 @@ public class BizFeedback implements Serializable {
     private Long id;
 
     /** 用户ID */
-    private Long appUserId;
+    private Long userId;
 
     /** 关联的卡片ID（若是对具体卡片的纠错） */
     private Long cardId;

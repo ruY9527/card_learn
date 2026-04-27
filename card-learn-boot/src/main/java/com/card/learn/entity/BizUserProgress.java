@@ -18,8 +18,8 @@ public class BizUserProgress implements Serializable {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
-    /** 用户ID(游客模式下可为空) */
-    private Long appUserId;
+    /** 用户ID */
+    private Long userId;
 
     /** 卡片ID */
     private Long cardId;

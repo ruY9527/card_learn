@@ -1,5 +1,5 @@
 import request from './request'
-import type { Major, Subject, Card, Tag, Feedback, FeedbackVO, PageResult, CardAuditVO } from './types'
+import type { Major, Subject, Card, Tag, SysUser, Feedback, FeedbackVO, PageResult, CardAuditVO, LearningStats, DailyLearnTrend, UserLearnRank, SubjectLearnStats } from './types'
 
 // 专业相关
 export const getMajorList = () => {
@@ -194,7 +194,7 @@ export interface CommentVO {
   cardId: number
   cardFrontContent: string
   subjectName: string
-  appUserId: number
+  userId: number
   userNickname: string
   content: string
   rating: number
@@ -206,4 +206,42 @@ export interface CommentVO {
   feedbackId: number
   createTime: string
   updateTime: string
+}
+
+// ==================== 学习数据统计 ====================
+
+/**
+ * 总体学习统计
+ */
+export const getLearningStats = (userId?: number) => {
+  return request.get<any, { data: LearningStats }>('/dashboard/learning-stats', { params: { userId } })
+}
+
+/**
+ * 每日学习趋势
+ */
+export const getLearnTrend = (days?: number, userId?: number) => {
+  return request.get<any, { data: DailyLearnTrend[] }>('/dashboard/learn-trend', { params: { days: days || 30, userId } })
+}
+
+/**
+ * 用户学习排行榜
+ */
+export const getUserRanking = (limit?: number) => {
+  return request.get<any, { data: UserLearnRank[] }>('/dashboard/user-ranking', { params: { limit: limit || 10 } })
+}
+
+/**
+ * 科目学习统计
+ */
+export const getSubjectStats = (userId?: number) => {
+  return request.get<any, { data: SubjectLearnStats[] }>('/dashboard/subject-stats', { params: { userId } })
+}
+
+/**
+ * 获取系统用户列表（用于下拉选择）
+ */
+export const getUserList = async (): Promise<SysUser[]> => {
+  const res = await request.get<any, { data: SysUser[] }>('/system/user/list')
+  return res.data
 }

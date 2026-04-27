@@ -75,15 +75,15 @@ public class MiniProgramController {
 
     /**
      * 解析用户ID，处理 null、"null"、空字符串等无效值
-     * @param appUserId 用户ID字符串
+     * @param userId 用户ID字符串
      * @return 用户ID Long类型，无效时返回 null
      */
-    private Long parseUserId(String appUserId) {
-        if (appUserId == null || appUserId.trim().isEmpty() || "null".equalsIgnoreCase(appUserId.trim())) {
+    private Long parseUserId(String userId) {
+        if (userId == null || userId.trim().isEmpty() || "null".equalsIgnoreCase(userId.trim())) {
             return null;
         }
         try {
-            return Long.parseLong(appUserId.trim());
+            return Long.parseLong(userId.trim());
         } catch (NumberFormatException e) {
             return null;
         }
@@ -203,8 +203,8 @@ public class MiniProgramController {
     @ApiOperation("获取科目学习统计")
     public Result<Map<String, Object>> getSubjectStats(
             @PathVariable Long subjectId,
-            @RequestParam(required = false) String appUserId) {
-        Long userId = parseUserId(appUserId);
+            @RequestParam(required = false) String userId) {
+        Long parsedUserId = parseUserId(userId);
         Map<String, Object> stats = new HashMap<>();
 
         // 获取该科目下的所有卡片（只查询已通过审批的）ID
@@ -228,24 +228,24 @@ public class MiniProgramController {
 
         // 统计已学习（状态>=1）
         long learned = progressService.lambdaQuery()
-                .eq(userId != null, BizUserProgress::getAppUserId, userId)
-                .isNull(userId == null, BizUserProgress::getAppUserId)
+                .eq(parsedUserId != null, BizUserProgress::getUserId, parsedUserId)
+                .isNull(parsedUserId == null, BizUserProgress::getUserId)
                 .in(BizUserProgress::getCardId, cardIds)
                 .ge(BizUserProgress::getStatus, 1)
                 .count();
 
         // 统计已掌握（状态=2）
         long mastered = progressService.lambdaQuery()
-                .eq(userId != null, BizUserProgress::getAppUserId, userId)
-                .isNull(userId == null, BizUserProgress::getAppUserId)
+                .eq(parsedUserId != null, BizUserProgress::getUserId, parsedUserId)
+                .isNull(parsedUserId == null, BizUserProgress::getUserId)
                 .in(BizUserProgress::getCardId, cardIds)
                 .eq(BizUserProgress::getStatus, 2)
                 .count();
 
         // 统计待复习（状态=1且需要复习）
         long review = progressService.lambdaQuery()
-                .eq(userId != null, BizUserProgress::getAppUserId, userId)
-                .isNull(userId == null, BizUserProgress::getAppUserId)
+                .eq(parsedUserId != null, BizUserProgress::getUserId, parsedUserId)
+                .isNull(parsedUserId == null, BizUserProgress::getUserId)
                 .in(BizUserProgress::getCardId, cardIds)
                 .eq(BizUserProgress::getStatus, 1)
                 .count();
@@ -266,13 +266,13 @@ public class MiniProgramController {
     public Result<Map<String, Object>> getCards(
             @RequestParam(required = false) Long subjectId,
             @RequestParam(required = false) String frontContent,
-            @RequestParam(required = false) String appUserId,
+            @RequestParam(required = false) String userId,
             @RequestParam(required = false) String status,
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize) {
 
         // 解析用户ID
-        final Long userId = parseUserId(appUserId);
+        final Long parsedUserId = parseUserId(userId);
 
         Page<BizCard> page = cardService.pageCards(subjectId, frontContent, pageNum, pageSize);
 
@@ -334,8 +334,8 @@ public class MiniProgramController {
         if (!cardIds.isEmpty()) {
             List<BizUserProgress> progressList = progressService.lambdaQuery()
                     .in(BizUserProgress::getCardId, cardIds)
-                    .eq(userId != null, BizUserProgress::getAppUserId, userId)
-                    .isNull(userId == null, BizUserProgress::getAppUserId)
+                    .eq(parsedUserId != null, BizUserProgress::getUserId, parsedUserId)
+                    .isNull(parsedUserId == null, BizUserProgress::getUserId)
                     .list();
             
             Map<Long, BizUserProgress> progressMap = progressList.stream()
@@ -438,7 +438,7 @@ public class MiniProgramController {
     public Result<Void> updateProgress(@RequestBody MiniProgressDTO dto) {
         BizUserProgress progress = new BizUserProgress();
         progress.setCardId(dto.getCardId());
-        progress.setAppUserId(dto.getAppUserId());
+        progress.setUserId(dto.getUserId());
         progress.setStatus(dto.getStatus());
         progress.setUpdateTime(LocalDateTime.now());
 
@@ -448,15 +448,15 @@ public class MiniProgramController {
         }
 
         BizUserProgress existing;
-        if (dto.getAppUserId() != null) {
+        if (dto.getUserId() != null) {
             existing = progressService.lambdaQuery()
                     .eq(BizUserProgress::getCardId, dto.getCardId())
-                    .eq(BizUserProgress::getAppUserId, dto.getAppUserId())
+                    .eq(BizUserProgress::getUserId, dto.getUserId())
                     .one();
         } else {
             existing = progressService.lambdaQuery()
                     .eq(BizUserProgress::getCardId, dto.getCardId())
-                    .isNull(BizUserProgress::getAppUserId)
+                    .isNull(BizUserProgress::getUserId)
                     .one();
         }
 
@@ -475,24 +475,24 @@ public class MiniProgramController {
      */
     @GetMapping("/stats")
     @ApiOperation("获取学习统计")
-    public Result<Map<String, Object>> getStats(@RequestParam(required = false) Long appUserId) {
+    public Result<Map<String, Object>> getStats(@RequestParam(required = false) Long userId) {
         Map<String, Object> stats = new HashMap<>();
 
         long learned = progressService.lambdaQuery()
-                .eq(appUserId != null, BizUserProgress::getAppUserId, appUserId)
-                .isNull(appUserId == null, BizUserProgress::getAppUserId)
+                .eq(userId != null, BizUserProgress::getUserId, userId)
+                .isNull(userId == null, BizUserProgress::getUserId)
                 .ge(BizUserProgress::getStatus, 1)
                 .count();
 
         long mastered = progressService.lambdaQuery()
-                .eq(appUserId != null, BizUserProgress::getAppUserId, appUserId)
-                .isNull(appUserId == null, BizUserProgress::getAppUserId)
+                .eq(userId != null, BizUserProgress::getUserId, userId)
+                .isNull(userId == null, BizUserProgress::getUserId)
                 .eq(BizUserProgress::getStatus, 2)
                 .count();
 
         long review = progressService.lambdaQuery()
-                .eq(appUserId != null, BizUserProgress::getAppUserId, appUserId)
-                .isNull(appUserId == null, BizUserProgress::getAppUserId)
+                .eq(userId != null, BizUserProgress::getUserId, userId)
+                .isNull(userId == null, BizUserProgress::getUserId)
                 .eq(BizUserProgress::getStatus, 1)
                 .count();
 
@@ -508,10 +508,10 @@ public class MiniProgramController {
      */
     @GetMapping("/review")
     @ApiOperation("获取待复习卡片")
-    public Result<List<MiniCardDTO>> getReviewCards(@RequestParam(required = false) Long appUserId) {
+    public Result<List<MiniCardDTO>> getReviewCards(@RequestParam(required = false) Long userId) {
         List<BizUserProgress> progressList = progressService.lambdaQuery()
-                .eq(appUserId != null, BizUserProgress::getAppUserId, appUserId)
-                .isNull(appUserId == null, BizUserProgress::getAppUserId)
+                .eq(userId != null, BizUserProgress::getUserId, userId)
+                .isNull(userId == null, BizUserProgress::getUserId)
                 .le(BizUserProgress::getNextReviewTime, LocalDateTime.now())
                 .list();
 

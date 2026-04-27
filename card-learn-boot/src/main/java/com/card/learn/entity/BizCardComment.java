@@ -23,7 +23,7 @@ public class BizCardComment implements Serializable {
     private Long cardId;
 
     /** 用户ID */
-    private Long appUserId;
+    private Long userId;
 
     /** 用户昵称（冗余字段） */
     private String userNickname;

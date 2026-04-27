@@ -45,7 +45,7 @@ public class BizCardCommentServiceImpl extends ServiceImpl<BizCardCommentMapper,
         // 如果是劣质评论，自动创建反馈记录
         if ("POOR".equals(comment.getCommentType())) {
             BizFeedback feedback = new BizFeedback();
-            feedback.setAppUserId(comment.getAppUserId());
+            feedback.setUserId(comment.getUserId());
             feedback.setCardId(comment.getCardId());
             feedback.setType("ERROR");  // 纠错类型
             feedback.setRating(comment.getRating());

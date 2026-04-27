@@ -39,7 +39,7 @@ public class BizUserProgressController {
         // 查找是否已存在进度记录
         BizUserProgress existing = progressService.lambdaQuery()
                 .eq(BizUserProgress::getCardId, progress.getCardId())
-                .eq(BizUserProgress::getAppUserId, progress.getAppUserId())
+                .eq(BizUserProgress::getUserId, progress.getUserId())
                 .one();
         
         if (existing != null) {
@@ -56,32 +56,32 @@ public class BizUserProgressController {
 
     @GetMapping("/list")
     @ApiOperation("获取用户学习进度列表")
-    public Result<List<BizUserProgress>> list(@RequestParam(required = false) Long appUserId) {
+    public Result<List<BizUserProgress>> list(@RequestParam(required = false) Long userId) {
         List<BizUserProgress> list = progressService.lambdaQuery()
-                .eq(appUserId != null, BizUserProgress::getAppUserId, appUserId)
+                .eq(userId != null, BizUserProgress::getUserId, userId)
                 .list();
         return Result.success(list);
     }
 
     @GetMapping("/stats")
     @ApiOperation("获取学习统计数据")
-    public Result<Map<String, Object>> stats(@RequestParam(required = false) Long appUserId,
+    public Result<Map<String, Object>> stats(@RequestParam(required = false) Long userId,
                                               @RequestParam(required = false) Long subjectId) {
         Map<String, Object> stats = new HashMap<>();
         
         // 统计各状态数量
         long learnedCount = progressService.lambdaQuery()
-                .eq(appUserId != null, BizUserProgress::getAppUserId, appUserId)
+                .eq(userId != null, BizUserProgress::getUserId, userId)
                 .ge(BizUserProgress::getStatus, 1)
                 .count();
         
         long masteredCount = progressService.lambdaQuery()
-                .eq(appUserId != null, BizUserProgress::getAppUserId, appUserId)
+                .eq(userId != null, BizUserProgress::getUserId, userId)
                 .eq(BizUserProgress::getStatus, 2)
                 .count();
         
         long reviewCount = progressService.lambdaQuery()
-                .eq(appUserId != null, BizUserProgress::getAppUserId, appUserId)
+                .eq(userId != null, BizUserProgress::getUserId, userId)
                 .eq(BizUserProgress::getStatus, 1)
                 .count();
         
@@ -94,9 +94,9 @@ public class BizUserProgressController {
 
     @GetMapping("/needReview")
     @ApiOperation("获取待复习卡片列表")
-    public Result<List<BizUserProgress>> needReview(@RequestParam(required = false) Long appUserId) {
+    public Result<List<BizUserProgress>> needReview(@RequestParam(required = false) Long userId) {
         List<BizUserProgress> list = progressService.lambdaQuery()
-                .eq(appUserId != null, BizUserProgress::getAppUserId, appUserId)
+                .eq(userId != null, BizUserProgress::getUserId, userId)
                 .le(BizUserProgress::getNextReviewTime, LocalDateTime.now())
                 .list();
         return Result.success(list);
