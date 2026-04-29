@@ -286,7 +286,7 @@ const handleView = async (row: FeedbackVO) => {
   try {
     const res = await getFeedbackById(row.id!)
     currentFeedback.value = { ...row, ...res.data }
-    processForm.status = row.status === '0' ? '1' : row.status
+    processForm.status = row.status === '0' ? '1' : (row.status || '1')
     processForm.adminReply = res.data.adminReply || ''
     dialogVisible.value = true
   } catch (error) {

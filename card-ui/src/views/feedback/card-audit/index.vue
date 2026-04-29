@@ -304,8 +304,8 @@ const handleView = (row: CardAuditVO) => {
 const handleApprove = async (row: CardAuditVO) => {
   await ElMessageBox.confirm('确定通过该卡片？通过后将添加到知识库中', '审批确认', { 
     type: 'success',
-    confirmText: '通过',
-    cancelText: '取消'
+    confirmButtonText: '通过',
+    cancelButtonText: '取消'
   })
   
   try {

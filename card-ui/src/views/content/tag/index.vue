@@ -134,7 +134,7 @@ const fetchData = async () => {
   try {
     const params = {
       tagName: queryParams.tagName || undefined,
-      subjectId: queryParams.subjectId === 'null' ? undefined : queryParams.subjectId,
+      subjectId: queryParams.subjectId,
       pageNum: queryParams.pageNum,
       pageSize: queryParams.pageSize
     }

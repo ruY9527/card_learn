@@ -242,7 +242,8 @@ const detailVisible = ref(false)
 const currentLog = ref<RequestLog | null>(null)
 
 // 获取方法标签类型
-const getMethodTagType = (method: string) => {
+const getMethodTagType = (method: string | undefined) => {
+  if (!method) return ''
   const types: Record<string, string> = {
     GET: '',
     POST: 'success',

@@ -245,12 +245,6 @@ const handleCommand = (command: string, row: SysRole) => {
   }
 }
 
-const openMenuDialog = async (row: SysRole) => {
-  currentRoleId.value = row.roleId!
-  menuDialogVisible.value = true
-  await fetchMenuList()
-}
-
 const saveMenuAssign = async () => {
   submitLoading.value = true
   try {

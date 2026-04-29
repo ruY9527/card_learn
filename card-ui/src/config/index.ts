@@ -1,14 +1,21 @@
 // 环境配置
-const config = {
-  // 开发环境
+type EnvConfig = {
+  baseURL: string
+}
+
+type Config = {
+  development: EnvConfig
+  production: EnvConfig
+}
+
+const config: Config = {
   development: {
     baseURL: '/api'
   },
-  // 生产环境
   production: {
-    baseURL: '/api'  // 使用 nginx 代理，保持相对路径
+    baseURL: '/api'
   }
 }
 
-// 根据环境导出配置
-export default config[import.meta.env.MODE] || config.development
+const mode = import.meta.env.MODE as keyof Config
+export default config[mode] || config.development

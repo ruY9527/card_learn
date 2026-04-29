@@ -60,11 +60,9 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import request from '@/api/request'
 import { ElMessage } from 'element-plus'
-import { useUserStore } from '@/store/user'
-import { ref } from 'vue'
 
 const stats = ref({
   majorCount: 0,
@@ -73,7 +71,6 @@ const stats = ref({
   tagCount: 0
 })
 const loading = ref(true)
-const userStore = useUserStore()
 
 const fetchStats = async () => {
   try {
