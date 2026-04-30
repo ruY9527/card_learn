@@ -80,6 +80,9 @@ struct MyCardsView: View {
             .navigationTitle("我的卡片")
             .navigationBarTitleDisplayMode(.inline)
             .onAppear {
+                pageNum = 1
+                cardList = []
+                hasMore = true
                 fetchStats()
                 fetchCards()
             }
@@ -99,7 +102,8 @@ struct MyCardsView: View {
     }
 
     private func fetchStats() {
-        guard let token = appState.userInfo?.token else { return }
+        let token = appState.token
+        guard !token.isEmpty else { return }
 
         Task {
             do {
@@ -111,7 +115,9 @@ struct MyCardsView: View {
     }
 
     private func fetchCards() {
-        guard !isLoading, let token = appState.userInfo?.token else { return }
+        guard !isLoading else { return }
+        let token = appState.token
+        guard !token.isEmpty else { return }
 
         isLoading = true
 
@@ -136,7 +142,9 @@ struct MyCardsView: View {
 
                 hasMore = cardList.count < total
             } catch {
-                cardList = []
+                if pageNum == 1 {
+                    cardList = []
+                }
             }
 
             isLoading = false
@@ -150,7 +158,8 @@ struct MyCardsView: View {
     }
 
     private func deleteCard(_ card: MyCard) {
-        guard let token = appState.userInfo?.token else { return }
+        let token = appState.token
+        guard !token.isEmpty else { return }
 
         Task {
             do {

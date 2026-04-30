@@ -2,6 +2,7 @@ package com.card.learn.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.card.learn.common.Result;
+import com.card.learn.dto.LoginDTO;
 import com.card.learn.dto.MiniCardDTO;
 import com.card.learn.dto.MiniProgressDTO;
 import com.card.learn.dto.MiniSubjectDTO;
@@ -13,13 +14,17 @@ import com.card.learn.entity.BizSubject;
 import com.card.learn.entity.BizTag;
 import com.card.learn.entity.BizCardTag;
 import com.card.learn.entity.BizUserProgress;
+import com.card.learn.entity.BizStudyHistory;
 import com.card.learn.entity.SysUser;
+import com.card.learn.vo.StudiedCardVO;
+import com.card.learn.vo.CardStudyHistoryVO;
 import com.card.learn.service.IBizCardService;
 import com.card.learn.service.IBizMajorService;
 import com.card.learn.service.IBizSubjectService;
 import com.card.learn.service.IBizTagService;
 import com.card.learn.service.IBizCardTagService;
 import com.card.learn.service.IBizUserProgressService;
+import com.card.learn.service.IBizStudyHistoryService;
 import com.card.learn.service.ISysUserService;
 import com.card.learn.service.ISysConfigService;
 import com.card.learn.util.JwtUtil;
@@ -28,6 +33,8 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
+
+import com.card.learn.vo.*;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -58,6 +65,9 @@ public class MiniProgramController {
 
     @Autowired
     private IBizUserProgressService progressService;
+
+    @Autowired
+    private IBizStudyHistoryService studyHistoryService;
 
     @Autowired
     private ISysUserService userService;
@@ -94,11 +104,11 @@ public class MiniProgramController {
      */
     @PostMapping("/login")
     @ApiOperation("小程序用户登录")
-    public Result<Map<String, Object>> login(@RequestBody Map<String, String> params) {
-        String username = params.get("username");
-        String password = params.get("password");
-        String captcha = params.get("captcha");
-        String captchaKey = params.get("captchaKey");
+    public Result<LoginVO> login(@RequestBody LoginDTO params) {
+        String username = params.getUsername();
+        String password = params.getPassword();
+        String captcha = params.getCaptcha();
+        String captchaKey = params.getCaptchaKey();
 
         // 验证码校验
         if (captchaKey == null || captcha == null) {
@@ -140,16 +150,16 @@ public class MiniProgramController {
         // 生成token
         String token = jwtUtil.generateToken(user.getUsername());
 
-        Map<String, Object> data = new HashMap<>();
-        data.put("token", token);
+        LoginUserInfoVO userInfo = new LoginUserInfoVO();
+        userInfo.setUserId(user.getUserId());
+        userInfo.setNickname(user.getNickname() != null ? user.getNickname() : user.getUsername());
+        userInfo.setAvatar(user.getAvatar());
 
-        Map<String, Object> userMap = new HashMap<>();
-        userMap.put("userId", user.getUserId());
-        userMap.put("nickname", user.getNickname() != null ? user.getNickname() : user.getUsername());
-        userMap.put("avatar", user.getAvatar());
-        data.put("user", userMap);
+        LoginVO loginVO = new LoginVO();
+        loginVO.setToken(token);
+        loginVO.setUser(userInfo);
 
-        return Result.success(data);
+        return Result.success(loginVO);
     }
 
     /**
@@ -201,25 +211,27 @@ public class MiniProgramController {
      */
     @GetMapping("/subjects/{subjectId}/stats")
     @ApiOperation("获取科目学习统计")
-    public Result<Map<String, Object>> getSubjectStats(
+    public Result<SubjectStatsVO> getSubjectStats(
             @PathVariable Long subjectId,
             @RequestParam(required = false) String userId) {
         Long parsedUserId = parseUserId(userId);
-        Map<String, Object> stats = new HashMap<>();
 
-        // 获取该科目下的所有卡片（只查询已通过审批的）ID
+        // 获取该科目下的所有卡片（只查询已通过审批的）ID，兼容 audit_status 为 NULL 的系统内置卡片
         List<Long> cardIds = cardService.lambdaQuery()
                 .eq(BizCard::getSubjectId, subjectId)
+                .and(w -> w.eq(BizCard::getAuditStatus, "1").or().isNull(BizCard::getAuditStatus))
                 .list()
                 .stream()
                 .map(BizCard::getCardId)
                 .collect(Collectors.toList());
 
+        SubjectStatsVO stats = new SubjectStatsVO();
+
         if (cardIds.isEmpty()) {
-            stats.put("total", 0);
-            stats.put("learned", 0);
-            stats.put("mastered", 0);
-            stats.put("review", 0);
+            stats.setTotal(0L);
+            stats.setLearned(0L);
+            stats.setMastered(0L);
+            stats.setReview(0L);
             return Result.success(stats);
         }
 
@@ -250,10 +262,10 @@ public class MiniProgramController {
                 .eq(BizUserProgress::getStatus, 1)
                 .count();
 
-        stats.put("total", total);
-        stats.put("learned", learned);
-        stats.put("mastered", mastered);
-        stats.put("review", review);
+        stats.setTotal(total);
+        stats.setLearned(learned);
+        stats.setMastered(mastered);
+        stats.setReview(review);
 
         return Result.success(stats);
     }
@@ -263,7 +275,7 @@ public class MiniProgramController {
      */
     @GetMapping("/cards")
     @ApiOperation("分页获取卡片")
-    public Result<Map<String, Object>> getCards(
+    public Result<PageResultVO<MiniCardDTO>> getCards(
             @RequestParam(required = false) Long subjectId,
             @RequestParam(required = false) String frontContent,
             @RequestParam(required = false) String userId,
@@ -348,6 +360,12 @@ public class MiniProgramController {
                     dto.setUpdateTime(progress.getUpdateTime());
                 }
             });
+
+            // 批量查询每张卡片的最近学习时间
+            Map<Long, LocalDateTime> lastStudyTimeMap = studyHistoryService.batchGetLastStudyTime(parsedUserId, cardIds);
+            cardDTOs.forEach(dto -> {
+                dto.setLastStudyTime(lastStudyTimeMap.get(dto.getCardId()));
+            });
         }
 
         // 根据状态筛选
@@ -373,12 +391,7 @@ public class MiniProgramController {
             }).collect(Collectors.toList());
         }
 
-        Map<String, Object> result = new HashMap<>();
-        result.put("records", cardDTOs);
-        result.put("total", page.getTotal());
-        result.put("pageNum", page.getCurrent());
-        result.put("pageSize", page.getSize());
-
+        PageResultVO<MiniCardDTO> result = new PageResultVO<>(cardDTOs, page.getTotal(), page.getCurrent(), page.getSize());
         return Result.success(result);
     }
 
@@ -467,6 +480,9 @@ public class MiniProgramController {
             progressService.save(progress);
         }
 
+        // 记录学习历史
+        studyHistoryService.recordHistory(dto.getUserId(), dto.getCardId(), dto.getStatus());
+
         return Result.success();
     }
 
@@ -475,8 +491,8 @@ public class MiniProgramController {
      */
     @GetMapping("/stats")
     @ApiOperation("获取学习统计")
-    public Result<Map<String, Object>> getStats(@RequestParam(required = false) Long userId) {
-        Map<String, Object> stats = new HashMap<>();
+    public Result<UserStatsVO> getStats(@RequestParam(required = false) Long userId) {
+        UserStatsVO stats = new UserStatsVO();
 
         long learned = progressService.lambdaQuery()
                 .eq(userId != null, BizUserProgress::getUserId, userId)
@@ -496,9 +512,9 @@ public class MiniProgramController {
                 .eq(BizUserProgress::getStatus, 1)
                 .count();
 
-        stats.put("learned", learned);
-        stats.put("mastered", mastered);
-        stats.put("review", review);
+        stats.setLearned(learned);
+        stats.setMastered(mastered);
+        stats.setReview(review);
 
         return Result.success(stats);
     }
@@ -559,10 +575,10 @@ public class MiniProgramController {
         
         // 从每个科目中随机抽取2条卡片
         for (BizSubject subject : subjects) {
-            // 获取该科目下的所有卡片（只查询已通过审批的）
+            // 获取该科目下的所有卡片（只查询已通过审批的），兼容 audit_status 为 NULL 的系统内置卡片
             List<BizCard> cards = cardService.lambdaQuery()
                     .eq(BizCard::getSubjectId, subject.getSubjectId())
-                    .eq(BizCard::getAuditStatus, "1") // 只查询已通过的卡片
+                    .and(w -> w.eq(BizCard::getAuditStatus, "1").or().isNull(BizCard::getAuditStatus))
                     .list();
             
             if (cards.size() <= 2) {
@@ -604,6 +620,155 @@ public class MiniProgramController {
     @ApiOperation("获取冲刺配置")
     public Result<SprintConfigDTO> getSprintConfig() {
         return Result.success(configService.getSprintConfig());
+    }
+
+    // ==================== 学习历史 ====================
+
+    /**
+     * 获取用户学习过的卡片列表（分页）
+     */
+    @GetMapping("/study-history/cards")
+    @ApiOperation("获取用户学习过的卡片列表")
+    public Result<Page<StudiedCardVO>> getStudiedCards(
+            @RequestParam(required = false) String userId,
+            @RequestParam(defaultValue = "1") Integer pageNum,
+            @RequestParam(defaultValue = "20") Integer pageSize) {
+
+        final Long parsedUserId = parseUserId(userId);
+
+        // 按（用户+卡片）分组，区分不同用户的学习记录
+        Page<BizStudyHistory> page = studyHistoryService.lambdaQuery()
+                .eq(parsedUserId != null, BizStudyHistory::getUserId, parsedUserId)
+                .select(BizStudyHistory::getUserId, BizStudyHistory::getCardId)
+                .groupBy(BizStudyHistory::getUserId, BizStudyHistory::getCardId)
+                .orderByDesc(BizStudyHistory::getCardId)
+                .page(new Page<>(pageNum, pageSize));
+
+        List<BizStudyHistory> records = page.getRecords();
+        List<Long> cardIds = records.stream()
+                .map(BizStudyHistory::getCardId)
+                .distinct()
+                .collect(Collectors.toList());
+        Set<Long> userIds = records.stream()
+                .map(BizStudyHistory::getUserId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        List<StudiedCardVO> voList = new ArrayList<>();
+        if (!cardIds.isEmpty()) {
+            // 获取卡片信息
+            List<BizCard> cards = cardService.listByIds(cardIds);
+            Map<Long, BizCard> cardMap = cards.stream()
+                    .collect(Collectors.toMap(BizCard::getCardId, c -> c));
+
+            // 获取科目名称
+            Set<Long> subjectIds = cards.stream()
+                    .map(BizCard::getSubjectId)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
+            Map<Long, String> subjectNameMap = new HashMap<>();
+            if (!subjectIds.isEmpty()) {
+                List<BizSubject> subjects = subjectService.listByIds(subjectIds);
+                subjectNameMap = subjects.stream()
+                        .collect(Collectors.toMap(BizSubject::getSubjectId, BizSubject::getSubjectName));
+            }
+
+            // 批量获取用户昵称
+            Map<Long, String> nicknameMap = new HashMap<>();
+            if (!userIds.isEmpty()) {
+                List<SysUser> users = userService.listByIds(userIds);
+                users.forEach(u -> nicknameMap.put(u.getUserId(), u.getNickname() != null ? u.getNickname() : u.getUsername()));
+            }
+
+            // 为每个（用户+卡片）组合查询学习次数和最近学习时间
+            for (BizStudyHistory record : records) {
+                Long cardId = record.getCardId();
+                Long uid = record.getUserId();
+                BizCard card = cardMap.get(cardId);
+                if (card == null) continue;
+
+                long studyCount = studyHistoryService.lambdaQuery()
+                        .eq(BizStudyHistory::getCardId, cardId)
+                        .eq(BizStudyHistory::getUserId, uid)
+                        .count();
+
+                BizStudyHistory lastRecord = studyHistoryService.lambdaQuery()
+                        .eq(BizStudyHistory::getCardId, cardId)
+                        .eq(BizStudyHistory::getUserId, uid)
+                        .orderByDesc(BizStudyHistory::getCreateTime)
+                        .last("LIMIT 1")
+                        .one();
+
+                StudiedCardVO vo = new StudiedCardVO();
+                vo.setUserId(uid);
+                vo.setNickname(nicknameMap.get(uid));
+                vo.setCardId(cardId);
+                vo.setSubjectId(card.getSubjectId());
+                vo.setSubjectName(subjectNameMap.get(card.getSubjectId()));
+                vo.setFrontContent(card.getFrontContent());
+                vo.setDifficultyLevel(card.getDifficultyLevel());
+                vo.setStudyCount(studyCount);
+                vo.setLastStudyTime(lastRecord != null ? lastRecord.getCreateTime() : null);
+                vo.setLastStatus(lastRecord != null ? lastRecord.getStatus() : null);
+                voList.add(vo);
+            }
+        }
+
+        Page<StudiedCardVO> result = new Page<>(pageNum, pageSize);
+        result.setRecords(voList);
+        result.setTotal(page.getTotal());
+        return Result.success(result);
+    }
+
+    /**
+     * 获取某张卡片的学习历史记录
+     */
+    @GetMapping("/study-history/card/{cardId}")
+    @ApiOperation("获取卡片学习历史记录")
+    public Result<CardStudyHistoryVO> getCardStudyHistory(
+            @PathVariable Long cardId,
+            @RequestParam(required = false) String userId,
+            @RequestParam(defaultValue = "1") Integer pageNum,
+            @RequestParam(defaultValue = "50") Integer pageSize) {
+
+        final Long parsedUserId = parseUserId(userId);
+
+        Page<BizStudyHistory> page = studyHistoryService.lambdaQuery()
+                .eq(BizStudyHistory::getCardId, cardId)
+                .eq(parsedUserId != null, BizStudyHistory::getUserId, parsedUserId)
+                .orderByDesc(BizStudyHistory::getCreateTime)
+                .page(new Page<>(pageNum, pageSize));
+
+        BizCard card = cardService.getById(cardId);
+
+        // 批量获取用户昵称
+        Set<Long> userIds = page.getRecords().stream()
+                .map(BizStudyHistory::getUserId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        Map<Long, String> nicknameMap = new HashMap<>();
+        if (!userIds.isEmpty()) {
+            List<SysUser> users = userService.listByIds(userIds);
+            users.forEach(u -> nicknameMap.put(u.getUserId(), u.getNickname() != null ? u.getNickname() : u.getUsername()));
+        }
+
+        List<StudyHistoryRecordVO> enrichedRecords = page.getRecords().stream().map(h -> {
+            StudyHistoryRecordVO vo = new StudyHistoryRecordVO();
+            vo.setId(h.getId());
+            vo.setUserId(h.getUserId());
+            vo.setNickname(nicknameMap.get(h.getUserId()));
+            vo.setCardId(h.getCardId());
+            vo.setStatus(h.getStatus());
+            vo.setCreateTime(h.getCreateTime());
+            return vo;
+        }).collect(Collectors.toList());
+
+        CardStudyHistoryVO vo = new CardStudyHistoryVO();
+        vo.setCardId(cardId);
+        vo.setFrontContent(card != null ? card.getFrontContent() : "");
+        vo.setRecords(enrichedRecords);
+        vo.setTotal(page.getTotal());
+        return Result.success(vo);
     }
 
 }

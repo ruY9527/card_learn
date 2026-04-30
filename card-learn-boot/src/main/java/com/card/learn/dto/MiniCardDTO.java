@@ -23,5 +23,6 @@ public class MiniCardDTO implements Serializable {
     private List<String> tags;
     private Integer status; // 学习状态：0未学/1模糊/2掌握
     private LocalDateTime updateTime; // 学习/更新时间
+    private LocalDateTime lastStudyTime; // 上次设置当前状态的时间
 
 }

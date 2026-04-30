@@ -51,7 +51,7 @@ class APIService {
             queryItems.append(URLQueryItem(name: "frontContent", value: frontContent))
         }
         if let appUserId = appUserId {
-            queryItems.append(URLQueryItem(name: "appUserId", value: String(appUserId)))
+            queryItems.append(URLQueryItem(name: "userId", value: String(appUserId)))
         }
         if let status = status {
             queryItems.append(URLQueryItem(name: "status", value: status))
@@ -70,7 +70,7 @@ class APIService {
     func getCardById(cardId: Int, appUserId: Int?) async throws -> Card {
         var urlComponents = URLComponents(string: config.getApiUrl(path: "/api/miniprogram/cards/\(cardId)"))!
         if let appUserId = appUserId {
-            urlComponents.queryItems = [URLQueryItem(name: "appUserId", value: String(appUserId))]
+            urlComponents.queryItems = [URLQueryItem(name: "userId", value: String(appUserId))]
         }
         let (data, _) = try await session.data(from: urlComponents.url!)
         let response = try JSONDecoder().decode(APIResponse<Card>.self, from: data)
@@ -102,7 +102,7 @@ class APIService {
     func getSubjectStats(subjectId: Int, appUserId: Int?) async throws -> SubjectStats {
         var urlComponents = URLComponents(string: config.getApiUrl(path: "/api/miniprogram/subjects/\(subjectId)/stats"))!
         if let appUserId = appUserId {
-            urlComponents.queryItems = [URLQueryItem(name: "appUserId", value: String(appUserId))]
+            urlComponents.queryItems = [URLQueryItem(name: "userId", value: String(appUserId))]
         }
         let (data, _) = try await session.data(from: urlComponents.url!)
         let response = try JSONDecoder().decode(APIResponse<SubjectStats>.self, from: data)
@@ -141,7 +141,7 @@ class APIService {
     func getProgressStats(appUserId: Int?) async throws -> StudyStats {
         var urlComponents = URLComponents(string: config.getApiUrl(path: "/api/miniprogram/stats"))!
         if let appUserId = appUserId {
-            urlComponents.queryItems = [URLQueryItem(name: "appUserId", value: String(appUserId))]
+            urlComponents.queryItems = [URLQueryItem(name: "userId", value: String(appUserId))]
         }
         let (data, _) = try await session.data(from: urlComponents.url!)
         let response = try JSONDecoder().decode(APIResponse<StudyStats>.self, from: data)
@@ -220,7 +220,7 @@ class APIService {
     func getUserFeedbackList(appUserId: Int, pageNum: Int = 1, pageSize: Int = 10, token: String) async throws -> PageResponse<Feedback> {
         var urlComponents = URLComponents(string: config.getApiUrl(path: "/api/miniprogram/feedback/list"))!
         urlComponents.queryItems = [
-            URLQueryItem(name: "appUserId", value: String(appUserId)),
+            URLQueryItem(name: "userId", value: String(appUserId)),
             URLQueryItem(name: "pageNum", value: String(pageNum)),
             URLQueryItem(name: "pageSize", value: String(pageSize))
         ]
@@ -242,7 +242,7 @@ class APIService {
     func getProgressCards(appUserId: Int, status: String, pageNum: Int = 1, pageSize: Int = 20) async throws -> PageResponse<Card> {
         var urlComponents = URLComponents(string: config.getApiUrl(path: "/api/miniprogram/cards"))!
         urlComponents.queryItems = [
-            URLQueryItem(name: "appUserId", value: String(appUserId)),
+            URLQueryItem(name: "userId", value: String(appUserId)),
             URLQueryItem(name: "status", value: status),
             URLQueryItem(name: "pageNum", value: String(pageNum)),
             URLQueryItem(name: "pageSize", value: String(pageSize))

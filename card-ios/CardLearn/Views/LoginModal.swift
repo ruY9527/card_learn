@@ -75,11 +75,10 @@ struct LoginModal: View {
                             // 验证码
                             HStack(spacing: 12) {
                                 InputField(
-                                    icon: "🔢",
+                                    icon: "number.square",
                                     placeholder: "请输入验证码",
                                     text: captcha,
-                                    isSecure: false,
-                                    maxWidth: 200
+                                    isSecure: false
                                 ) {
                                     captcha = $0
                                     errorMessage = ""
@@ -100,7 +99,8 @@ struct LoginModal: View {
                                         .cornerRadius(8)
                                     } else {
                                         // 显示 base64 图片
-                                        if let data = Data(base64Encoded: captchaImage),
+                                        let base64String = captchaImage.replacingOccurrences(of: "data:image/png;base64,", with: "")
+                                        if let data = Data(base64Encoded: base64String),
                                            let uiImage = UIImage(data: data) {
                                             Image(uiImage: uiImage)
                                                 .resizable()
@@ -254,8 +254,13 @@ struct InputField: View {
     
     var body: some View {
         HStack(spacing: 12) {
-            Text(icon)
-                .font(.system(size: 20))
+            if icon.contains(".") {
+                Image(systemName: icon)
+                    .font(.system(size: 20))
+            } else {
+                Text(icon)
+                    .font(.system(size: 20))
+            }
             
             if isSecure {
                 SecureField(placeholder, text: Binding(

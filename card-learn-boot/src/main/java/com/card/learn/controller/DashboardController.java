@@ -15,9 +15,9 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
+import com.card.learn.vo.DashboardStatsVO;
+
 import java.util.List;
-import java.util.Map;
 
 /**
  * Dashboard数据统计控制器
@@ -44,13 +44,13 @@ public class DashboardController {
 
     @GetMapping("/stats")
     @ApiOperation("获取统计数据")
-    public Result<Map<String, Object>> getStats() {
-        Map<String, Object> data = new HashMap<>();
-        data.put("majorCount", majorService.count());
-        data.put("subjectCount", subjectService.count());
-        data.put("cardCount", cardService.count());
-        data.put("tagCount", tagService.count());
-        return Result.success(data);
+    public Result<DashboardStatsVO> getStats() {
+        DashboardStatsVO stats = new DashboardStatsVO();
+        stats.setMajorCount(majorService.count());
+        stats.setSubjectCount(subjectService.count());
+        stats.setCardCount(cardService.count());
+        stats.setTagCount(tagService.count());
+        return Result.success(stats);
     }
 
     @GetMapping("/learning-stats")

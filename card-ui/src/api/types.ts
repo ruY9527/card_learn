@@ -298,3 +298,27 @@ export interface SubjectLearnStats {
   fuzzyCount: number
   masteredCount: number
 }
+
+// 学习历史 - 卡片列表项
+export interface StudiedCard {
+  userId: number
+  nickname: string
+  cardId: number
+  subjectId: number
+  subjectName: string
+  frontContent: string
+  difficultyLevel: number
+  studyCount: number
+  lastStudyTime: string
+  lastStatus: number
+}
+
+// 学习历史 - 历史记录项
+export interface StudyHistoryRecord {
+  id: number
+  userId: number
+  nickname: string
+  cardId: number
+  status: number
+  createTime: string
+}

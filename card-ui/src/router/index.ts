@@ -103,6 +103,12 @@ const routes: RouteRecordRaw[] = [
         name: 'LearningStats',
         component: () => import('@/views/stats/learning/index.vue'),
         meta: { title: '学习数据统计' }
+      },
+      {
+        path: 'stats/study-history',
+        name: 'StudyHistory',
+        component: () => import('@/views/stats/study-history/index.vue'),
+        meta: { title: '学习记录' }
       }
     ]
   }

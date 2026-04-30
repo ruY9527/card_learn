@@ -262,7 +262,7 @@ Page({
 
     try {
       const feedbackData = {
-        appUserId: this.data.appUserId,
+        userId: this.data.appUserId,
         cardId: this.data.cardId,
         majorId: this.data.selectedMajorId,
         subjectId: this.data.selectedSubjectId,

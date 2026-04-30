@@ -1,5 +1,5 @@
 import request from './request'
-import type { Major, Subject, Card, Tag, SysUser, Feedback, FeedbackVO, PageResult, CardAuditVO, LearningStats, DailyLearnTrend, UserLearnRank, SubjectLearnStats } from './types'
+import type { Major, Subject, Card, Tag, SysUser, Feedback, FeedbackVO, PageResult, CardAuditVO, LearningStats, DailyLearnTrend, UserLearnRank, SubjectLearnStats, StudiedCard, StudyHistoryRecord } from './types'
 
 // 专业相关
 export const getMajorList = () => {
@@ -244,4 +244,20 @@ export const getSubjectStats = (userId?: number) => {
 export const getUserList = async (): Promise<SysUser[]> => {
   const res = await request.get<any, { data: SysUser[] }>('/system/user/list')
   return res.data
+}
+
+// ==================== 学习历史 ====================
+
+/**
+ * 获取用户学习过的卡片列表（分页）
+ */
+export const getStudiedCards = (params: { userId?: number; pageNum: number; pageSize: number }) => {
+  return request.get<any, { data: { records: StudiedCard[]; total: number; pageNum: number; pageSize: number } }>('/miniprogram/study-history/cards', { params })
+}
+
+/**
+ * 获取某张卡片的学习历史记录（分页）
+ */
+export const getCardStudyHistory = (params: { cardId: number; userId?: number; pageNum?: number; pageSize?: number }) => {
+  return request.get<any, { data: { cardId: number; frontContent: string; records: StudyHistoryRecord[]; total: number } }>(`/miniprogram/study-history/card/${params.cardId}`, { params: { userId: params.userId, pageNum: params.pageNum || 1, pageSize: params.pageSize || 50 } })
 }

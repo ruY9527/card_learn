@@ -29,6 +29,7 @@ struct Card: Codable, Identifiable, Equatable {
     let tags: [String]?
     let status: Int?  // 0: 未学, 1: 模糊, 2: 掌握
     let updateTime: String?
+    let lastStudyTime: String?
 
     var id: Int { cardId }
 
@@ -85,6 +86,14 @@ struct PageResponse<T: Codable>: Codable {
     let size: Int
     let current: Int
     let pages: Int?
+
+    enum CodingKeys: String, CodingKey {
+        case records
+        case total
+        case size = "pageSize"
+        case current = "pageNum"
+        case pages
+    }
 }
 
 // API 响应
@@ -163,6 +172,12 @@ struct ProgressUpdate: Codable {
     let cardId: Int
     let appUserId: Int?
     let status: Int
+
+    enum CodingKeys: String, CodingKey {
+        case cardId
+        case appUserId = "userId"
+        case status
+    }
 }
 
 // 我的卡片模型（用户贡献的卡片草稿）

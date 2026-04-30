@@ -18,9 +18,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
+import com.card.learn.vo.MyCardStatsVO;
+
 import java.util.List;
-import java.util.Map;
 
 /**
  * 小程序用户录入卡片控制器（使用临时表）
@@ -120,36 +120,36 @@ public class MiniCardController {
      */
     @GetMapping("/my/stats")
     @ApiOperation("获取我的卡片统计")
-    public Result<Map<String, Object>> getMyCardStats(@RequestParam(required = false) Long userId) {
+    public Result<MyCardStatsVO> getMyCardStats(@RequestParam(required = false) Long userId) {
         Long currentUserId = getCurrentUserId();
         if (currentUserId == null) {
             return Result.error(401, "请先登录后再查看统计");
         }
-        Map<String, Object> stats = new HashMap<>();
-        
+
         // 待审批数量
         long pendingCount = draftService.lambdaQuery()
                 .eq(BizCardDraft::getCreateUserId, currentUserId)
                 .eq(BizCardDraft::getAuditStatus, "0")
                 .count();
-        
+
         // 已通过数量
         long passedCount = draftService.lambdaQuery()
                 .eq(BizCardDraft::getCreateUserId, currentUserId)
                 .eq(BizCardDraft::getAuditStatus, "1")
                 .count();
-        
+
         // 已拒绝数量
         long rejectedCount = draftService.lambdaQuery()
                 .eq(BizCardDraft::getCreateUserId, currentUserId)
                 .eq(BizCardDraft::getAuditStatus, "2")
                 .count();
-        
-        stats.put("pending", pendingCount);
-        stats.put("passed", passedCount);
-        stats.put("rejected", rejectedCount);
-        stats.put("total", pendingCount + passedCount + rejectedCount);
-        
+
+        MyCardStatsVO stats = new MyCardStatsVO();
+        stats.setPending(pendingCount);
+        stats.setPassed(passedCount);
+        stats.setRejected(rejectedCount);
+        stats.setTotal(pendingCount + passedCount + rejectedCount);
+
         return Result.success(stats);
     }
 

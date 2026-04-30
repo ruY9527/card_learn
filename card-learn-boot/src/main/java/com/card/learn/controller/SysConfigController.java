@@ -9,8 +9,10 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import com.card.learn.dto.ConfigUpdateDTO;
+import com.card.learn.dto.SprintConfigUpdateDTO;
+
 import java.util.List;
-import java.util.Map;
 
 /**
  * 系统配置管理Controller（管理端）
@@ -50,8 +52,8 @@ public class SysConfigController {
      */
     @PutMapping("/{key}")
     @ApiOperation("更新配置值")
-    public Result<Void> updateConfig(@PathVariable String key, @RequestBody Map<String, String> body) {
-        String value = body.get("value");
+    public Result<Void> updateConfig(@PathVariable String key, @RequestBody ConfigUpdateDTO body) {
+        String value = body.getValue();
         if (value == null) {
             return Result.error("配置值不能为空");
         }
@@ -140,10 +142,10 @@ public class SysConfigController {
      */
     @PutMapping("/sprint")
     @ApiOperation("更新冲刺配置")
-    public Result<Void> updateSprintConfig(@RequestBody Map<String, String> body) {
-        String examDate = body.get("examDate");
-        String examName = body.get("examName");
-        String enabled = body.get("enabled");
+    public Result<Void> updateSprintConfig(@RequestBody SprintConfigUpdateDTO body) {
+        String examDate = body.getExamDate();
+        String examName = body.getExamName();
+        String enabled = body.getEnabled();
 
         if (examDate != null) {
             configService.updateConfigValue("sprint_exam_date", examDate);

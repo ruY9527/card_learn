@@ -9,8 +9,8 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.card.learn.vo.PageResultVO;
+import com.card.learn.vo.RequestLogStatsVO;
 
 /**
  * 系统请求日志管理Controller
@@ -28,7 +28,7 @@ public class SysRequestLogController {
      */
     @GetMapping("/list")
     @ApiOperation("分页查询日志列表")
-    public Result<Map<String, Object>> pageLogs(
+    public Result<PageResultVO<SysRequestLog>> pageLogs(
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize,
             @RequestParam(required = false) String requestMethod,
@@ -39,12 +39,7 @@ public class SysRequestLogController {
 
         Page<SysRequestLog> page = requestLogService.pageLogs(pageNum, pageSize, requestMethod, requestUrl, status, startTime, endTime);
 
-        Map<String, Object> result = new HashMap<>();
-        result.put("records", page.getRecords());
-        result.put("total", page.getTotal());
-        result.put("pageNum", page.getCurrent());
-        result.put("pageSize", page.getSize());
-
+        PageResultVO<SysRequestLog> result = new PageResultVO<>(page.getRecords(), page.getTotal(), page.getCurrent(), page.getSize());
         return Result.success(result);
     }
 
@@ -76,29 +71,29 @@ public class SysRequestLogController {
      */
     @GetMapping("/stats")
     @ApiOperation("获取日志统计信息")
-    public Result<Map<String, Object>> getStats() {
-        Map<String, Object> stats = new HashMap<>();
+    public Result<RequestLogStatsVO> getStats() {
+        RequestLogStatsVO stats = new RequestLogStatsVO();
 
         // 总日志数
-        stats.put("total", requestLogService.count());
+        stats.setTotal(requestLogService.count());
 
         // 成功日志数
         long successCount = requestLogService.lambdaQuery()
                 .eq(SysRequestLog::getStatus, "1")
                 .count();
-        stats.put("success", successCount);
+        stats.setSuccess(successCount);
 
         // 失败日志数
         long failCount = requestLogService.lambdaQuery()
                 .eq(SysRequestLog::getStatus, "0")
                 .count();
-        stats.put("fail", failCount);
+        stats.setFail(failCount);
 
         // 今日日志数
         long todayCount = requestLogService.lambdaQuery()
                 .ge(SysRequestLog::getCreateTime, java.time.LocalDateTime.now().toLocalDate().atStartOfDay())
                 .count();
-        stats.put("today", todayCount);
+        stats.setToday(todayCount);
 
         return Result.success(stats);
     }

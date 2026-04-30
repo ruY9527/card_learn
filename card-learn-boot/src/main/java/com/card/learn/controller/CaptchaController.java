@@ -10,12 +10,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.card.learn.vo.CaptchaVO;
+
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -38,7 +38,7 @@ public class CaptchaController {
      */
     @GetMapping("/generate")
     @ApiOperation("生成验证码")
-    public Result<Map<String, String>> generate() {
+    public Result<CaptchaVO> generate() {
         // 生成验证码字符串
         String code = CaptchaUtil.generateCode();
         // 生成唯一key
@@ -50,10 +50,10 @@ public class CaptchaController {
         // 转为Base64
         String base64Image = imageToBase64(image);
 
-        Map<String, String> data = new HashMap<>();
-        data.put("key", key);
-        data.put("image", "data:image/png;base64," + base64Image);
-        return Result.success(data);
+        CaptchaVO captcha = new CaptchaVO();
+        captcha.setKey(key);
+        captcha.setImage("data:image/png;base64," + base64Image);
+        return Result.success(captcha);
     }
 
     /**

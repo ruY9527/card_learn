@@ -158,21 +158,21 @@ INSERT INTO `sys_app_user` (`openid`, `nickname`, `avatar`, `last_login_time`) V
 -- ----------------------------
 -- 8. 用户学习进度表模拟数据
 -- ----------------------------
-INSERT INTO `biz_user_progress` (`app_user_id`, `card_id`, `status`, `next_review_time`) VALUES 
+INSERT INTO `biz_user_progress` (`user_id`, `card_id`, `status`, `next_review_time`) VALUES 
 (1, 1, 2, NOW() + INTERVAL 7 DAY);   -- 已掌握，7天后复习
-INSERT INTO `biz_user_progress` (`app_user_id`, `card_id`, `status`, `next_review_time`) VALUES 
+INSERT INTO `biz_user_progress` (`user_id`, `card_id`, `status`, `next_review_time`) VALUES 
 (1, 2, 1, NOW() + INTERVAL 3 DAY);   -- 模糊，3天后复习
-INSERT INTO `biz_user_progress` (`app_user_id`, `card_id`, `status`, `next_review_time`) VALUES 
+INSERT INTO `biz_user_progress` (`user_id`, `card_id`, `status`, `next_review_time`) VALUES 
 (1, 3, 0, NULL);                      -- 未学
-INSERT INTO `biz_user_progress` (`app_user_id`, `card_id`, `status`, `next_review_time`) VALUES 
+INSERT INTO `biz_user_progress` (`user_id`, `card_id`, `status`, `next_review_time`) VALUES 
 (2, 1, 2, NOW() + INTERVAL 5 DAY);
-INSERT INTO `biz_user_progress` (`app_user_id`, `card_id`, `status`, `next_review_time`) VALUES 
+INSERT INTO `biz_user_progress` (`user_id`, `card_id`, `status`, `next_review_time`) VALUES 
 (2, 4, 2, NOW() + INTERVAL 4 DAY);
-INSERT INTO `biz_user_progress` (`app_user_id`, `card_id`, `status`, `next_review_time`) VALUES 
+INSERT INTO `biz_user_progress` (`user_id`, `card_id`, `status`, `next_review_time`) VALUES 
 (2, 5, 1, NOW() + INTERVAL 2 DAY);
-INSERT INTO `biz_user_progress` (`app_user_id`, `card_id`, `status`, `next_review_time`) VALUES 
+INSERT INTO `biz_user_progress` (`user_id`, `card_id`, `status`, `next_review_time`) VALUES 
 (3, 1, 2, NOW() + INTERVAL 10 DAY);
-INSERT INTO `biz_user_progress` (`app_user_id`, `card_id`, `status`, `next_review_time`) VALUES 
+INSERT INTO `biz_user_progress` (`user_id`, `card_id`, `status`, `next_review_time`) VALUES 
 (3, 16, 2, NOW() + INTERVAL 6 DAY);   -- TCP三次握手已掌握
-INSERT INTO `biz_user_progress` (`app_user_id`, `card_id`, `status`, `next_review_time`) VALUES 
+INSERT INTO `biz_user_progress` (`user_id`, `card_id`, `status`, `next_review_time`) VALUES 
 (3, 17, 1, NOW() + INTERVAL 3 DAY);   -- TCP四次挥手模糊

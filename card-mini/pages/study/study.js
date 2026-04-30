@@ -91,7 +91,7 @@ Page({
       pageNum: this.data.pageNum,
       pageSize: this.data.pageSize,
       status: this.data.currentTab,
-      appUserId: this.data.appUserId
+      userId: this.data.appUserId
     }
 
     console.log('请求卡片参数:', params)

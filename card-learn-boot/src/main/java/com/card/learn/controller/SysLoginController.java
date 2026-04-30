@@ -12,8 +12,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.card.learn.vo.LoginUserInfoVO;
+import com.card.learn.vo.LoginVO;
 
 /**
  * 登录控制器
@@ -39,7 +39,7 @@ public class SysLoginController {
 
     @PostMapping("/login")
     @ApiOperation("用户登录")
-    public Result<Map<String, Object>> login(@RequestBody LoginDTO loginDTO) {
+    public Result<LoginVO> login(@RequestBody LoginDTO loginDTO) {
         // 验证码校验
         if (loginDTO.getCaptchaKey() == null || loginDTO.getCaptcha() == null) {
             return Result.error("请输入验证码");
@@ -67,18 +67,18 @@ public class SysLoginController {
             return Result.error("账号已停用");
         }
         String token = jwtUtil.generateToken(user.getUsername());
-        
+
         // 构建用户信息（不返回敏感字段）
-        Map<String, Object> userMap = new HashMap<>();
-        userMap.put("userId", user.getUserId());
-        userMap.put("username", user.getUsername());
-        userMap.put("nickname", user.getNickname());
-        userMap.put("avatar", user.getAvatar());
-        
-        Map<String, Object> data = new HashMap<>();
-        data.put("token", token);
-        data.put("user", userMap);
-        return Result.success(data);
+        LoginUserInfoVO userInfo = new LoginUserInfoVO();
+        userInfo.setUserId(user.getUserId());
+        userInfo.setUsername(user.getUsername());
+        userInfo.setNickname(user.getNickname());
+        userInfo.setAvatar(user.getAvatar());
+
+        LoginVO loginVO = new LoginVO();
+        loginVO.setToken(token);
+        loginVO.setUser(userInfo);
+        return Result.success(loginVO);
     }
 
     @PostMapping("/logout")

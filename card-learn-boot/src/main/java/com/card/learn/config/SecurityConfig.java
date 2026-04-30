@@ -86,7 +86,8 @@ public class SecurityConfig {
                 "/api/miniprogram/subjects/**/stats",
                 "/api/miniprogram/review",
                 "/api/miniprogram/recommend",
-                "/api/miniprogram/sprint-config"
+                "/api/miniprogram/sprint-config",
+                "/api/miniprogram/study-history/**"
             ).permitAll()
             // 其他请求需要认证
             .anyRequest().authenticated()

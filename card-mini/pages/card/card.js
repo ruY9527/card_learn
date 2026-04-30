@@ -103,13 +103,21 @@ Page({
   loadCards(startCardId = 0, appUserId) {
     if (this.data.loading) return
 
-    this.setData({ loading: true })
+    this.setData({
+      loading: true,
+      pageNum: 1,
+      cardList: [],
+      currentCard: null,
+      currentIndex: 0,
+      totalCount: 0,
+      hasMore: true
+    })
 
     getCardPage({
       subjectId: this.data.subjectId,
-      pageNum: this.data.pageNum,
+      pageNum: 1,
       pageSize: this.data.pageSize,
-      appUserId: appUserId
+      userId: appUserId
     }).then(res => {
       console.log('卡片列表响应:', res)
 
@@ -157,7 +165,7 @@ Page({
       subjectId: this.data.subjectId,
       pageNum: this.data.pageNum,
       pageSize: this.data.pageSize,
-      appUserId: this.data.appUserId
+      userId: this.data.appUserId
     }).then(res => {
       const newCards = res.data && res.data.records ? res.data.records : []
       const total = res.data && res.data.total ? res.data.total : 0
@@ -198,7 +206,7 @@ Page({
 
     updateProgress({
       cardId: card.cardId,
-      appUserId: this.data.appUserId,
+      userId: this.data.appUserId,
       status: status
     }).then(() => {
       wx.showToast({
@@ -490,7 +498,7 @@ Page({
 
     submitComment({
       cardId: card.cardId,
-      appUserId: userInfo.userId,
+      userId: userInfo.userId,
       content: this.data.commentContent,
       rating: this.data.rating,
       commentType: this.data.commentType

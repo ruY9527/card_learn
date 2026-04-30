@@ -221,7 +221,7 @@ const getCardPage = (params) =>
  * @param {number} pageSize - 每页数量
  */
 const getLearnedCards = (appUserId, pageNum = 1, pageSize = 20) =>
-  request({ url: '/api/miniprogram/cards', data: { appUserId, status: 'learned', pageNum, pageSize } })
+  request({ url: '/api/miniprogram/cards', data: { userId: appUserId, status: 'learned', pageNum, pageSize } })
 
 /**
  * 获取已掌握卡片列表
@@ -230,7 +230,7 @@ const getLearnedCards = (appUserId, pageNum = 1, pageSize = 20) =>
  * @param {number} pageSize - 每页数量
  */
 const getMasteredCards = (appUserId, pageNum = 1, pageSize = 20) =>
-  request({ url: '/api/miniprogram/cards', data: { appUserId, status: 'mastered', pageNum, pageSize } })
+  request({ url: '/api/miniprogram/cards', data: { userId: appUserId, status: 'mastered', pageNum, pageSize } })
 
 /**
  * 获取待复习卡片列表
@@ -239,7 +239,7 @@ const getMasteredCards = (appUserId, pageNum = 1, pageSize = 20) =>
  * @param {number} pageSize - 每页数量
  */
 const getReviewCardsList = (appUserId, pageNum = 1, pageSize = 20) =>
-  request({ url: '/api/miniprogram/cards', data: { appUserId, status: 'review', pageNum, pageSize } })
+  request({ url: '/api/miniprogram/cards', data: { userId: appUserId, status: 'review', pageNum, pageSize } })
 
 /**
  * 获取卡片详情
@@ -247,7 +247,7 @@ const getReviewCardsList = (appUserId, pageNum = 1, pageSize = 20) =>
  * @param {number} appUserId - 用户ID（可选）
  */
 const getCardById = (cardId, appUserId) =>
-  request({ url: `/api/miniprogram/cards/${cardId}`, data: { appUserId } })
+  request({ url: `/api/miniprogram/cards/${cardId}`, data: { userId: appUserId } })
 
 /**
  * 更新学习进度
@@ -264,7 +264,7 @@ const updateProgress = (data) =>
  * @param {number} appUserId - 用户ID（可选）
  */
 const getProgressStats = (appUserId) =>
-  request({ url: '/api/miniprogram/stats', data: { appUserId } })
+  request({ url: '/api/miniprogram/stats', data: { userId: appUserId } })
 
 /**
  * 获取科目学习统计
@@ -272,14 +272,14 @@ const getProgressStats = (appUserId) =>
  * @param {number} appUserId - 用户ID（可选）
  */
 const getSubjectStats = (subjectId, appUserId) =>
-  request({ url: `/api/miniprogram/subjects/${subjectId}/stats`, data: { appUserId } })
+  request({ url: `/api/miniprogram/subjects/${subjectId}/stats`, data: { userId: appUserId } })
 
 /**
  * 获取待复习卡片
  * @param {number} appUserId - 用户ID（可选）
  */
 const getReviewCards = (appUserId) =>
-  request({ url: '/api/miniprogram/review', data: { appUserId } })
+  request({ url: '/api/miniprogram/review', data: { userId: appUserId } })
 
 // ==================== 反馈相关API（需登录） ====================
 
@@ -304,7 +304,7 @@ const submitFeedback = (data) =>
  * @param {number} pageSize - 每页数量
  */
 const getUserFeedbackList = (appUserId, pageNum = 1, pageSize = 10) =>
-  request({ url: '/api/miniprogram/feedback/list', data: { appUserId, pageNum, pageSize }, needAuth: true })
+  request({ url: '/api/miniprogram/feedback/list', data: { userId: appUserId, pageNum, pageSize }, needAuth: true })
 
 /**
  * 获取反馈详情

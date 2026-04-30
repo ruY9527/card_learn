@@ -15,7 +15,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/card_learn?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     username: root
-    password: your_password_here
+    password: 123456
     # 连接池配置
     hikari:
       minimum-idle: 5
@@ -28,7 +28,7 @@ spring:
   redis:
     host: localhost
     port: 6379
-    password: your_redis_password
+    password: 123
     database: 0
     timeout: 10000ms
     lettuce:

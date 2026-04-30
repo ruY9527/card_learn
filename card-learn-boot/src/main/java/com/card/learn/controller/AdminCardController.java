@@ -12,9 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
+import com.card.learn.vo.AuditResultVO;
+
 import java.util.List;
-import java.util.Map;
 
 /**
  * 管理端卡片审批控制器（审批临时表中的卡片）
@@ -59,16 +59,16 @@ public class AdminCardController {
      */
     @PostMapping("/process")
     @ApiOperation("审批卡片")
-    public Result<Map<String, Object>> auditCard(@RequestBody @Validated CardAuditDTO dto) {
+    public Result<AuditResultVO> auditCard(@RequestBody @Validated CardAuditDTO dto) {
         try {
             Long cardId = draftService.auditDraftCard(dto);
             String msg = "1".equals(dto.getAuditStatus()) ? "审批通过，已添加到知识库" : "审批拒绝";
-            
-            Map<String, Object> data = new HashMap<>();
-            data.put("cardId", cardId); // 审批通过时返回正式卡片ID
-            data.put("message", msg);
-            
-            return Result.success(data);
+
+            AuditResultVO result = new AuditResultVO();
+            result.setCardId(cardId);
+            result.setMessage(msg);
+
+            return Result.success(result);
         } catch (RuntimeException e) {
             return Result.error(e.getMessage());
         }

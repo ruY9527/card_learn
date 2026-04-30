@@ -21,6 +21,8 @@
 		A0000012 /* ProgressCardsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000012; };
 		A0000013 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B0000013; };
 		A0000014 /* EnvConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000014; };
+		A0000015 /* AddCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000015; };
+		A0000016 /* MyCardsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000016; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -39,6 +41,8 @@
 		B0000012 /* ProgressCardsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressCardsView.swift; sourceTree = "<group>"; };
 		B0000013 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B0000014 /* EnvConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvConfig.swift; sourceTree = "<group>"; };
+		B0000015 /* AddCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddCardView.swift; sourceTree = "<group>"; };
+		B0000016 /* MyCardsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyCardsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -97,7 +101,7 @@
 			path = Services;
 			sourceTree = "<group>";
 		};
-		E0000006 /* Views */ = {
+			E0000006 /* Views */ = {
 			isa = PBXGroup;
 			children = (
 				B0000004 /* MainTabView.swift */,
@@ -109,6 +113,8 @@
 				B0000010 /* FeedbackView.swift */,
 				B0000011 /* FeedbackListView.swift */,
 				B0000012 /* ProgressCardsView.swift */,
+				B0000015 /* AddCardView.swift */,
+				B0000016 /* MyCardsView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -203,6 +209,8 @@
 				A0000010 /* FeedbackView.swift in Sources */,
 				A0000011 /* FeedbackListView.swift in Sources */,
 				A0000012 /* ProgressCardsView.swift in Sources */,
+				A0000015 /* AddCardView.swift in Sources */,
+				A0000016 /* MyCardsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

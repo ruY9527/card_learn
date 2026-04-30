@@ -9,6 +9,7 @@ struct HomeView: View {
     @State private var countdownDays: Int = 0
     @State private var countdownText: String = ""
     @State private var isLoading: Bool = false
+    @State private var isLoadingSubjects: Bool = false
     @State private var initialized: Bool = false // 是否已初始化
 
     @State private var showStudy: Bool = false
@@ -31,56 +32,104 @@ struct HomeView: View {
                         )
                     }
 
-                    // 专业分类
+                    // 专业分类下拉选择
                     VStack(alignment: .leading, spacing: 12) {
                         Text("专业分类")
                             .font(.system(size: 18, weight: .bold))
                             .foregroundColor(Color(hex: "303133"))
                             .padding(.horizontal, 16)
 
-                        LazyVStack(spacing: 12) {
+                        Menu {
                             ForEach(majorList) { major in
-                                MajorItem(
-                                    major: major,
-                                    isSelected: appState.selectedMajorId == major.majorId
-                                ) {
+                                Button(action: {
                                     selectMajor(major)
+                                }) {
+                                    HStack {
+                                        Text(major.majorName)
+                                        if appState.selectedMajorId == major.majorId {
+                                            Image(systemName: "checkmark")
+                                        }
+                                    }
                                 }
                             }
+                        } label: {
+                            HStack {
+                                if let selectedMajor = majorList.first(where: { $0.majorId == appState.selectedMajorId }) {
+                                    Text(selectedMajor.majorName)
+                                        .font(.system(size: 16, weight: .medium))
+                                        .foregroundColor(Color(hex: "303133"))
+                                } else if let firstMajor = majorList.first {
+                                    Text(firstMajor.majorName)
+                                        .font(.system(size: 16, weight: .medium))
+                                        .foregroundColor(Color(hex: "303133"))
+                                } else {
+                                    Text("请选择专业")
+                                        .font(.system(size: 16))
+                                        .foregroundColor(Color(hex: "909399"))
+                                }
+
+                                Spacer()
+
+                                Image(systemName: "chevron.down")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(Color(hex: "909399"))
+                            }
+                            .padding(16)
+                            .background(Color.white)
+                            .cornerRadius(12)
+                            .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
                         }
                         .padding(.horizontal, 16)
                     }
 
-                    // 科目列表
-                    if !subjectList.isEmpty {
+                    // 科目列表（联动加载）
+                    if appState.selectedMajorId != nil {
                         VStack(alignment: .leading, spacing: 12) {
-                            Text("科目列表")
-                                .font(.system(size: 18, weight: .bold))
-                                .foregroundColor(Color(hex: "303133"))
-                                .padding(.horizontal, 16)
+                            HStack {
+                                Text("科目列表")
+                                    .font(.system(size: 18, weight: .bold))
+                                    .foregroundColor(Color(hex: "303133"))
 
-                            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 4), spacing: 16) {
-                                ForEach(subjectList) { subject in
-                                    SubjectItem(subject: subject)
-                                        .onTapGesture {
-                                            selectedSubject = subject
-                                            showStudy = true
-                                        }
+                                if isLoadingSubjects {
+                                    ProgressView()
+                                        .scaleEffect(0.8)
                                 }
+
+                                Spacer()
                             }
                             .padding(.horizontal, 16)
-                        }
-                    }
 
-                    // 无科目提示
-                    if subjectList.isEmpty && appState.selectedMajorId != nil {
-                        VStack {
-                            Text("该专业暂无科目数据")
-                                .font(.system(size: 14))
-                                .foregroundColor(Color(hex: "909399"))
-                                .padding(.vertical, 32)
+                            if isLoadingSubjects {
+                                HStack {
+                                    Spacer()
+                                    Text("加载科目中...")
+                                        .font(.system(size: 14))
+                                        .foregroundColor(Color(hex: "909399"))
+                                        .padding(.vertical, 32)
+                                    Spacer()
+                                }
+                            } else if subjectList.isEmpty {
+                                HStack {
+                                    Spacer()
+                                    Text("该专业暂无科目数据")
+                                        .font(.system(size: 14))
+                                        .foregroundColor(Color(hex: "909399"))
+                                        .padding(.vertical, 32)
+                                    Spacer()
+                                }
+                            } else {
+                                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 4), spacing: 16) {
+                                    ForEach(subjectList) { subject in
+                                        SubjectItem(subject: subject)
+                                            .onTapGesture {
+                                                selectedSubject = subject
+                                                showStudy = true
+                                            }
+                                    }
+                                }
+                                .padding(.horizontal, 16)
+                            }
                         }
-                        .padding(.horizontal, 16)
                     }
 
                     // 推荐卡片
@@ -272,11 +321,13 @@ struct HomeView: View {
     }
 
     private func fetchSubjects(majorId: Int) async {
+        isLoadingSubjects = true
         do {
             subjectList = try await apiService.getSubjectList(majorId: majorId)
         } catch {
             subjectList = []
         }
+        isLoadingSubjects = false
     }
 
     private func fetchRecommendCards(majorId: Int) async {

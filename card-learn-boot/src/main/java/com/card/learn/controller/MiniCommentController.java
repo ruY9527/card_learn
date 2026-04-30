@@ -27,12 +27,9 @@ public class MiniCommentController {
      */
     @PostMapping("/submit")
     @ApiOperation("提交评论")
-    public Result<Long> submit(@RequestBody BizCardComment comment, @RequestParam String userId) {
-        // 获取用户昵称
-        Long parsedUserId = parseUserId(userId);
-        if (parsedUserId != null) {
-            comment.setUserId(parsedUserId);
-            // 可以从用户表获取昵称
+    public Result<Long> submit(@RequestBody BizCardComment comment) {
+        if (comment.getUserId() == null) {
+            return Result.error("请先登录后再提交评论");
         }
 
         BizCardComment saved = commentService.submitComment(comment);

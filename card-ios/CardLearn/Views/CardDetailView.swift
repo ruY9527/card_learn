@@ -44,6 +44,9 @@ struct CardDetailView: View {
                 Text(subjectName)
                     .font(.system(size: 16, weight: .medium))
                     .foregroundColor(Color(hex: "303133"))
+                    .onTapGesture(count: 2) {
+                        dismiss()
+                    }
                 
                 Spacer()
                 
@@ -81,95 +84,98 @@ struct CardDetailView: View {
             
             // 卡片滑动区域
             if let card = currentCard {
-                ZStack {
-                    // 滑动提示
-                    if isDragging && dragOffset > 50 && currentCardIndex > 0 {
-                        HStack {
-                            Text("← 上一张")
-                                .font(.system(size: 14))
-                                .foregroundColor(Color(hex: "667eea"))
-                                .padding(.leading, 20)
-                            
-                            Spacer()
-                        }
-                    }
-                    
-                    if isDragging && dragOffset < -50 {
-                        HStack {
-                            Spacer()
-                            
-                            Text("下一张 →")
-                                .font(.system(size: 14))
-                                .foregroundColor(Color(hex: "667eea"))
-                                .padding(.trailing, 20)
-                        }
-                    }
-                    
-                    // 3D翻转卡片
-                    FlipCardView(
-                        frontContent: card.frontContent,
-                        backContent: card.backContent,
-                        difficulty: card.difficultyLevel ?? 1,
-                        isFlipped: isFlipped,
-                        onTap: {
-                            withAnimation(.easeInOut(duration: 0.3)) {
-                                isFlipped.toggle()
-                            }
-                        },
-                        onFeedbackTap: {
-                            showFeedback = true
-                        }
-                    )
-                    .offset(x: dragOffset)
-                    .gesture(
-                        DragGesture()
-                            .onChanged { value in
-                                isDragging = true
-                                dragOffset = value.translation.width
-                            }
-                            .onEnded { value in
-                                isDragging = false
-                                withAnimation(.easeOut) {
-                                    dragOffset = 0
-                                }
-                                
-                                if value.translation.width > 80 {
-                                    goToPrev()
-                                } else if value.translation.width < -80 {
-                                    goToNext()
+                GeometryReader { geometry in
+                    VStack(spacing: 0) {
+                        ZStack {
+                            // 滑动提示
+                            if isDragging && dragOffset > 50 && currentCardIndex > 0 {
+                                HStack {
+                                    Text("← 上一张")
+                                        .font(.system(size: 14))
+                                        .foregroundColor(Color(hex: "667eea"))
+                                        .padding(.leading, 20)
+
+                                    Spacer()
                                 }
                             }
-                    )
-                }
-                
-                // 标签展示
-                if let tags = card.tags, !tags.isEmpty {
-                    ScrollView {
-                        HStack(spacing: 8) {
-                            ForEach(tags, id: \.self) { tag in
-                                Text(tag)
-                                    .font(.system(size: 12))
-                                    .foregroundColor(Color(hex: "909399"))
-                                    .padding(.horizontal, 10)
-                                    .padding(.vertical, 4)
-                                    .background(Color(hex: "F5F7FA"))
-                                    .cornerRadius(6)
+
+                            if isDragging && dragOffset < -50 {
+                                HStack {
+                                    Spacer()
+
+                                    Text("下一张 →")
+                                        .font(.system(size: 14))
+                                        .foregroundColor(Color(hex: "667eea"))
+                                        .padding(.trailing, 20)
+                                }
                             }
+
+                            // 3D翻转卡片
+                            FlipCardView(
+                                frontContent: card.frontContent,
+                                backContent: card.backContent,
+                                difficulty: card.difficultyLevel ?? 1,
+                                isFlipped: isFlipped,
+                                onTap: {
+                                    withAnimation(.easeInOut(duration: 0.3)) {
+                                        isFlipped.toggle()
+                                    }
+                                },
+                                onFeedbackTap: {
+                                    showFeedback = true
+                                }
+                            )
+                            .offset(x: dragOffset)
+                            .gesture(
+                                DragGesture()
+                                    .onChanged { value in
+                                        isDragging = true
+                                        dragOffset = value.translation.width
+                                    }
+                                    .onEnded { value in
+                                        isDragging = false
+                                        withAnimation(.easeOut) {
+                                            dragOffset = 0
+                                        }
+
+                                        if value.translation.width > 80 {
+                                            goToPrev()
+                                        } else if value.translation.width < -80 {
+                                            goToNext()
+                                        }
+                                    }
+                            )
                         }
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 8)
+                        .frame(maxHeight: .infinity)
+
+                        // 标签展示
+                        if let tags = card.tags, !tags.isEmpty {
+                            HStack(spacing: 8) {
+                                ForEach(tags, id: \.self) { tag in
+                                    Text(tag)
+                                        .font(.system(size: 12))
+                                        .foregroundColor(Color(hex: "909399"))
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 4)
+                                        .background(Color(hex: "F5F7FA"))
+                                        .cornerRadius(6)
+                                }
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                        }
+
+                        // 学习状态按钮
+                        if isFlipped {
+                            StatusButtons(
+                                onSelect: { status in
+                                    handleStatus(status)
+                                }
+                            )
+                        }
                     }
                 }
-                
-                // 学习状态按钮
-                if isFlipped {
-                    StatusButtons(
-                        onSelect: { status in
-                            handleStatus(status)
-                        }
-                    )
-                }
-                
+
                 // 底部进度条
                 VStack(spacing: 8) {
                     GeometryReader { geometry in
@@ -177,21 +183,21 @@ struct CardDetailView: View {
                             RoundedRectangle(cornerRadius: 4)
                                 .fill(Color(hex: "E0E0E0"))
                                 .frame(height: 8)
-                            
+
                             RoundedRectangle(cornerRadius: 4)
                                 .fill(Color(hex: "667eea"))
                                 .frame(width: geometry.size.width * CGFloat(progress) / 100, height: 8)
                         }
                     }
                     .frame(height: 8)
-                    
+
                     HStack {
                         Text("\(progress)%")
                             .font(.system(size: 12))
                             .foregroundColor(Color(hex: "667eea"))
-                        
+
                         Spacer()
-                        
+
                         Text("剩余 \(totalCount - currentCardIndex - 1) 张")
                             .font(.system(size: 12))
                             .foregroundColor(Color(hex: "909399"))
@@ -226,10 +232,10 @@ struct CardDetailView: View {
     
     private func goToPrev() {
         guard currentCardIndex > 0 else {
-            // 已经是第一张
+            dismiss()
             return
         }
-        
+
         currentCardIndex -= 1
         isFlipped = false
         updateProgress()
@@ -351,8 +357,9 @@ struct FlipCardView: View {
                     axis: (x: 0, y: 1, z: 0)
                 )
         }
-        .frame(height: 320)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(.horizontal, 16)
+        .padding(.vertical, 8)
     }
 }
 
@@ -382,12 +389,10 @@ struct CardFrontView: View {
             }
             
             ScrollView {
-                Text(content)
-                    .font(.system(size: 16))
-                    .foregroundColor(Color(hex: "303133"))
+                MarkdownText(content, fontSize: 16)
                     .lineSpacing(6)
             }
-            .frame(maxHeight: 180)
+            .frame(maxHeight: .infinity)
             
             HStack {
                 Spacer()
@@ -403,7 +408,7 @@ struct CardFrontView: View {
             }
         }
         .padding(16)
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.white)
         .cornerRadius(16)
         .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
@@ -438,12 +443,10 @@ struct CardBackView: View {
             }
             
             ScrollView {
-                Text(content)
-                    .font(.system(size: 16))
-                    .foregroundColor(Color(hex: "303133"))
+                MarkdownText(content, fontSize: 16)
                     .lineSpacing(6)
             }
-            .frame(maxHeight: 180)
+            .frame(maxHeight: .infinity)
             
             HStack {
                 VStack(spacing: 4) {
@@ -470,7 +473,7 @@ struct CardBackView: View {
             }
         }
         .padding(16)
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.white)
         .cornerRadius(16)
         .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
@@ -536,7 +539,7 @@ struct StatusButton: View {
     let color: Color
     let bgColor: Color
     let action: () -> Void
-    
+
     var body: some View {
         Button(action: action) {
             VStack(spacing: 8) {
@@ -544,17 +547,52 @@ struct StatusButton: View {
                     Circle()
                         .fill(bgColor)
                         .frame(width: 50, height: 50)
-                    
+
                     Text(icon)
                         .font(.system(size: 20))
                         .foregroundColor(color)
                 }
-                
+
                 Text(label)
                     .font(.system(size: 14))
                     .foregroundColor(color)
             }
             .frame(maxWidth: .infinity)
+        }
+    }
+}
+
+struct MarkdownText: View {
+    let content: String
+    let fontSize: CGFloat
+    let textColor: Color
+
+    init(_ content: String, fontSize: CGFloat = 16, textColor: Color = Color(hex: "303133")) {
+        self.content = content
+        self.fontSize = fontSize
+        self.textColor = textColor
+    }
+
+    var body: some View {
+        if let attributedString = parseMarkdown(content) {
+            Text(attributedString)
+                .font(.system(size: fontSize))
+        } else {
+            Text(content)
+                .font(.system(size: fontSize))
+                .foregroundColor(textColor)
+        }
+    }
+
+    private func parseMarkdown(_ text: String) -> AttributedString? {
+        do {
+            var result = try AttributedString(markdown: text, options: AttributedString.MarkdownParsingOptions(
+                interpretedSyntax: .inlineOnlyPreservingWhitespace
+            ))
+            result.foregroundColor = textColor
+            return result
+        } catch {
+            return nil
         }
     }
 }

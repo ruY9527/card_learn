@@ -2,9 +2,10 @@ import SwiftUI
 
 struct ProgressCardsView: View {
     @EnvironmentObject var appState: AppState
-    
+
     let type: String
-    
+    var subjectId: Int? = nil
+
     @State private var cardList: [Card] = []
     @State private var totalCount: Int = 0
     @State private var isLoading: Bool = false
@@ -13,14 +14,15 @@ struct ProgressCardsView: View {
     @State private var selectedCard: Card?
     @State private var showCardDetail: Bool = false
     @State private var selectedCardIndex: Int = 0
-    
+
     private let apiService = APIService.shared
-    
+
     private var title: String {
         switch type {
         case "learned": return "已学习"
         case "mastered": return "已掌握"
         case "review": return "待复习"
+        case "all": return "全部卡片"
         default: return "学习进度"
         }
     }
@@ -118,31 +120,36 @@ struct ProgressCardsView: View {
             }
         }
         .onAppear {
+            pageNum = 1
+            cardList = []
+            hasMore = true
             fetchCards()
         }
     }
     
     private func fetchCards() {
         guard let userId = appState.userInfo?.userId else { return }
-        
+
         isLoading = true
-        
+
         Task {
             do {
-                let statusParam = type == "mastered" ? "mastered" : type == "review" ? "review" : "learned"
-                let pageData = try await apiService.getProgressCards(
+                let statusParam: String? = type == "all" ? nil : (type == "mastered" ? "mastered" : type == "review" ? "review" : "learned")
+                let pageData = try await apiService.getCardPage(
+                    subjectId: subjectId,
+                    frontContent: nil,
                     appUserId: userId,
                     status: statusParam,
                     pageNum: pageNum,
                     pageSize: 20
                 )
-                
+
                 if pageNum == 1 {
                     cardList = pageData.records
                 } else {
                     cardList.append(contentsOf: pageData.records)
                 }
-                
+
                 totalCount = pageData.total
                 hasMore = cardList.count < totalCount
                 isLoading = false
@@ -163,6 +170,50 @@ struct ProgressCardsView: View {
 struct ProgressCardItem: View {
     let card: Card
     let type: String
+
+    private var displayTime: String {
+        // 优先使用 lastStudyTime（来自学习历史表）
+        if let lastStudyTime = card.lastStudyTime {
+            return formatStudyTime(lastStudyTime)
+        }
+        return card.formattedTime
+    }
+
+    private func formatStudyTime(_ timeStr: String) -> String {
+        let dateFormatter = ISO8601DateFormatter()
+        dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        guard let date = dateFormatter.date(from: timeStr) else {
+            let altFormatter = DateFormatter()
+            altFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+            guard let date = altFormatter.date(from: timeStr) else {
+                let altFormatter2 = DateFormatter()
+                altFormatter2.dateFormat = "yyyy-MM-dd HH:mm:ss"
+                guard let date = altFormatter2.date(from: timeStr) else { return "" }
+                return formatRelative(date)
+            }
+            return formatRelative(date)
+        }
+        return formatRelative(date)
+    }
+
+    private func formatRelative(_ date: Date) -> String {
+        let now = Date()
+        let diff = now.timeIntervalSince(date)
+        let minutes = Int(diff / 60)
+        let hours = Int(diff / 3600)
+        let days = Int(diff / 86400)
+
+        if minutes < 1 { return "刚刚" }
+        else if minutes < 60 { return "\(minutes)分钟前" }
+        else if hours < 24 { return "\(hours)小时前" }
+        else if days < 7 { return "\(days)天前" }
+        else {
+            let calendar = Calendar.current
+            let month = calendar.component(.month, from: date)
+            let day = calendar.component(.day, from: date)
+            return "\(month)月\(day)日"
+        }
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -201,7 +252,8 @@ struct ProgressCardItem: View {
             }
 
             // 学习时间显示
-            if let timeStr = card.formattedTime, !timeStr.isEmpty {
+            let timeStr = displayTime
+            if !timeStr.isEmpty {
                 HStack(spacing: 8) {
                     Text("🕐")
                         .font(.system(size: 14))
@@ -210,7 +262,7 @@ struct ProgressCardItem: View {
                         .font(.system(size: 12))
                         .foregroundColor(Color(hex: "606266"))
 
-                    Text(type == "mastered" ? "掌握于" : "学习于")
+                    Text(type == "mastered" ? "掌握于" : type == "review" ? "复习于" : "学习于")
                         .font(.system(size: 12))
                         .foregroundColor(Color(hex: "909399"))
                 }

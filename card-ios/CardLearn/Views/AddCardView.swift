@@ -130,7 +130,8 @@ struct AddCardView: View {
     }
 
     private func submitCard() {
-        guard let token = appState.userInfo?.token else {
+        let token = appState.token
+        guard !token.isEmpty else {
             errorMessage = "请先登录后再提交卡片"
             showError = true
             return
@@ -207,7 +208,7 @@ struct MajorSelectSection: View {
                 ScrollView {
                     HStack(spacing: 12) {
                         ForEach(majorList) { major in
-                            MajorItem(
+                            AddCardMajorItem(
                                 major: major,
                                 isSelected: selectedMajorId == major.majorId,
                                 onSelect: { onSelect(major.majorId) }
@@ -225,7 +226,7 @@ struct MajorSelectSection: View {
     }
 }
 
-struct MajorItem: View {
+fileprivate struct AddCardMajorItem: View {
     let major: Major
     let isSelected: Bool
     let onSelect: () -> Void
@@ -267,7 +268,7 @@ struct SubjectSelectSection: View {
                 ScrollView {
                     HStack(spacing: 12) {
                         ForEach(subjectList) { subject in
-                            SubjectItem(
+                            AddCardSubjectItem(
                                 subject: subject,
                                 isSelected: selectedSubjectId == subject.subjectId,
                                 onSelect: { onSelect(subject.subjectId) }
@@ -285,7 +286,7 @@ struct SubjectSelectSection: View {
     }
 }
 
-struct SubjectItem: View {
+fileprivate struct AddCardSubjectItem: View {
     let subject: Subject
     let isSelected: Bool
     let onSelect: () -> Void

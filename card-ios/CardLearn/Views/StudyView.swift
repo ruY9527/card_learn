@@ -6,10 +6,11 @@ struct StudyView: View {
     let subjectName: String
     
     @State private var cardList: [Card] = []
-    @State private var totalCount: Int = 0
+    @State private var cardListTotal: Int = 0
     @State private var learnedCount: Int = 0
     @State private var masteredCount: Int = 0
     @State private var reviewCount: Int = 0
+    @State private var totalCount: Int = 0
     @State private var currentTab: String = "all"
     @State private var pageNum: Int = 1
     @State private var hasMore: Bool = true
@@ -20,6 +21,8 @@ struct StudyView: View {
     @State private var navigateToCardDetail: Bool = false
     @State private var selectedCard: Card?
     @State private var selectedCardIndex: Int = 0
+    @State private var navigateToProgressCards: Bool = false
+    @State private var progressCardsType: String = "learned"
     
     private let apiService = APIService.shared
     
@@ -32,7 +35,11 @@ struct StudyView: View {
                     learned: learnedCount,
                     mastered: masteredCount,
                     review: reviewCount,
-                    total: totalCount
+                    total: totalCount,
+                    onStatTap: { type in
+                        progressCardsType = type
+                        navigateToProgressCards = true
+                    }
                 )
                 
                 ScrollView {
@@ -43,70 +50,73 @@ struct StudyView: View {
                             isFocused: $isSearchFocused,
                             onSearch: {
                                 pageNum = 1
-                                cardList = []
                                 fetchCards()
                             },
                             onClear: {
                                 searchKeyword = ""
                                 pageNum = 1
-                                cardList = []
                                 fetchCards()
                             }
                         )
 
                         // 快速开始按钮
-                        if !cardList.isEmpty && !isLoading {
+                        if !cardList.isEmpty {
                             QuickStartButton {
                                 startStudy()
                             }
                         }
-                        
+
                         // 筛选标签
                         FilterTabs(
                             currentTab: currentTab,
-                            total: totalCount,
+                            total: cardListTotal,
                             learned: learnedCount,
                             onChange: { tab in
                                 currentTab = tab
                                 pageNum = 1
-                                cardList = []
                                 fetchCards()
                             }
                         )
-                        
+
                         // 卡片列表
-                        if !isLoading || !cardList.isEmpty {
-                            LazyVStack(spacing: 12) {
-                                ForEach(Array(cardList.enumerated()), id: \.element.cardId) { index, card in
-                                    CardListItem(card: card)
-                                        .onTapGesture {
-                                            selectedCard = card
-                                            selectedCardIndex = index
-                                            navigateToCardDetail = true
-                                        }
-                                }
-                                
-                                // 加载更多
-                                if hasMore && !isLoading {
-                                    LoadMoreButton {
-                                        loadMore()
+                        LazyVStack(spacing: 12) {
+                            ForEach(Array(cardList.enumerated()), id: \.element.cardId) { index, card in
+                                CardListItem(card: card)
+                                    .onTapGesture {
+                                        selectedCard = card
+                                        selectedCardIndex = index
+                                        navigateToCardDetail = true
                                     }
-                                }
-                                
-                                // 已加载全部
-                                if !hasMore && !cardList.isEmpty {
-                                    AllLoadedText(total: totalCount)
+                            }
+
+                            // 加载更多
+                            if hasMore && !isLoading {
+                                LoadMoreButton {
+                                    loadMore()
                                 }
                             }
-                            .padding(.horizontal, 16)
+
+                            // 已加载全部
+                            if !hasMore && !cardList.isEmpty {
+                                AllLoadedText(total: cardListTotal)
+                            }
                         }
-                        
-                        // 加载状态
-                        if isLoading && cardList.isEmpty {
-                            LoadingSection()
+                        .padding(.horizontal, 16)
+
+                        // 加载中指示器（列表底部，不影响已有内容）
+                        if isLoading {
+                            HStack(spacing: 8) {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: Color(hex: "667eea")))
+                                    .scaleEffect(0.8)
+                                Text("加载中...")
+                                    .font(.system(size: 13))
+                                    .foregroundColor(Color(hex: "909399"))
+                            }
+                            .padding(.vertical, 12)
                         }
-                        
-                        // 空状态
+
+                        // 空状态（仅在非加载且列表为空时显示）
                         if cardList.isEmpty && !isLoading {
                             EmptyState(tab: currentTab)
                         }
@@ -127,8 +137,14 @@ struct StudyView: View {
                     )
                 }
             }
+            .navigationDestination(isPresented: $navigateToProgressCards) {
+                ProgressCardsView(type: progressCardsType, subjectId: subjectId)
+            }
         }
         .onAppear {
+            pageNum = 1
+            cardList = []
+            hasMore = true
             fetchCards()
             fetchStats()
         }
@@ -153,17 +169,19 @@ struct StudyView: View {
                 
                 let cards = pageData.records
                 let total = pageData.total
-                
+
                 if pageNum == 1 {
                     cardList = cards
                 } else {
                     cardList.append(contentsOf: cards)
                 }
-                
-                totalCount = total
+
+                cardListTotal = total
                 hasMore = cardList.count < total
             } catch {
-                cardList = []
+                if pageNum == 1 {
+                    cardList = []
+                }
             }
             
             isLoading = false
@@ -211,12 +229,13 @@ struct SearchSection: View {
     var body: some View {
         HStack(spacing: 12) {
             HStack(spacing: 8) {
-                Text("🔍")
-                    .font(.system(size: 14))
+                Image(systemName: "magnifyingglass")
+                    .font(.system(size: 15))
+                    .foregroundColor(Color(hex: "C0C4CC"))
 
-                TextField("搜索正面内容", text: $keyword)
+                TextField("搜索卡片内容", text: $keyword)
                     .focused(isFocused)
-                    .font(.system(size: 14))
+                    .font(.system(size: 15))
                     .submitLabel(.search)
                     .onSubmit {
                         onSearch()
@@ -224,30 +243,24 @@ struct SearchSection: View {
 
                 if !keyword.isEmpty {
                     Button(action: onClear) {
-                        Text("✕")
-                            .font(.system(size: 12))
-                            .foregroundColor(Color(hex: "909399"))
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.system(size: 15))
+                            .foregroundColor(Color(hex: "C0C4CC"))
                     }
                 }
             }
-            .padding(12)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 11)
             .background(Color.white)
             .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+            .shadow(color: Color.black.opacity(0.06), radius: 4, x: 0, y: 2)
 
             Button(action: onSearch) {
-                Text("搜索")
-                    .font(.system(size: 14, weight: .medium))
+                Image(systemName: "magnifyingglass")
+                    .font(.system(size: 15, weight: .medium))
                     .foregroundColor(.white)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 12)
-                    .background(
-                        LinearGradient(
-                            colors: [Color(hex: "667eea"), Color(hex: "764ba2")],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
+                    .frame(width: 44, height: 44)
+                    .background(Color(hex: "667eea"))
                     .cornerRadius(12)
             }
         }
@@ -262,7 +275,8 @@ struct HeaderSection: View {
     let mastered: Int
     let review: Int
     let total: Int
-    
+    let onStatTap: (String) -> Void
+
     var body: some View {
         ZStack {
             LinearGradient(
@@ -270,17 +284,21 @@ struct HeaderSection: View {
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
-            
+
             VStack(alignment: .leading, spacing: 12) {
                 Text(subjectName)
                     .font(.system(size: 20, weight: .semibold))
                     .foregroundColor(.white)
-                
+
                 HStack(spacing: 0) {
                     StatBox(value: learned, label: "已学习", color: .white)
+                        .onTapGesture { onStatTap("learned") }
                     StatBox(value: mastered, label: "已掌握", color: Color(hex: "43e97b"))
+                        .onTapGesture { onStatTap("mastered") }
                     StatBox(value: review, label: "待复习", color: Color(hex: "FFD700"))
+                        .onTapGesture { onStatTap("review") }
                     StatBox(value: total, label: "总卡片", color: .white.opacity(0.8))
+                        .onTapGesture { onStatTap("all") }
                 }
                 .padding(8)
                 .background(Color.white.opacity(0.15))
@@ -298,16 +316,22 @@ struct StatBox: View {
     let value: Int
     let label: String
     let color: Color
-    
+
     var body: some View {
         VStack(spacing: 4) {
             Text("\(value)")
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundColor(color)
-            
-            Text(label)
-                .font(.system(size: 11))
-                .foregroundColor(.white.opacity(0.7))
+
+            HStack(spacing: 2) {
+                Text(label)
+                    .font(.system(size: 11))
+                    .foregroundColor(.white.opacity(0.7))
+
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 8))
+                    .foregroundColor(.white.opacity(0.5))
+            }
         }
         .frame(maxWidth: .infinity)
     }

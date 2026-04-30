@@ -47,6 +47,7 @@
             <span>数据统计</span>
           </template>
           <el-menu-item index="/stats/learning">学习数据统计</el-menu-item>
+          <el-menu-item index="/stats/study-history">学习记录</el-menu-item>
         </el-sub-menu>
         <el-menu-item index="/ai">
           <el-icon><MagicStick /></el-icon>

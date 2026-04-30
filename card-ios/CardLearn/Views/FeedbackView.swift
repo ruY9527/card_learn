@@ -457,26 +457,34 @@ struct CardInfoSection: View {
     let content: String
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 12) {
             Text("关联卡片")
                 .font(.system(size: 16, weight: .bold))
                 .foregroundColor(Color(hex: "303133"))
 
-            Text("#\(cardId)")
-                .font(.system(size: 12))
-                .foregroundColor(Color(hex: "667eea"))
-                .padding(.horizontal, 6)
-                .padding(.vertical, 2)
-                .background(Color(hex: "F0F5FF"))
-                .cornerRadius(4)
+            HStack(spacing: 8) {
+                Text("#\(cardId)")
+                    .font(.system(size: 12))
+                    .foregroundColor(Color(hex: "667eea"))
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(Color(hex: "F0F5FF"))
+                    .cornerRadius(4)
 
-            Text(content)
-                .font(.system(size: 14))
-                .foregroundColor(Color(hex: "606266"))
-                .lineLimit(2)
-                .padding(12)
-                .background(Color(hex: "F5F7FA"))
-                .cornerRadius(8)
+                Text(content.isEmpty ? "卡片\(cardId)" : content)
+                    .font(.system(size: 14))
+                    .foregroundColor(Color(hex: "303133"))
+                    .lineLimit(1)
+
+                Spacer()
+
+                Text("✓")
+                    .font(.system(size: 14))
+                    .foregroundColor(Color(hex: "667eea"))
+            }
+            .padding(12)
+            .background(Color(hex: "F5F7FA"))
+            .cornerRadius(8)
         }
     }
 }

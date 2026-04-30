@@ -50,8 +50,8 @@ public class BizCardServiceImpl extends ServiceImpl<BizCardMapper, BizCard> impl
         if (frontContent != null && !frontContent.trim().isEmpty()) {
             wrapper.like(BizCard::getFrontContent, frontContent.trim());
         }
-        // 只查询已通过的卡片（供学习使用）
-        wrapper.eq(BizCard::getAuditStatus, "1");
+        // 只查询已通过的卡片（供学习使用），兼容 audit_status 为 NULL 的系统内置卡片
+        wrapper.and(w -> w.eq(BizCard::getAuditStatus, "1").or().isNull(BizCard::getAuditStatus));
         // 按card_id升序排列，让旧卡片（有标签的）排在前面
         wrapper.orderByAsc(BizCard::getCardId);
         return page(new Page<>(pageNum, pageSize), wrapper);

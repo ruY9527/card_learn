@@ -9,7 +9,7 @@ enum AppEnvironment {
 /// 环境配置
 struct EnvConfig {
     /// 当前环境（修改此值切换环境）
-    static let current: AppEnvironment = .production
+    static let current: AppEnvironment = .development
     
     /// 获取当前环境的配置
     static var config: Config {

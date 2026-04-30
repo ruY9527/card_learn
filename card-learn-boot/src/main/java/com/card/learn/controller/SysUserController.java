@@ -12,9 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import com.card.learn.vo.UserDetailVO;
+
 import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
 
 /**
  * 用户管理控制器
@@ -51,13 +51,13 @@ public class SysUserController {
 
     @GetMapping("/detail/{id}")
     @ApiOperation("获取用户详情")
-    public Result<Map<String, Object>> getById(@PathVariable Long id) {
+    public Result<UserDetailVO> getById(@PathVariable Long id) {
         SysUser user = userService.getById(id);
         List<SysRole> roles = roleService.selectRolesByUserId(id);
-        Map<String, Object> data = new HashMap<>();
-        data.put("user", user);
-        data.put("roles", roles);
-        return Result.success(data);
+        UserDetailVO detail = new UserDetailVO();
+        detail.setUser(user);
+        detail.setRoles(roles);
+        return Result.success(detail);
     }
 
     @PostMapping

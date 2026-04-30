@@ -8,10 +8,10 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import com.card.learn.vo.ProgressStatsVO;
+
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 用户学习进度控制器（小程序端公开接口）
@@ -65,30 +65,29 @@ public class BizUserProgressController {
 
     @GetMapping("/stats")
     @ApiOperation("获取学习统计数据")
-    public Result<Map<String, Object>> stats(@RequestParam(required = false) Long userId,
-                                              @RequestParam(required = false) Long subjectId) {
-        Map<String, Object> stats = new HashMap<>();
-        
+    public Result<ProgressStatsVO> stats(@RequestParam(required = false) Long userId,
+                                          @RequestParam(required = false) Long subjectId) {
         // 统计各状态数量
         long learnedCount = progressService.lambdaQuery()
                 .eq(userId != null, BizUserProgress::getUserId, userId)
                 .ge(BizUserProgress::getStatus, 1)
                 .count();
-        
+
         long masteredCount = progressService.lambdaQuery()
                 .eq(userId != null, BizUserProgress::getUserId, userId)
                 .eq(BizUserProgress::getStatus, 2)
                 .count();
-        
+
         long reviewCount = progressService.lambdaQuery()
                 .eq(userId != null, BizUserProgress::getUserId, userId)
                 .eq(BizUserProgress::getStatus, 1)
                 .count();
-        
-        stats.put("learnedCount", learnedCount);
-        stats.put("masteredCount", masteredCount);
-        stats.put("reviewCount", reviewCount);
-        
+
+        ProgressStatsVO stats = new ProgressStatsVO();
+        stats.setLearnedCount(learnedCount);
+        stats.setMasteredCount(masteredCount);
+        stats.setReviewCount(reviewCount);
+
         return Result.success(stats);
     }
 
