@@ -3,6 +3,7 @@
 # ============================================================================
 # 编译并运行 card-learn-boot
 # 功能：杀死旧进程 -> Maven 编译 -> 启动新服务
+# 支持 JDK 8 和 JDK 17
 # ============================================================================
 
 set -e
@@ -15,6 +16,11 @@ PID_FILE="${SCRIPT_DIR}/${APP_NAME}.pid"
 LOG_DIR="${SCRIPT_DIR}/logs"
 LOG_FILE="${LOG_DIR}/console.log"
 
+# JDK 版本配置: 支持 8 和 17，默认 auto 自动检测
+JDK_VERSION="${JDK_VERSION:-auto}"
+JDK8_HOME="${JDK8_HOME:-}"
+JDK17_HOME="${JDK17_HOME:-}"
+
 # 颜色
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -26,6 +32,53 @@ print_info() { echo -e "${BLUE}[INFO]${NC} $1"; }
 print_success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }
 print_warning() { echo -e "${YELLOW}[WARNING]${NC} $1"; }
 print_error() { echo -e "${RED}[ERROR]${NC} $1"; }
+
+# 检测 JDK 版本
+detect_jdk_version() {
+    if [ "$JDK_VERSION" != "auto" ]; then
+        echo "$JDK_VERSION"
+        return
+    fi
+
+    local version=$(java -version 2>&1 | head -1 | cut -d'"' -f2 | cut -d'.' -f1)
+    if [ "$version" = "1" ]; then
+        java -version 2>&1 | head -1 | cut -d'"' -f2 | cut -d'.' -f2
+    else
+        echo "$version"
+    fi
+}
+
+# 设置 JAVA_HOME 和 JAVA_CMD
+set_java_home() {
+    local version=$1
+
+    if [ "$version" = "8" ]; then
+        if [ -n "$JDK8_HOME" ] && [ -d "$JDK8_HOME" ]; then
+            JAVA_HOME="$JDK8_HOME"
+        elif [ -n "$JAVA_HOME" ]; then
+            :
+        else
+            JAVA_HOME=""
+        fi
+    elif [ "$version" = "17" ]; then
+        if [ -n "$JDK17_HOME" ] && [ -d "$JDK17_HOME" ]; then
+            JAVA_HOME="$JDK17_HOME"
+        elif [ -n "$JAVA_HOME" ]; then
+            :
+        else
+            JAVA_HOME=""
+        fi
+    else
+        JAVA_HOME=""
+    fi
+
+    if [ -n "$JAVA_HOME" ]; then
+        JAVA_CMD="$JAVA_HOME/bin/java"
+        export JAVA_HOME
+    else
+        JAVA_CMD="java"
+    fi
+}
 
 # ==================== 步骤1: 停止旧进程 ====================
 stop_old_process() {
@@ -70,11 +123,15 @@ stop_old_process() {
 
 # ==================== 步骤2: Maven 编译 ====================
 build_project() {
-    print_info "开始 Maven 编译..."
+    local jdk_ver=$1
+    print_info "开始 Maven 编译 (JDK ${jdk_ver})..."
     cd "$SCRIPT_DIR"
 
-    # 跳过测试进行编译
-    mvn clean package -DskipTests -q
+    if [ "$jdk_ver" = "17" ]; then
+        mvn clean package -DskipTests -Djdk.version=17 -q
+    else
+        mvn clean package -DskipTests -Djdk.version=8 -q
+    fi
 
     if [ $? -eq 0 ]; then
         print_success "Maven 编译成功"
@@ -86,9 +143,10 @@ build_project() {
 
 # ==================== 步骤3: 启动新服务 ====================
 start_service() {
-    print_info "启动 ${APP_NAME}..."
+    local jdk_ver=$1
 
-    # 查找 jar 文件
+    print_info "启动 ${APP_NAME} (JDK ${jdk_ver})..."
+
     local jar_file=$(find "$JAR_DIR" -name "${APP_NAME}*.jar" -type f | grep -v '\.original' | head -1)
 
     if [ -z "$jar_file" ]; then
@@ -98,10 +156,8 @@ start_service() {
 
     print_info "JAR 文件: $jar_file"
 
-    # 确保日志目录存在
     mkdir -p "$LOG_DIR"
 
-    # 查找配置文件
     local config_param=""
     local config_file="${SCRIPT_DIR}/conf/application.yml"
     if [ -f "$config_file" ]; then
@@ -109,21 +165,26 @@ start_service() {
         print_info "配置文件: $config_file"
     fi
 
-    # JVM 参数
     local jvm_opts="-Xms256m -Xmx512m"
-    jvm_opts="$jvm_opts -XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=256m"
-    jvm_opts="$jvm_opts -XX:+UseG1GC"
+
+    if [ "$jdk_ver" -ge 17 ]; then
+        jvm_opts="$jvm_opts -XX:+UseG1GC"
+        jvm_opts="$jvm_opts -XX:MaxGCPauseMillis=200"
+        jvm_opts="$jvm_opts -XX:+UseStringDeduplication"
+    else
+        jvm_opts="$jvm_opts -XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=256m"
+        jvm_opts="$jvm_opts -XX:+UseG1GC"
+    fi
+
     jvm_opts="$jvm_opts -XX:+HeapDumpOnOutOfMemoryError"
     jvm_opts="$jvm_opts -XX:HeapDumpPath=${LOG_DIR}/heap_dump.hprof"
     jvm_opts="$jvm_opts -Djava.security.egd=file:/dev/./urandom"
     jvm_opts="$jvm_opts -Dfile.encoding=UTF-8"
 
-    # 后台启动
-    nohup java ${jvm_opts} -jar "${jar_file}" ${config_param} > "${LOG_FILE}" 2>&1 &
+    nohup ${JAVA_CMD} ${jvm_opts} -jar "${jar_file}" ${config_param} > "${LOG_FILE}" 2>&1 &
     local pid=$!
     echo $pid > "$PID_FILE"
 
-    # 等待启动
     print_info "等待服务启动..."
     sleep 5
 
@@ -131,6 +192,7 @@ start_service() {
         print_success "${APP_NAME} 启动成功!"
         echo ""
         echo "  PID:      $pid"
+        echo "  JDK:      ${jdk_ver}"
         echo "  日志:     $LOG_FILE"
         echo "  PID文件:  $PID_FILE"
         echo ""
@@ -151,9 +213,15 @@ main() {
     echo "=========================================="
     echo ""
 
+    local jdk_ver=$(detect_jdk_version)
+    print_info "检测到 JDK 版本: ${jdk_ver}"
+    print_info "JDK 版本设置: ${JDK_VERSION}"
+
+    set_java_home "$jdk_ver"
+
     stop_old_process
-    build_project
-    start_service
+    build_project "$jdk_ver"
+    start_service "$jdk_ver"
 
     echo ""
     print_success "完成!"

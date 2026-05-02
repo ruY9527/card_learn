@@ -21,12 +21,18 @@ PID_FILE="${JAR_DIR}/${APP_NAME}.pid"
 # JVM 配置
 JVM_XMS="256m"
 JVM_XMX="512m"
-JVM_META_SIZE="128m"
-JVM_MAX_META_SIZE="256m"
+
+# JDK 版本配置: 支持 8 和 17，默认自动检测
+# 通过环境变量 JDK_VERSION 指定 (8 或 17)
+JDK_VERSION="${JDK_VERSION:-auto}"  # auto: 自动检测, 8: JDK8, 17: JDK17
 
 # GC 配置
 GC_TYPE="G1"  # 可选: G1, CMS, Parallel
 GC_LOG_FILE="${LOG_DIR}/gc.log"
+
+# JDK 安装路径配置
+JDK8_HOME="${JDK8_HOME:-}"
+JDK17_HOME="${JDK17_HOME:-}"
 
 # 日志清理配置
 LOG_RETENTION_DAYS=7
@@ -105,59 +111,98 @@ get_pid() {
     fi
 }
 
+# 检测 JDK 版本
+detect_jdk_version() {
+    if [ "$JDK_VERSION" != "auto" ]; then
+        echo "$JDK_VERSION"
+        return
+    fi
+
+    local version=$(java -version 2>&1 | head -1 | cut -d'"' -f2 | cut -d'.' -f1)
+    if [ "$version" = "1" ]; then
+        java -version 2>&1 | head -1 | cut -d'"' -f2 | cut -d'.' -f2
+    else
+        echo "$version"
+    fi
+}
+
+# 设置 JAVA_HOME
+set_java_home() {
+    local version=$1
+
+    if [ "$version" = "8" ]; then
+        if [ -n "$JDK8_HOME" ] && [ -d "$JDK8_HOME" ]; then
+            JAVA_CMD="$JDK8_HOME/bin/java"
+        elif [ -n "$JAVA_HOME" ]; then
+            JAVA_CMD="$JAVA_HOME/bin/java"
+        else
+            JAVA_CMD="java"
+        fi
+    elif [ "$version" = "17" ]; then
+        if [ -n "$JDK17_HOME" ] && [ -d "$JDK17_HOME" ]; then
+            JAVA_CMD="$JDK17_HOME/bin/java"
+        elif [ -n "$JAVA_HOME" ]; then
+            JAVA_CMD="$JAVA_HOME/bin/java"
+        else
+            JAVA_CMD="java"
+        fi
+    else
+        JAVA_CMD="java"
+    fi
+}
+
 # 构建 JVM 参数
 build_jvm_opts() {
     local opts=""
-    
-    # 内存配置
+    local jdk_ver=$(detect_jdk_version)
+
+    set_java_home "$jdk_ver"
+
     opts="-Xms${JVM_XMS} -Xmx${JVM_XMX}"
-    opts="$opts -XX:MetaspaceSize=${JVM_META_SIZE} -XX:MaxMetaspaceSize=${JVM_MAX_META_SIZE}"
-    
-    # GC 配置
-    case "$GC_TYPE" in
-        "G1")
-            opts="$opts -XX:+UseG1GC"
-            opts="$opts -XX:MaxGCPauseMillis=200"
-            opts="$opts -XX:G1HeapRegionSize=4m"
-            opts="$opts -XX:InitiatingHeapOccupancyPercent=45"
-            ;;
-        "CMS")
-            opts="$opts -XX:+UseConcMarkSweepGC"
-            opts="$opts -XX:CMSInitiatingOccupancyFraction=70"
-            opts="$opts -XX:+UseCMSInitiatingOccupancyOnly"
-            ;;
-        "Parallel")
-            opts="$opts -XX:+UseParallelGC"
-            ;;
-    esac
-    
-    # GC 日志配置 - 自动检测 JDK 版本
-    # 检测 Java 版本
-    java_version=$(java -version 2>&1 | head -1 | cut -d'"' -f2 | cut -d'.' -f1)
-    if [ "$java_version" -ge 9 ]; then
-        # JDK 9+ 新格式
+
+    if [ "$jdk_ver" -ge 17 ]; then
+        opts="$opts -XX:+UseG1GC"
+        opts="$opts -XX:MaxGCPauseMillis=200"
+        opts="$opts -XX:InitiatingHeapOccupancyPercent=45"
+        opts="$opts -XX:+UseStringDeduplication"
+        opts="$opts -XX:+DisableExplicitGC"
+    else
+        opts="$opts -XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=256m"
+        case "$GC_TYPE" in
+            "G1")
+                opts="$opts -XX:+UseG1GC"
+                opts="$opts -XX:MaxGCPauseMillis=200"
+                opts="$opts -XX:G1HeapRegionSize=4m"
+                opts="$opts -XX:InitiatingHeapOccupancyPercent=45"
+                ;;
+            "CMS")
+                opts="$opts -XX:+UseConcMarkSweepGC"
+                opts="$opts -XX:CMSInitiatingOccupancyFraction=70"
+                opts="$opts -XX:+UseCMSInitiatingOccupancyOnly"
+                ;;
+            "Parallel")
+                opts="$opts -XX:+UseParallelGC"
+                ;;
+        esac
+    fi
+
+    if [ "$jdk_ver" -ge 9 ]; then
         opts="$opts -Xlog:gc*:file=${GC_LOG_FILE}:time,level,tags:filecount=5,filesize=10m"
     else
-        # JDK 8 旧格式
         opts="$opts -Xloggc:${GC_LOG_FILE}"
         opts="$opts -XX:+PrintGCDetails"
         opts="$opts -XX:+PrintGCDateStamps"
         opts="$opts -XX:+PrintGCTimeStamps"
         opts="$opts -XX:+PrintGCApplicationStoppedTime"
     fi
-    
-    # 其他优化参数
+
     opts="$opts -XX:+HeapDumpOnOutOfMemoryError"
     opts="$opts -XX:HeapDumpPath=${LOG_DIR}/heap_dump.hprof"
     opts="$opts -XX:ErrorFile=${LOG_DIR}/hs_err_pid%p.log"
-    
-    # 安全随机数生成
     opts="$opts -Djava.security.egd=file:/dev/./urandom"
-    
-    # 字符编码
     opts="$opts -Dfile.encoding=UTF-8"
     opts="$opts -Dsun.jnu.encoding=UTF-8"
-    
+
     echo "$opts"
 }
 
@@ -202,8 +247,10 @@ start() {
     local jvm_opts=$(build_jvm_opts)
     
     # 启动命令
-    local start_cmd="java ${jvm_opts} -jar ${jar_file} ${config_param}"
-    
+    local start_cmd="${JAVA_CMD} ${jvm_opts} -jar ${jar_file} ${config_param}"
+
+    local detected_jdk=$(detect_jdk_version)
+    print_info "JDK 版本: ${detected_jdk}"
     print_info "启动命令: $start_cmd"
     
     # 后台启动
@@ -454,14 +501,17 @@ tail_logs() {
 
 # 设置 JVM 参数
 set_jvm() {
+    local detected_jdk=$(detect_jdk_version)
     print_info "当前 JVM 配置:"
+    echo "  JDK 版本: ${detected_jdk} (自动检测)"
     echo "  XMS: ${JVM_XMS}"
     echo "  XMX: ${JVM_XMX}"
-    echo "  MetaSize: ${JVM_META_SIZE}"
-    echo "  MaxMetaSize: ${JVM_MAX_META_SIZE}"
     echo "  GC Type: ${GC_TYPE}"
     echo ""
     print_info "可通过环境变量修改配置:"
+    echo "  export JDK_VERSION=17        # 指定 JDK 版本 (8 或 17)"
+    echo "  export JDK8_HOME=/path/jdk8  # JDK8 安装路径"
+    echo "  export JDK17_HOME=/path/jdk17 # JDK17 安装路径"
     echo "  export JVM_XMS=512m"
     echo "  export JVM_XMX=1024m"
     echo "  export GC_TYPE=G1"
@@ -482,14 +532,23 @@ help() {
     echo "  jvm         显示 JVM 配置信息"
     echo "  help        显示帮助信息"
     echo ""
+    echo "JDK 版本支持:"
+    echo "  支持 JDK 8 和 JDK 17，以 JDK 17 为主"
+    echo "  自动检测系统 Java 版本，也可通过环境变量指定"
+    echo ""
     echo "环境变量配置:"
-    echo "  JVM_XMS         初始堆内存大小 (默认: 256m)"
-    echo "  JVM_XMX         最大堆内存大小 (默认: 512m)"
-    echo "  JVM_META_SIZE   元空间初始大小 (默认: 128m)"
-    echo "  JVM_MAX_META_SIZE 元空间最大大小 (默认: 256m)"
-    echo "  GC_TYPE         GC类型 (G1/CMS/Parallel, 默认: G1)"
+    echo "  JDK_VERSION       JDK 版本 (8 或 17, 默认: auto 自动检测)"
+    echo "  JDK8_HOME         JDK 8 安装路径 (可选)"
+    echo "  JDK17_HOME        JDK 17 安装路径 (可选)"
+    echo "  JVM_XMS           初始堆内存大小 (默认: 256m)"
+    echo "  JVM_XMX           最大堆内存大小 (默认: 512m)"
+    echo "  GC_TYPE           GC类型 (G1/CMS/Parallel, 默认: G1)"
     echo "  LOG_RETENTION_DAYS 日志保留天数 (默认: 7)"
     echo "  LOG_MAX_SIZE_MB   单个日志最大大小MB (默认: 100)"
+    echo ""
+    echo "示例:"
+    echo "  JDK_VERSION=17 ./card-learn.sh start   # 使用 JDK17 启动"
+    echo "  JDK8_HOME=/opt/jdk8 ./card-learn.sh start  # 指定 JDK8 路径"
     echo ""
     echo "目录结构:"
     echo "  ${APP_HOME}/"
@@ -507,11 +566,12 @@ help() {
 # 读取环境变量覆盖默认配置
 if [ -n "$JVM_XMS" ]; then JVM_XMS=$JVM_XMS; fi
 if [ -n "$JVM_XMX" ]; then JVM_XMX=$JVM_XMX; fi
-if [ -n "$JVM_META_SIZE" ]; then JVM_META_SIZE=$JVM_META_SIZE; fi
-if [ -n "$JVM_MAX_META_SIZE" ]; then JVM_MAX_META_SIZE=$JVM_MAX_META_SIZE; fi
 if [ -n "$GC_TYPE" ]; then GC_TYPE=$GC_TYPE; fi
 if [ -n "$LOG_RETENTION_DAYS" ]; then LOG_RETENTION_DAYS=$LOG_RETENTION_DAYS; fi
 if [ -n "$LOG_MAX_SIZE_MB" ]; then LOG_MAX_SIZE_MB=$LOG_MAX_SIZE_MB; fi
+if [ -n "$JDK_VERSION" ]; then JDK_VERSION=$JDK_VERSION; fi
+if [ -n "$JDK8_HOME" ]; then JDK8_HOME=$JDK8_HOME; fi
+if [ -n "$JDK17_HOME" ]; then JDK17_HOME=$JDK17_HOME; fi
 
 case "$1" in
     "start")
