@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.card.learn.common.Result;
 import com.card.learn.dto.CardAuditDTO;
 import com.card.learn.dto.CardCreateDTO;
+import com.card.learn.dto.MyCardQueryDTO;
 import com.card.learn.entity.BizCardDraft;
 import com.card.learn.entity.SysUser;
 import com.card.learn.service.IBizCardDraftService;
@@ -69,17 +70,12 @@ public class MiniCardController {
      */
     @GetMapping("/my")
     @ApiOperation("获取我的卡片列表")
-    public Result<Page<MyCardVO>> getMyCards(
-            @RequestParam(required = false) Long userId,
-            @RequestParam(required = false) String auditStatus,
-            @RequestParam(defaultValue = "1") Integer pageNum,
-            @RequestParam(defaultValue = "10") Integer pageSize) {
+    public Result<Page<MyCardVO>> getMyCards(MyCardQueryDTO queryDTO) {
         Long currentUserId = getCurrentUserId();
         if (currentUserId == null) {
             return Result.error(401, "请先登录后再查看我的卡片");
         }
-        Page<MyCardVO> page = draftService.pageMyDrafts(currentUserId, auditStatus, pageNum, pageSize);
-        return Result.success(page);
+        return Result.success(draftService.pageMyDrafts(currentUserId, queryDTO));
     }
 
     /**

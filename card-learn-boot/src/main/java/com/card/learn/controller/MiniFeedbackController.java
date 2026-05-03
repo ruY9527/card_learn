@@ -2,6 +2,7 @@ package com.card.learn.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.card.learn.common.Result;
+import com.card.learn.dto.UserFeedbackQueryDTO;
 import com.card.learn.entity.BizFeedback;
 import com.card.learn.service.IBizFeedbackService;
 import io.swagger.annotations.Api;
@@ -45,12 +46,8 @@ public class MiniFeedbackController {
      */
     @GetMapping("/list")
     @ApiOperation("获取用户反馈列表")
-    public Result<Page<BizFeedback>> getUserFeedbackList(
-            @RequestParam Long userId,
-            @RequestParam(defaultValue = "1") Integer pageNum,
-            @RequestParam(defaultValue = "10") Integer pageSize) {
-        Page<BizFeedback> page = feedbackService.pageUserFeedback(userId, pageNum, pageSize);
-        return Result.success(page);
+    public Result<Page<BizFeedback>> getUserFeedbackList(UserFeedbackQueryDTO queryDTO) {
+        return Result.success(feedbackService.pageUserFeedback(queryDTO));
     }
 
     /**

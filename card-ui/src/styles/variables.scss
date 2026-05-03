@@ -1,0 +1,49 @@
+// CSS 变量定义（浅色主题默认值）
+:root {
+  // 背景色
+  --bg-color: #ffffff;
+  --bg-color-page: #f5f7fa;
+  --bg-color-overlay: #ffffff;
+
+  // 文字色
+  --text-color-primary: #303133;
+  --text-color-regular: #606266;
+  --text-color-secondary: #909399;
+  --text-color-placeholder: #a8abb2;
+  --text-color-disabled: #c0c4cc;
+
+  // 边框色
+  --border-color: #dcdfe6;
+  --border-color-light: #e4e7ed;
+  --border-color-lighter: #ebeef5;
+  --border-color-extra-light: #f2f6fc;
+
+  // 填充色
+  --fill-color: #f0f2f5;
+  --fill-color-light: #f5f7fa;
+  --fill-color-lighter: #fafafa;
+  --fill-color-extra-light: #fafcff;
+  --fill-color-dark: #ebedf0;
+
+  // 阴影
+  --box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.06);
+  --box-shadow-light: 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+  --box-shadow-dark: 0 2px 8px 0 rgba(0, 0, 0, 0.12);
+
+  // 侧边栏
+  --sidebar-bg: #304156;
+  --sidebar-text: #bfcbd9;
+  --sidebar-active-text: #409eff;
+  --sidebar-width: 210px;
+
+  // 头部
+  --header-bg: #ffffff;
+  --header-border: #e6e6e6;
+  --header-height: 50px;
+
+  // 卡片
+  --card-bg: #ffffff;
+
+  // 遮罩
+  --mask-color: rgba(0, 0, 0, 0.5);
+}

@@ -2,6 +2,7 @@ package com.card.learn.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.card.learn.common.Result;
+import com.card.learn.dto.CommentQueryDTO;
 import com.card.learn.entity.BizCardComment;
 import com.card.learn.mapper.CommentStats;
 import com.card.learn.service.IBizCardCommentService;
@@ -41,11 +42,10 @@ public class MiniCommentController {
      */
     @GetMapping("/list/{cardId}")
     @ApiOperation("获取卡片评论列表")
-    public Result<Page<CommentVO>> list(
-            @PathVariable Long cardId,
-            @RequestParam(defaultValue = "1") Integer pageNum,
-            @RequestParam(defaultValue = "10") Integer pageSize) {
-        return Result.success(commentService.pageComments(cardId, null, "0", pageNum, pageSize));
+    public Result<Page<CommentVO>> list(@PathVariable Long cardId, CommentQueryDTO queryDTO) {
+        queryDTO.setCardId(cardId);
+        queryDTO.setStatus("0");
+        return Result.success(commentService.pageComments(queryDTO));
     }
 
     /**

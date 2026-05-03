@@ -170,20 +170,20 @@ struct TipSection: View {
                     .font(.system(size: 16))
                 Text("添加知识点卡片")
                     .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(Color(hex: "303133"))
+                    .foregroundColor(AppColor.textPrimary)
             }
 
             Text("贡献您的知识卡片，帮助更多考生复习。提交后需要管理员审核通过才会显示。")
                 .font(.system(size: 13))
-                .foregroundColor(Color(hex: "606266"))
+                .foregroundColor(AppColor.textMedium)
 
             Text("支持Markdown格式编写答案")
                 .font(.system(size: 12))
-                .foregroundColor(Color(hex: "909399"))
+                .foregroundColor(AppColor.textSecondary)
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(hex: "F5F7FA"))
+        .background(AppColor.backgroundLight)
         .cornerRadius(12)
     }
 }
@@ -198,12 +198,12 @@ struct MajorSelectSection: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("选择专业")
                 .font(.system(size: 15, weight: .medium))
-                .foregroundColor(Color(hex: "303133"))
+                .foregroundColor(AppColor.textPrimary)
 
             if majorList.isEmpty {
                 Text("加载中...")
                     .font(.system(size: 14))
-                    .foregroundColor(Color(hex: "909399"))
+                    .foregroundColor(AppColor.textSecondary)
             } else {
                 ScrollView {
                     HStack(spacing: 12) {
@@ -235,14 +235,14 @@ fileprivate struct AddCardMajorItem: View {
         Button(action: onSelect) {
             Text(major.majorName)
                 .font(.system(size: 13, weight: isSelected ? .medium : .regular))
-                .foregroundColor(isSelected ? .white : Color(hex: "606266"))
+                .foregroundColor(isSelected ? .white : AppColor.textMedium)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 10)
                 .background(
                     RoundedRectangle(cornerRadius: 8)
                         .fill(isSelected ?
-                              Color(hex: "667eea") :
-                              Color(hex: "F5F7FA"))
+                              AppColor.primary :
+                              AppColor.backgroundLight)
                 )
         }
     }
@@ -258,12 +258,12 @@ struct SubjectSelectSection: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("选择科目")
                 .font(.system(size: 15, weight: .medium))
-                .foregroundColor(Color(hex: "303133"))
+                .foregroundColor(AppColor.textPrimary)
 
             if subjectList.isEmpty {
                 Text("请先选择专业")
                     .font(.system(size: 14))
-                    .foregroundColor(Color(hex: "909399"))
+                    .foregroundColor(AppColor.textSecondary)
             } else {
                 ScrollView {
                     HStack(spacing: 12) {
@@ -295,14 +295,14 @@ fileprivate struct AddCardSubjectItem: View {
         Button(action: onSelect) {
             Text(subject.subjectName)
                 .font(.system(size: 13, weight: isSelected ? .medium : .regular))
-                .foregroundColor(isSelected ? .white : Color(hex: "606266"))
+                .foregroundColor(isSelected ? .white : AppColor.textMedium)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 10)
                 .background(
                     RoundedRectangle(cornerRadius: 8)
                         .fill(isSelected ?
-                              Color(hex: "667eea") :
-                              Color(hex: "F5F7FA"))
+                              AppColor.primary :
+                              AppColor.backgroundLight)
                 )
         }
     }
@@ -318,24 +318,24 @@ struct ContentInputSection: View {
         VStack(alignment: .leading, spacing: 12) {
             Text(title)
                 .font(.system(size: 15, weight: .medium))
-                .foregroundColor(Color(hex: "303133"))
+                .foregroundColor(AppColor.textPrimary)
 
             TextEditor(text: $content)
                 .font(.system(size: 14))
-                .foregroundColor(Color(hex: "303133"))
+                .foregroundColor(AppColor.textPrimary)
                 .frame(height: 120)
                 .padding(12)
-                .background(Color(hex: "F5F7FA"))
+                .background(AppColor.backgroundLight)
                 .cornerRadius(8)
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color(hex: "DCDFE6"), lineWidth: 1)
+                        .stroke(AppColor.border, lineWidth: 1)
                 )
 
             if content.isEmpty {
                 Text(placeholder)
                     .font(.system(size: 14))
-                    .foregroundColor(Color(hex: "C0C4CC"))
+                    .foregroundColor(AppColor.disabledText)
                     .padding(.top, -100)
                     .padding(.leading, 16)
             }
@@ -355,7 +355,7 @@ struct DifficultySection: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("难度等级")
                 .font(.system(size: 15, weight: .medium))
-                .foregroundColor(Color(hex: "303133"))
+                .foregroundColor(AppColor.textPrimary)
 
             HStack(spacing: 12) {
                 ForEach(1...5, id: \.self) { i in
@@ -408,14 +408,14 @@ struct DifficultyItem: View {
 
                 Text(label)
                     .font(.system(size: 11))
-                    .foregroundColor(isSelected ? .white : Color(hex: "909399"))
+                    .foregroundColor(isSelected ? .white : AppColor.textSecondary)
             }
             .frame(width: 50, height: 50)
             .background(
                 RoundedRectangle(cornerRadius: 8)
                     .fill(isSelected ?
                           Color(hex: color) :
-                          Color(hex: "F5F7FA"))
+                          AppColor.backgroundLight)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
@@ -441,15 +441,15 @@ struct SubmitButton: View {
 
                 Text(isSubmitting ? "提交中..." : "提交卡片")
                     .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(isEnabled ? .white : Color(hex: "C0C4CC"))
+                    .foregroundColor(isEnabled ? .white : AppColor.disabledText)
             }
             .frame(maxWidth: .infinity)
             .padding(16)
             .background(
                 LinearGradient(
                     colors: isEnabled ?
-                        [Color(hex: "667eea"), Color(hex: "764ba2")] :
-                        [Color(hex: "DCDFE6"), Color(hex: "DCDFE6")],
+                        [AppColor.primary, AppColor.primaryGradientEnd] :
+                        [AppColor.border, AppColor.border],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )

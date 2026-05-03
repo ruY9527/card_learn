@@ -131,7 +131,7 @@ onMounted(() => {
   width: 100%;
 
   .captcha-input {
-    width: 150px;
+    flex: 1;
     margin-right: 10px;
   }
 

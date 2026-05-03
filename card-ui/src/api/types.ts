@@ -322,3 +322,18 @@ export interface StudyHistoryRecord {
   status: number
   createTime: string
 }
+
+// 管理端复习计划
+export interface AdminReviewPlan {
+  id: number
+  userId: number
+  nickname: string
+  avatar: string
+  cardId: number
+  scheduledDate: string
+  frontContent: string
+  backContent: string
+  subjectName: string
+  difficultyLevel: number
+  status: string
+}

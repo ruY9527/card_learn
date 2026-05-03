@@ -1,8 +1,8 @@
 package com.card.learn.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.card.learn.dto.CommentQueryDTO;
 import com.card.learn.entity.BizCardComment;
 import com.card.learn.entity.BizFeedback;
 import com.card.learn.mapper.BizCardCommentMapper;
@@ -29,9 +29,9 @@ public class BizCardCommentServiceImpl extends ServiceImpl<BizCardCommentMapper,
     private IBizFeedbackService feedbackService;
 
     @Override
-    public Page<CommentVO> pageComments(Long cardId, String commentType, String status, Integer pageNum, Integer pageSize) {
-        Page<CommentVO> page = new Page<>(pageNum, pageSize);
-        return commentMapper.selectCommentsWithCardInfo(page, cardId, commentType, status);
+    public Page<CommentVO> pageComments(CommentQueryDTO queryDTO) {
+        Page<CommentVO> page = new Page<>(queryDTO.getPageNum(), queryDTO.getPageSize());
+        return commentMapper.selectCommentsWithCardInfo(page, queryDTO.getCardId(), queryDTO.getCommentType(), queryDTO.getStatus());
     }
 
     @Override

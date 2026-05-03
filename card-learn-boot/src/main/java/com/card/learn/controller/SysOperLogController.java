@@ -1,8 +1,8 @@
 package com.card.learn.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.card.learn.common.Result;
+import com.card.learn.dto.OperLogQueryDTO;
 import com.card.learn.entity.SysOperLog;
 import com.card.learn.service.ISysOperLogService;
 import io.swagger.annotations.Api;
@@ -23,11 +23,8 @@ public class SysOperLogController {
 
     @GetMapping("/page")
     @ApiOperation("分页查询操作日志")
-    public Result<Page<SysOperLog>> page(
-            @RequestParam(required = false) String title,
-            @RequestParam(defaultValue = "1") Integer pageNum,
-            @RequestParam(defaultValue = "10") Integer pageSize) {
-        return Result.success(operLogService.pageLogs(title, pageNum, pageSize));
+    public Result<Page<SysOperLog>> page(OperLogQueryDTO queryDTO) {
+        return Result.success(operLogService.pageLogs(queryDTO));
     }
 
     @GetMapping("/{id}")
@@ -46,7 +43,7 @@ public class SysOperLogController {
     @DeleteMapping("/clear")
     @ApiOperation("清空日志")
     public Result<Void> clear() {
-        operLogService.remove(new LambdaQueryWrapper<>());
+        operLogService.clearLogs();
         return Result.success();
     }
 

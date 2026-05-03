@@ -9,6 +9,8 @@ import com.card.learn.vo.UserLearnRankVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
@@ -41,7 +43,8 @@ public class LearningStatsServiceImpl implements ILearningStatsService {
         if (days == null || days <= 0) {
             days = 30;
         }
-        return progressMapper.selectDailyTrend(days, userId);
+        String startDate = LocalDate.now().minusDays(days).format(DateTimeFormatter.ISO_LOCAL_DATE);
+        return progressMapper.selectDailyTrend(startDate, userId);
     }
 
     @Override

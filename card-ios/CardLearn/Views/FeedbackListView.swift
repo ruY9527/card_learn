@@ -33,7 +33,7 @@ struct FeedbackListView: View {
                             
                             Text("请先登录后查看反馈记录")
                                 .font(.system(size: 16))
-                                .foregroundColor(Color(hex: "606266"))
+                                .foregroundColor(AppColor.textMedium)
                         }
                         .padding(.top, 100)
                     } else {
@@ -53,7 +53,7 @@ struct FeedbackListView: View {
                                     Button(action: loadMore) {
                                         Text(isLoading ? "加载中..." : "加载更多")
                                             .font(.system(size: 14))
-                                            .foregroundColor(Color(hex: "667eea"))
+                                            .foregroundColor(AppColor.primary)
                                     }
                                     .padding(.vertical, 16)
                                 }
@@ -69,7 +69,7 @@ struct FeedbackListView: View {
                                 
                                 Text("暂无反馈记录")
                                     .font(.system(size: 16))
-                                    .foregroundColor(Color(hex: "606266"))
+                                    .foregroundColor(AppColor.textMedium)
                             }
                             .padding(.top, 100)
                         }
@@ -78,11 +78,11 @@ struct FeedbackListView: View {
                         if isLoading && feedbackList.isEmpty {
                             VStack(spacing: 12) {
                                 ProgressView()
-                                    .progressViewStyle(CircularProgressViewStyle(tint: Color(hex: "667eea")))
+                                    .progressViewStyle(CircularProgressViewStyle(tint: AppColor.primary))
                                 
                                 Text("加载中...")
                                     .font(.system(size: 14))
-                                    .foregroundColor(Color(hex: "909399"))
+                                    .foregroundColor(AppColor.textSecondary)
                             }
                             .padding(.top, 100)
                         }
@@ -155,7 +155,7 @@ struct FeedbackItem: View {
             // 内容
             Text(feedback.content)
                 .font(.system(size: 14))
-                .foregroundColor(Color(hex: "303133"))
+                .foregroundColor(AppColor.textPrimary)
                 .lineSpacing(4)
             
             // 卡片关联
@@ -163,14 +163,14 @@ struct FeedbackItem: View {
                 HStack(spacing: 8) {
                     Text("关联卡片:")
                         .font(.system(size: 12))
-                        .foregroundColor(Color(hex: "909399"))
+                        .foregroundColor(AppColor.textSecondary)
                     
                     Text("#\(cardId)")
                         .font(.system(size: 12))
-                        .foregroundColor(Color(hex: "667eea"))
+                        .foregroundColor(AppColor.primary)
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
-                        .background(Color(hex: "F0F5FF"))
+                        .background(AppColor.infoLight)
                         .cornerRadius(4)
                 }
             }
@@ -179,7 +179,7 @@ struct FeedbackItem: View {
             HStack {
                 Text(feedback.createTime ?? "")
                     .font(.system(size: 12))
-                    .foregroundColor(Color(hex: "909399"))
+                    .foregroundColor(AppColor.textSecondary)
                 
                 Spacer()
                 
@@ -188,7 +188,7 @@ struct FeedbackItem: View {
                         ForEach(1..<6, id: \.self) { index in
                             Text("★")
                                 .font(.system(size: 10))
-                                .foregroundColor(index <= rating ? Color(hex: "FFD700") : Color(hex: "E0E0E0"))
+                                .foregroundColor(index <= rating ? AppColor.gold : AppColor.divider)
                         }
                     }
                 }
@@ -199,13 +199,13 @@ struct FeedbackItem: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("管理员回复:")
                         .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(Color(hex: "667eea"))
+                        .foregroundColor(AppColor.primary)
                     
                     Text(adminReply)
                         .font(.system(size: 13))
-                        .foregroundColor(Color(hex: "606266"))
+                        .foregroundColor(AppColor.textMedium)
                         .padding(12)
-                        .background(Color(hex: "F5F7FA"))
+                        .background(AppColor.backgroundLight)
                         .cornerRadius(8)
                 }
             }
@@ -224,16 +224,16 @@ struct TypeTag: View {
     var body: some View {
         Text(label)
             .font(.system(size: 12))
-            .foregroundColor(type == "ERROR" ? Color(hex: "F56C6C") :
-                             type == "SUGGESTION" ? Color(hex: "409EFF") :
-                             type == "FUNCTION" ? Color(hex: "E6A23C") :
-                             Color(hex: "909399"))
+            .foregroundColor(type == "ERROR" ? AppColor.error :
+                             type == "SUGGESTION" ? AppColor.info :
+                             type == "FUNCTION" ? AppColor.warning :
+                             AppColor.textSecondary)
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
-            .background(type == "ERROR" ? Color(hex: "FEF0F0") :
-                        type == "SUGGESTION" ? Color(hex: "ECF5FF") :
-                        type == "FUNCTION" ? Color(hex: "FDF6EC") :
-                        Color(hex: "F5F5F5"))
+            .background(type == "ERROR" ? AppColor.errorLight :
+                        type == "SUGGESTION" ? AppColor.blueLight :
+                        type == "FUNCTION" ? AppColor.warningLight :
+                        AppColor.backgroundGray)
             .cornerRadius(4)
     }
 }
@@ -245,16 +245,16 @@ struct StatusTag: View {
     var body: some View {
         Text(label)
             .font(.system(size: 12))
-            .foregroundColor(status == "RESOLVED" ? Color(hex: "67C23A") :
-                             status == "PROCESSING" ? Color(hex: "409EFF") :
-                             status == "CLOSED" ? Color(hex: "909399") :
-                             Color(hex: "E6A23C"))
+            .foregroundColor(status == "RESOLVED" ? AppColor.success :
+                             status == "PROCESSING" ? AppColor.info :
+                             status == "CLOSED" ? AppColor.textSecondary :
+                             AppColor.warning)
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
-            .background(status == "RESOLVED" ? Color(hex: "F0F9EB") :
-                        status == "PROCESSING" ? Color(hex: "ECF5FF") :
-                        status == "CLOSED" ? Color(hex: "F5F5F5") :
-                        Color(hex: "FDF6EC"))
+            .background(status == "RESOLVED" ? AppColor.successLight :
+                        status == "PROCESSING" ? AppColor.blueLight :
+                        status == "CLOSED" ? AppColor.backgroundGray :
+                        AppColor.warningLight)
             .cornerRadius(4)
     }
 }

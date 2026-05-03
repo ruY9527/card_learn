@@ -8,8 +8,16 @@ enum AppEnvironment {
 
 /// 环境配置
 struct EnvConfig {
-    /// 当前环境（修改此值切换环境）
-    static let current: AppEnvironment = .development
+    /// 当前环境（运行时可通过 UserDefaults 切换）
+    static var current: AppEnvironment {
+        get {
+            let raw = UserDefaults.standard.string(forKey: AppKey.environment) ?? ""
+            return raw == "production" ? .production : .development
+        }
+        set {
+            UserDefaults.standard.set(newValue == .production ? "production" : "development", forKey: AppKey.environment)
+        }
+    }
     
     /// 获取当前环境的配置
     static var config: Config {

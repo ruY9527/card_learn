@@ -36,7 +36,7 @@ struct HomeView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("专业分类")
                             .font(.system(size: 18, weight: .bold))
-                            .foregroundColor(Color(hex: "303133"))
+                            .foregroundColor(AppColor.textPrimary)
                             .padding(.horizontal, 16)
 
                         Menu {
@@ -57,22 +57,22 @@ struct HomeView: View {
                                 if let selectedMajor = majorList.first(where: { $0.majorId == appState.selectedMajorId }) {
                                     Text(selectedMajor.majorName)
                                         .font(.system(size: 16, weight: .medium))
-                                        .foregroundColor(Color(hex: "303133"))
+                                        .foregroundColor(AppColor.textPrimary)
                                 } else if let firstMajor = majorList.first {
                                     Text(firstMajor.majorName)
                                         .font(.system(size: 16, weight: .medium))
-                                        .foregroundColor(Color(hex: "303133"))
+                                        .foregroundColor(AppColor.textPrimary)
                                 } else {
                                     Text("请选择专业")
                                         .font(.system(size: 16))
-                                        .foregroundColor(Color(hex: "909399"))
+                                        .foregroundColor(AppColor.textSecondary)
                                 }
 
                                 Spacer()
 
                                 Image(systemName: "chevron.down")
                                     .font(.system(size: 14))
-                                    .foregroundColor(Color(hex: "909399"))
+                                    .foregroundColor(AppColor.textSecondary)
                             }
                             .padding(16)
                             .background(Color.white)
@@ -88,7 +88,7 @@ struct HomeView: View {
                             HStack {
                                 Text("科目列表")
                                     .font(.system(size: 18, weight: .bold))
-                                    .foregroundColor(Color(hex: "303133"))
+                                    .foregroundColor(AppColor.textPrimary)
 
                                 if isLoadingSubjects {
                                     ProgressView()
@@ -104,7 +104,7 @@ struct HomeView: View {
                                     Spacer()
                                     Text("加载科目中...")
                                         .font(.system(size: 14))
-                                        .foregroundColor(Color(hex: "909399"))
+                                        .foregroundColor(AppColor.textSecondary)
                                         .padding(.vertical, 32)
                                     Spacer()
                                 }
@@ -113,7 +113,7 @@ struct HomeView: View {
                                     Spacer()
                                     Text("该专业暂无科目数据")
                                         .font(.system(size: 14))
-                                        .foregroundColor(Color(hex: "909399"))
+                                        .foregroundColor(AppColor.textSecondary)
                                         .padding(.vertical, 32)
                                     Spacer()
                                 }
@@ -136,7 +136,7 @@ struct HomeView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("今日推荐")
                             .font(.system(size: 18, weight: .bold))
-                            .foregroundColor(Color(hex: "303133"))
+                            .foregroundColor(AppColor.textPrimary)
                             .padding(.horizontal, 16)
 
                         if !recommendCards.isEmpty {
@@ -154,7 +154,7 @@ struct HomeView: View {
                             VStack {
                                 Text("暂无推荐卡片")
                                     .font(.system(size: 14))
-                                    .foregroundColor(Color(hex: "909399"))
+                                    .foregroundColor(AppColor.textSecondary)
                                     .padding(.vertical, 32)
                             }
                             .padding(.horizontal, 16)
@@ -354,7 +354,12 @@ struct HomeView: View {
     private func calculateDefaultCountdown() {
         let now = Date()
         let currentYear = Calendar.current.component(.year, from: now)
-        let examDate = Calendar.current.date(from: DateComponents(year: currentYear, month: 12, day: 21))!
+        guard let examDate = Calendar.current.date(from: DateComponents(year: currentYear, month: 12, day: 21)) else {
+            countdownDays = 0
+            countdownText = ""
+            sprintConfig = SprintConfig(enabled: false, examName: nil, examDate: nil, daysRemaining: nil, isExpired: true)
+            return
+        }
         let diffDays = Calendar.current.dateComponents([.day], from: now, to: examDate).day ?? 0
 
         countdownDays = max(diffDays, 0)
@@ -419,45 +424,11 @@ struct CountdownBar: View {
         .padding(20)
         .background(
             LinearGradient(
-                colors: [Color(hex: "667eea"), Color(hex: "764ba2")],
+                colors: [AppColor.primary, AppColor.primaryGradientEnd],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
         )
-    }
-}
-
-// 专业项目组件
-struct MajorItem: View {
-    let major: Major
-    let isSelected: Bool
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(major.majorName)
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(isSelected ? .white : Color(hex: "303133"))
-
-                    Text(major.description ?? "点击查看科目")
-                        .font(.system(size: 12))
-                        .foregroundColor(isSelected ? .white.opacity(0.8) : Color(hex: "909399"))
-                }
-
-                Spacer()
-            }
-            .padding(16)
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(isSelected ?
-                          LinearGradient(colors: [Color(hex: "667eea"), Color(hex: "764ba2")], startPoint: .topLeading, endPoint: .bottomTrailing) :
-                          LinearGradient(colors: [.white, .white], startPoint: .topLeading, endPoint: .bottomTrailing)
-                    )
-            )
-            .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
-        }
     }
 }
 
@@ -469,7 +440,7 @@ struct SubjectItem: View {
         VStack(spacing: 8) {
             ZStack {
                 Circle()
-                    .fill(Color(hex: "409EFF"))
+                    .fill(AppColor.info)
                     .frame(width: 40, height: 40)
 
                 Text(String(subject.subjectName.prefix(1)))
@@ -479,7 +450,7 @@ struct SubjectItem: View {
 
             Text(subject.subjectName)
                 .font(.system(size: 12))
-                .foregroundColor(Color(hex: "303133"))
+                .foregroundColor(AppColor.textPrimary)
                 .lineLimit(1)
         }
     }
@@ -494,10 +465,10 @@ struct RecommendCardItem: View {
             HStack {
                 Text(card.subjectName ?? "")
                     .font(.system(size: 11))
-                    .foregroundColor(Color(hex: "409EFF"))
+                    .foregroundColor(AppColor.info)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
-                    .background(Color(hex: "ECF5FF"))
+                    .background(AppColor.blueLight)
                     .cornerRadius(4)
 
                 Spacer()
@@ -505,19 +476,19 @@ struct RecommendCardItem: View {
 
             Text(card.frontContent)
                 .font(.system(size: 14))
-                .foregroundColor(Color(hex: "303133"))
+                .foregroundColor(AppColor.textPrimary)
                 .lineLimit(3)
 
             HStack {
                 Text("难度: \(card.difficultyLevel ?? 1)级")
                     .font(.system(size: 12))
-                    .foregroundColor(Color(hex: "909399"))
+                    .foregroundColor(AppColor.textSecondary)
 
                 Spacer()
 
                 Text("点击查看答案")
                     .font(.system(size: 12))
-                    .foregroundColor(Color(hex: "409EFF"))
+                    .foregroundColor(AppColor.info)
             }
         }
         .padding(16)

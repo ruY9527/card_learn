@@ -40,42 +40,7 @@ struct Card: Codable, Identifiable, Equatable {
     // 格式化时间显示
     var formattedTime: String {
         guard let timeStr = updateTime else { return "" }
-
-        // 解析时间字符串
-        let dateFormatter = ISO8601DateFormatter()
-        dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        guard let date = dateFormatter.date(from: timeStr) else {
-            // 尝试其他格式
-            let alternateFormatter = DateFormatter()
-            alternateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-            guard let date = alternateFormatter.date(from: timeStr) else { return "" }
-            return formatRelativeTime(date)
-        }
-        return formatRelativeTime(date)
-    }
-
-    private func formatRelativeTime(_ date: Date) -> String {
-        let now = Date()
-        let diff = now.timeIntervalSince(date)
-
-        let minutes = Int(diff / 60)
-        let hours = Int(diff / 3600)
-        let days = Int(diff / 86400)
-
-        if minutes < 1 {
-            return "刚刚"
-        } else if minutes < 60 {
-            return "\(minutes)分钟前"
-        } else if hours < 24 {
-            return "\(hours)小时前"
-        } else if days < 7 {
-            return "\(days)天前"
-        } else {
-            let calendar = Calendar.current
-            let month = calendar.component(.month, from: date)
-            let day = calendar.component(.day, from: date)
-            return "\(month)月\(day)日"
-        }
+        return DateUtils.formatDisplayTime(timeStr)
     }
 }
 
@@ -287,4 +252,61 @@ struct CommentStats: Codable {
     let qualityCount: Int?
     let poorCount: Int?
     let avgRating: Double?
+}
+
+// MARK: - SM-2 相关模型
+
+// SM-2学习进度
+struct SM2Progress: Codable {
+    let cardId: Int
+    let easeFactor: Double?
+    let repetitions: Int?
+    let interval: Int?
+    let nextReviewTime: String?
+}
+
+// 复习计划
+struct ReviewPlanResponse: Codable, Identifiable {
+    let cardId: Int
+    let scheduledDate: String
+    let frontContent: String
+    let backContent: String?
+    let subjectName: String?
+    let difficultyLevel: Int?
+
+    var id: Int { cardId }
+}
+
+// 科目进度
+struct SubjectProgressResponse: Codable, Identifiable {
+    let subjectId: Int
+    let subjectName: String
+    let majorId: Int?
+    let majorName: String?
+    let totalCards: Int
+    let masteredCount: Int
+    let learnedCount: Int
+    let masteryRate: Double
+
+    var id: Int { subjectId }
+}
+
+// 学习统计
+struct LearningStatsResponse: Codable {
+    let currentStreak: Int
+    let longestStreak: Int
+    let totalStudyDays: Int
+    let masteredToday: Int
+    let learnedToday: Int
+}
+
+// 复习提交请求
+struct ReviewSubmitRequest: Codable {
+    let cardId: Int
+    let userId: Int
+    let quality: Int
+    let easeFactor: Double
+    let repetitions: Int
+    let interval: Int
+    let nextReviewTime: String
 }

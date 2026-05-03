@@ -3,19 +3,26 @@ import SwiftUI
 struct MainTabView: View {
     @EnvironmentObject var appState: AppState
     @State private var selectedTab: Tab = .home
-    
+
     enum Tab {
         case home
+        case review
+        case stats
         case profile
     }
-    
+
     var body: some View {
         ZStack(alignment: .bottom) {
             // 主内容区域
             Group {
-                if selectedTab == .home {
+                switch selectedTab {
+                case .home:
                     HomeView()
-                } else {
+                case .review:
+                    ReviewListView()
+                case .stats:
+                    StatsView()
+                case .profile:
                     ProfileView()
                 }
             }
@@ -23,19 +30,19 @@ struct MainTabView: View {
             .safeAreaInset(edge: .bottom) {
                 Color.clear.frame(height: 80)
             }
-            
+
             // 自定义 TabBar
             CustomTabBar(selectedTab: $selectedTab)
         }
         .ignoresSafeArea(.keyboard)
-        .background(Color(hex: "F5F5F5"))
+        .background(AppColor.backgroundGray)
     }
 }
 
 // 自定义 TabBar
 struct CustomTabBar: View {
     @Binding var selectedTab: MainTabView.Tab
-    
+
     var body: some View {
         HStack(spacing: 0) {
             TabBarItem(
@@ -45,7 +52,23 @@ struct CustomTabBar: View {
             ) {
                 selectedTab = .home
             }
-            
+
+            TabBarItem(
+                icon: "clock.arrow.circlepath",
+                title: "复习",
+                isSelected: selectedTab == .review
+            ) {
+                selectedTab = .review
+            }
+
+            TabBarItem(
+                icon: "chart.bar.fill",
+                title: "统计",
+                isSelected: selectedTab == .stats
+            ) {
+                selectedTab = .stats
+            }
+
             TabBarItem(
                 icon: "person.fill",
                 title: "我的",
@@ -72,42 +95,14 @@ struct TabBarItem: View {
             VStack(spacing: 6) {
                 Image(systemName: icon)
                     .font(.system(size: 24))
-                    .foregroundColor(isSelected ? Color(hex: "409EFF") : Color(hex: "999999"))
+                    .foregroundColor(isSelected ? AppColor.info : AppColor.inactive)
                 
                 Text(title)
                     .font(.system(size: 12))
-                    .foregroundColor(isSelected ? Color(hex: "409EFF") : Color(hex: "999999"))
+                    .foregroundColor(isSelected ? AppColor.info : AppColor.inactive)
             }
             .frame(maxWidth: .infinity)
         }
-    }
-}
-
-// Color extension for hex colors
-extension Color {
-    init(hex: String) {
-        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
-        var int: UInt64 = 0
-        Scanner(string: hex).scanHexInt64(&int)
-        let a, r, g, b: UInt64
-        switch hex.count {
-        case 3: // RGB (12-bit)
-            (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
-        case 6: // RGB (24-bit)
-            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
-        case 8: // ARGB (32-bit)
-            (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
-        default:
-            (a, r, g, b) = (1, 1, 1, 0)
-        }
-        
-        self.init(
-            .sRGB,
-            red: Double(r) / 255,
-            green: Double(g) / 255,
-            blue: Double(b) / 255,
-            opacity: Double(a) / 255
-        )
     }
 }
 

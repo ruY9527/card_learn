@@ -18,7 +18,7 @@ struct LoginModal: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(hex: "F5F7FA")
+                AppColor.backgroundLight
                     .ignoresSafeArea()
                 
                 ScrollView {
@@ -30,11 +30,11 @@ struct LoginModal: View {
                             
                             Text("欢迎登录")
                                 .font(.system(size: 24, weight: .bold))
-                                .foregroundColor(Color(hex: "303133"))
+                                .foregroundColor(AppColor.textPrimary)
                             
                             Text("登录后可保存学习进度并提交反馈")
                                 .font(.system(size: 14))
-                                .foregroundColor(Color(hex: "909399"))
+                                .foregroundColor(AppColor.textSecondary)
                         }
                         .padding(.top, 40)
                         
@@ -68,7 +68,7 @@ struct LoginModal: View {
                                 Button(action: { showPassword.toggle() }) {
                                     Text(showPassword ? "🙈 隐藏密码" : "👁️ 显示密码")
                                         .font(.system(size: 12))
-                                        .foregroundColor(Color(hex: "667eea"))
+                                        .foregroundColor(AppColor.primary)
                                 }
                             }
                             
@@ -89,10 +89,10 @@ struct LoginModal: View {
                                     if captchaImage.isEmpty {
                                         VStack(spacing: 4) {
                                             ProgressView()
-                                                .progressViewStyle(CircularProgressViewStyle(tint: Color(hex: "667eea")))
+                                                .progressViewStyle(CircularProgressViewStyle(tint: AppColor.primary))
                                             Text("加载中")
                                                 .font(.system(size: 10))
-                                                .foregroundColor(Color(hex: "909399"))
+                                                .foregroundColor(AppColor.textSecondary)
                                         }
                                         .frame(width: 100, height: 40)
                                         .background(Color.white)
@@ -110,12 +110,12 @@ struct LoginModal: View {
                                                 .cornerRadius(8)
                                         } else {
                                             RoundedRectangle(cornerRadius: 8)
-                                                .fill(Color(hex: "E0E0E0"))
+                                                .fill(AppColor.divider)
                                                 .frame(width: 100, height: 40)
                                                 .overlay(
                                                     Text("点击刷新")
                                                         .font(.system(size: 10))
-                                                        .foregroundColor(Color(hex: "909399"))
+                                                        .foregroundColor(AppColor.textSecondary)
                                                 )
                                         }
                                     }
@@ -131,7 +131,7 @@ struct LoginModal: View {
                                             .font(.system(size: 12))
                                         Text("点击刷新验证码")
                                             .font(.system(size: 12))
-                                            .foregroundColor(Color(hex: "667eea"))
+                                            .foregroundColor(AppColor.primary)
                                     }
                                 }
                             }
@@ -140,7 +140,7 @@ struct LoginModal: View {
                             if !errorMessage.isEmpty {
                                 Text(errorMessage)
                                     .font(.system(size: 14))
-                                    .foregroundColor(Color(hex: "F56C6C"))
+                                    .foregroundColor(AppColor.error)
                                     .padding(.horizontal, 16)
                             }
                             
@@ -161,8 +161,8 @@ struct LoginModal: View {
                                 .background(
                                     LinearGradient(
                                         colors: isFormValid ?
-                                            [Color(hex: "667eea"), Color(hex: "764ba2")] :
-                                            [Color(hex: "C0C4CC"), Color(hex: "C0C4CC")],
+                                            [AppColor.primary, AppColor.primaryGradientEnd] :
+                                            [AppColor.disabledText, AppColor.disabledText],
                                         startPoint: .topLeading,
                                         endPoint: .bottomTrailing
                                     )
@@ -174,7 +174,7 @@ struct LoginModal: View {
                             // 底部提示
                             Text("首次登录请联系管理员获取账号")
                                 .font(.system(size: 12))
-                                .foregroundColor(Color(hex: "909399"))
+                                .foregroundColor(AppColor.textSecondary)
                                 .padding(.top, 8)
                         }
                         .padding(.horizontal, 24)
@@ -187,7 +187,7 @@ struct LoginModal: View {
                     Button("✕") {
                         onSuccess()
                     }
-                    .foregroundColor(Color(hex: "909399"))
+                    .foregroundColor(AppColor.textSecondary)
                 }
             }
         }
@@ -280,7 +280,7 @@ struct InputField: View {
                 Button(action: { onChange("") }) {
                     Text("✕")
                         .font(.system(size: 14))
-                        .foregroundColor(Color(hex: "C0C4CC"))
+                        .foregroundColor(AppColor.disabledText)
                 }
             }
         }

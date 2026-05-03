@@ -2,6 +2,7 @@ package com.card.learn.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.card.learn.common.Result;
+import com.card.learn.dto.MajorQueryDTO;
 import com.card.learn.entity.BizMajor;
 import com.card.learn.service.IBizMajorService;
 import io.swagger.annotations.Api;
@@ -30,13 +31,8 @@ public class BizMajorController {
 
     @GetMapping("/page")
     @ApiOperation("分页查询专业列表")
-    public Result<Page<BizMajor>> page(
-            @RequestParam(required = false) String majorName,
-            @RequestParam(required = false) String status,
-            @RequestParam(defaultValue = "1") Integer pageNum,
-            @RequestParam(defaultValue = "10") Integer pageSize) {
-        Page<BizMajor> page = majorService.pageMajors(majorName, status, pageNum, pageSize);
-        return Result.success(page);
+    public Result<Page<BizMajor>> page(MajorQueryDTO queryDTO) {
+        return Result.success(majorService.pageMajors(queryDTO));
     }
 
     @PostMapping

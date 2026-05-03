@@ -2,6 +2,7 @@ package com.card.learn.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.card.learn.common.Result;
+import com.card.learn.dto.RequestLogQueryDTO;
 import com.card.learn.entity.SysRequestLog;
 import com.card.learn.service.ISysRequestLogService;
 import io.swagger.annotations.Api;
@@ -28,16 +29,8 @@ public class SysRequestLogController {
      */
     @GetMapping("/list")
     @ApiOperation("分页查询日志列表")
-    public Result<PageResultVO<SysRequestLog>> pageLogs(
-            @RequestParam(defaultValue = "1") Integer pageNum,
-            @RequestParam(defaultValue = "10") Integer pageSize,
-            @RequestParam(required = false) String requestMethod,
-            @RequestParam(required = false) String requestUrl,
-            @RequestParam(required = false) String status,
-            @RequestParam(required = false) String startTime,
-            @RequestParam(required = false) String endTime) {
-
-        Page<SysRequestLog> page = requestLogService.pageLogs(pageNum, pageSize, requestMethod, requestUrl, status, startTime, endTime);
+    public Result<PageResultVO<SysRequestLog>> pageLogs(RequestLogQueryDTO queryDTO) {
+        Page<SysRequestLog> page = requestLogService.pageLogs(queryDTO);
 
         PageResultVO<SysRequestLog> result = new PageResultVO<>(page.getRecords(), page.getTotal(), page.getCurrent(), page.getSize());
         return Result.success(result);

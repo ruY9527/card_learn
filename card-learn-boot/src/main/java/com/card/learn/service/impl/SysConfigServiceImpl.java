@@ -1,6 +1,5 @@
 package com.card.learn.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.card.learn.dto.SprintConfigDTO;
@@ -8,6 +7,7 @@ import com.card.learn.entity.SysConfig;
 import com.card.learn.mapper.SysConfigMapper;
 import com.card.learn.service.ISysConfigService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -22,6 +22,9 @@ import java.util.List;
 @Service
 public class SysConfigServiceImpl extends ServiceImpl<SysConfigMapper, SysConfig> implements ISysConfigService {
 
+    @Autowired
+    private SysConfigMapper configMapper;
+
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @Override
@@ -32,9 +35,7 @@ public class SysConfigServiceImpl extends ServiceImpl<SysConfigMapper, SysConfig
 
     @Override
     public SysConfig getConfigByKey(String configKey) {
-        LambdaQueryWrapper<SysConfig> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(SysConfig::getConfigKey, configKey);
-        return this.getOne(wrapper);
+        return configMapper.selectByKey(configKey);
     }
 
     @Override
@@ -47,9 +48,7 @@ public class SysConfigServiceImpl extends ServiceImpl<SysConfigMapper, SysConfig
 
     @Override
     public List<SysConfig> getAllConfigs() {
-        LambdaQueryWrapper<SysConfig> wrapper = new LambdaQueryWrapper<>();
-        wrapper.orderByAsc(SysConfig::getId);
-        return this.list(wrapper);
+        return configMapper.selectAll();
     }
 
     @Override

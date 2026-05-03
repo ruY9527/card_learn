@@ -1,8 +1,8 @@
 package com.card.learn.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.card.learn.dto.UserQueryDTO;
 import com.card.learn.entity.SysUser;
 import com.card.learn.entity.SysUserRole;
 import com.card.learn.mapper.SysUserMapper;
@@ -27,23 +27,18 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private SysUserMapper userMapper;
+
     @Override
     public SysUser getByUsername(String username) {
-        return getOne(new LambdaQueryWrapper<SysUser>()
-                .eq(SysUser::getUsername, username));
+        return userMapper.selectByUsername(username);
     }
 
     @Override
-    public Page<SysUser> pageUsers(String username, String status, Integer pageNum, Integer pageSize) {
-        LambdaQueryWrapper<SysUser> wrapper = new LambdaQueryWrapper<>();
-        if (username != null && !username.isEmpty()) {
-            wrapper.like(SysUser::getUsername, username);
-        }
-        if (status != null && !status.isEmpty()) {
-            wrapper.eq(SysUser::getStatus, status);
-        }
-        wrapper.orderByDesc(SysUser::getCreateTime);
-        return page(new Page<>(pageNum, pageSize), wrapper);
+    public Page<SysUser> pageUsers(UserQueryDTO queryDTO) {
+        Page<SysUser> page = new Page<>(queryDTO.getPageNum(), queryDTO.getPageSize());
+        return userMapper.selectPageByCondition(page, queryDTO.getUsername(), queryDTO.getStatus());
     }
 
     @Override

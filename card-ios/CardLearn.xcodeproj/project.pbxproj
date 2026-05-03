@@ -23,6 +23,14 @@
 		A0000014 /* EnvConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000014; };
 		A0000015 /* AddCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000015; };
 		A0000016 /* MyCardsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000016; };
+		A0000017 /* AppConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000017; };
+		A0000018 /* DateUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000018; };
+		A0000019 /* SharedComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000019; };
+		A000001A /* SM2Algorithm.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000001A; };
+		A000001B /* CardFlipView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000001B; };
+		A000001C /* ReviewListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000001C; };
+		A000001D /* StatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000001D; };
+		A000001E /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000001E; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -43,6 +51,14 @@
 		B0000014 /* EnvConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvConfig.swift; sourceTree = "<group>"; };
 		B0000015 /* AddCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddCardView.swift; sourceTree = "<group>"; };
 		B0000016 /* MyCardsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyCardsView.swift; sourceTree = "<group>"; };
+		B0000017 /* AppConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConstants.swift; sourceTree = "<group>"; };
+		B0000018 /* DateUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateUtils.swift; sourceTree = "<group>"; };
+		B0000019 /* SharedComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedComponents.swift; sourceTree = "<group>"; };
+		B000001A /* SM2Algorithm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SM2Algorithm.swift; sourceTree = "<group>"; };
+		B000001B /* CardFlipView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardFlipView.swift; sourceTree = "<group>"; };
+		B000001C /* ReviewListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewListView.swift; sourceTree = "<group>"; };
+		B000001D /* StatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsView.swift; sourceTree = "<group>"; };
+		B000001E /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -69,6 +85,7 @@
 			children = (
 				B0000001 /* CardLearnApp.swift */,
 				E0000007 /* Config */,
+				E0000008 /* Core */,
 				E0000004 /* Models */,
 				E0000005 /* Services */,
 				E0000006 /* Views */,
@@ -89,6 +106,7 @@
 			isa = PBXGroup;
 			children = (
 				B0000002 /* Models.swift */,
+				B0000018 /* DateUtils.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -97,6 +115,7 @@
 			isa = PBXGroup;
 			children = (
 				B0000003 /* APIService.swift */,
+				B000001E /* NotificationService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -115,6 +134,10 @@
 				B0000012 /* ProgressCardsView.swift */,
 				B0000015 /* AddCardView.swift */,
 				B0000016 /* MyCardsView.swift */,
+				B0000019 /* SharedComponents.swift */,
+				B000001B /* CardFlipView.swift */,
+				B000001C /* ReviewListView.swift */,
+				B000001D /* StatsView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -123,8 +146,17 @@
 			isa = PBXGroup;
 			children = (
 				B0000014 /* EnvConfig.swift */,
+				B0000017 /* AppConstants.swift */,
 			);
 			path = Config;
+			sourceTree = "<group>";
+		};
+		E0000008 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				B000001A /* SM2Algorithm.swift */,
+			);
+			path = Core;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -211,6 +243,14 @@
 				A0000012 /* ProgressCardsView.swift in Sources */,
 				A0000015 /* AddCardView.swift in Sources */,
 				A0000016 /* MyCardsView.swift in Sources */,
+				A0000017 /* AppConstants.swift in Sources */,
+				A0000018 /* DateUtils.swift in Sources */,
+				A0000019 /* SharedComponents.swift in Sources */,
+				A000001A /* SM2Algorithm.swift in Sources */,
+				A000001B /* CardFlipView.swift in Sources */,
+				A000001C /* ReviewListView.swift in Sources */,
+				A000001D /* StatsView.swift in Sources */,
+				A000001E /* NotificationService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

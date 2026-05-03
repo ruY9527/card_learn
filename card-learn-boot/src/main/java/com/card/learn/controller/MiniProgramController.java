@@ -2,12 +2,7 @@ package com.card.learn.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.card.learn.common.Result;
-import com.card.learn.dto.LoginDTO;
-import com.card.learn.dto.MiniCardDTO;
-import com.card.learn.dto.MiniProgressDTO;
-import com.card.learn.dto.MiniSubjectDTO;
-import com.card.learn.dto.MiniMajorDTO;
-import com.card.learn.dto.SprintConfigDTO;
+import com.card.learn.dto.*;
 import com.card.learn.entity.BizCard;
 import com.card.learn.entity.BizMajor;
 import com.card.learn.entity.BizSubject;
@@ -275,18 +270,16 @@ public class MiniProgramController {
      */
     @GetMapping("/cards")
     @ApiOperation("分页获取卡片")
-    public Result<PageResultVO<MiniCardDTO>> getCards(
-            @RequestParam(required = false) Long subjectId,
-            @RequestParam(required = false) String frontContent,
-            @RequestParam(required = false) String userId,
-            @RequestParam(required = false) String status,
-            @RequestParam(defaultValue = "1") Integer pageNum,
-            @RequestParam(defaultValue = "10") Integer pageSize) {
+    public Result<PageResultVO<MiniCardDTO>> getCards(MiniCardQueryDTO queryDTO) {
 
-        // 解析用户ID
-        final Long parsedUserId = parseUserId(userId);
+        final Long parsedUserId = parseUserId(queryDTO.getUserId());
 
-        Page<BizCard> page = cardService.pageCards(subjectId, frontContent, pageNum, pageSize);
+        CardQueryDTO cardQuery = new CardQueryDTO();
+        cardQuery.setSubjectId(queryDTO.getSubjectId());
+        cardQuery.setFrontContent(queryDTO.getFrontContent());
+        cardQuery.setPageNum(queryDTO.getPageNum());
+        cardQuery.setPageSize(queryDTO.getPageSize());
+        Page<BizCard> page = cardService.pageCards(cardQuery);
 
         // 获取卡片标签关联
         List<Long> cardIds = page.getRecords().stream()
@@ -369,6 +362,7 @@ public class MiniProgramController {
         }
 
         // 根据状态筛选
+        String status = queryDTO.getStatus();
         if (status != null && !status.isEmpty() && !status.equals("all")) {
             cardDTOs = cardDTOs.stream().filter(dto -> {
                 Integer cardStatus = dto.getStatus();
@@ -394,6 +388,10 @@ public class MiniProgramController {
         PageResultVO<MiniCardDTO> result = new PageResultVO<>(cardDTOs, page.getTotal(), page.getCurrent(), page.getSize());
         return Result.success(result);
     }
+
+    /**
+     * 获取卡片详情
+     */
 
     /**
      * 获取卡片详情
@@ -629,12 +627,9 @@ public class MiniProgramController {
      */
     @GetMapping("/study-history/cards")
     @ApiOperation("获取用户学习过的卡片列表")
-    public Result<Page<StudiedCardVO>> getStudiedCards(
-            @RequestParam(required = false) String userId,
-            @RequestParam(defaultValue = "1") Integer pageNum,
-            @RequestParam(defaultValue = "20") Integer pageSize) {
+    public Result<Page<StudiedCardVO>> getStudiedCards(StudiedCardQueryDTO queryDTO) {
 
-        final Long parsedUserId = parseUserId(userId);
+        final Long parsedUserId = parseUserId(queryDTO.getUserId());
 
         // 按（用户+卡片）分组，区分不同用户的学习记录
         Page<BizStudyHistory> page = studyHistoryService.lambdaQuery()
@@ -642,7 +637,7 @@ public class MiniProgramController {
                 .select(BizStudyHistory::getUserId, BizStudyHistory::getCardId)
                 .groupBy(BizStudyHistory::getUserId, BizStudyHistory::getCardId)
                 .orderByDesc(BizStudyHistory::getCardId)
-                .page(new Page<>(pageNum, pageSize));
+                .page(new Page<>(queryDTO.getPageNum(), queryDTO.getPageSize()));
 
         List<BizStudyHistory> records = page.getRecords();
         List<Long> cardIds = records.stream()
@@ -714,7 +709,7 @@ public class MiniProgramController {
             }
         }
 
-        Page<StudiedCardVO> result = new Page<>(pageNum, pageSize);
+        Page<StudiedCardVO> result = new Page<>(queryDTO.getPageNum(), queryDTO.getPageSize());
         result.setRecords(voList);
         result.setTotal(page.getTotal());
         return Result.success(result);
@@ -727,17 +722,15 @@ public class MiniProgramController {
     @ApiOperation("获取卡片学习历史记录")
     public Result<CardStudyHistoryVO> getCardStudyHistory(
             @PathVariable Long cardId,
-            @RequestParam(required = false) String userId,
-            @RequestParam(defaultValue = "1") Integer pageNum,
-            @RequestParam(defaultValue = "50") Integer pageSize) {
+            CardStudyHistoryQueryDTO queryDTO) {
 
-        final Long parsedUserId = parseUserId(userId);
+        final Long parsedUserId = parseUserId(queryDTO.getUserId());
 
         Page<BizStudyHistory> page = studyHistoryService.lambdaQuery()
                 .eq(BizStudyHistory::getCardId, cardId)
                 .eq(parsedUserId != null, BizStudyHistory::getUserId, parsedUserId)
                 .orderByDesc(BizStudyHistory::getCreateTime)
-                .page(new Page<>(pageNum, pageSize));
+                .page(new Page<>(queryDTO.getPageNum(), queryDTO.getPageSize()));
 
         BizCard card = cardService.getById(cardId);
 

@@ -1,4 +1,5 @@
 import SwiftUI
+import PhotosUI
 
 struct FeedbackView: View {
     @EnvironmentObject var appState: AppState
@@ -48,10 +49,10 @@ struct FeedbackView: View {
                                 HStack(spacing: 4) {
                                     Text("选择专业")
                                         .font(.system(size: 16, weight: .bold))
-                                        .foregroundColor(Color(hex: "303133"))
+                                        .foregroundColor(AppColor.textPrimary)
                                     Text("*")
                                         .font(.system(size: 14))
-                                        .foregroundColor(Color(hex: "F56C6C"))
+                                        .foregroundColor(AppColor.error)
                                 }
 
                                 if isLoadingMajors {
@@ -62,15 +63,15 @@ struct FeedbackView: View {
                                         Spacer()
                                     }
                                     .padding(12)
-                                    .background(Color(hex: "F5F7FA"))
+                                    .background(AppColor.backgroundLight)
                                     .cornerRadius(8)
                                 } else if majorList.isEmpty {
                                     Text("暂无专业数据")
                                         .font(.system(size: 14))
-                                        .foregroundColor(Color(hex: "909399"))
+                                        .foregroundColor(AppColor.textSecondary)
                                         .padding(12)
                                         .frame(maxWidth: .infinity)
-                                        .background(Color(hex: "F5F7FA"))
+                                        .background(AppColor.backgroundLight)
                                         .cornerRadius(8)
                                 } else {
                                     Menu {
@@ -91,14 +92,14 @@ struct FeedbackView: View {
                                         HStack {
                                             Text(selectedMajor?.majorName ?? "请选择专业")
                                                 .font(.system(size: 14))
-                                                .foregroundColor(selectedMajor != nil ? Color(hex: "303133") : Color(hex: "909399"))
+                                                .foregroundColor(selectedMajor != nil ? AppColor.textPrimary : AppColor.textSecondary)
                                             Spacer()
                                             Text("▼")
                                                 .font(.system(size: 12))
-                                                .foregroundColor(Color(hex: "909399"))
+                                                .foregroundColor(AppColor.textSecondary)
                                         }
                                         .padding(12)
-                                        .background(Color(hex: "F5F7FA"))
+                                        .background(AppColor.backgroundLight)
                                         .cornerRadius(8)
                                     }
                                 }
@@ -109,10 +110,10 @@ struct FeedbackView: View {
                                 HStack(spacing: 4) {
                                     Text("选择科目")
                                         .font(.system(size: 16, weight: .bold))
-                                        .foregroundColor(Color(hex: "303133"))
+                                        .foregroundColor(AppColor.textPrimary)
                                     Text("*")
                                         .font(.system(size: 14))
-                                        .foregroundColor(Color(hex: "F56C6C"))
+                                        .foregroundColor(AppColor.error)
                                 }
 
                                 if isLoadingSubjects {
@@ -123,23 +124,23 @@ struct FeedbackView: View {
                                         Spacer()
                                     }
                                     .padding(12)
-                                    .background(Color(hex: "F5F7FA"))
+                                    .background(AppColor.backgroundLight)
                                     .cornerRadius(8)
                                 } else if selectedMajor == nil {
                                     Text("请先选择专业")
                                         .font(.system(size: 14))
-                                        .foregroundColor(Color(hex: "909399"))
+                                        .foregroundColor(AppColor.textSecondary)
                                         .padding(12)
                                         .frame(maxWidth: .infinity)
-                                        .background(Color(hex: "F5F7FA"))
+                                        .background(AppColor.backgroundLight)
                                         .cornerRadius(8)
                                 } else if subjectList.isEmpty {
                                     Text("该专业暂无科目")
                                         .font(.system(size: 14))
-                                        .foregroundColor(Color(hex: "909399"))
+                                        .foregroundColor(AppColor.textSecondary)
                                         .padding(12)
                                         .frame(maxWidth: .infinity)
-                                        .background(Color(hex: "F5F7FA"))
+                                        .background(AppColor.backgroundLight)
                                         .cornerRadius(8)
                                 } else {
                                     Menu {
@@ -159,14 +160,14 @@ struct FeedbackView: View {
                                         HStack {
                                             Text(selectedSubject?.subjectName ?? "请选择科目")
                                                 .font(.system(size: 14))
-                                                .foregroundColor(selectedSubject != nil ? Color(hex: "303133") : Color(hex: "909399"))
+                                                .foregroundColor(selectedSubject != nil ? AppColor.textPrimary : AppColor.textSecondary)
                                             Spacer()
                                             Text("▼")
                                                 .font(.system(size: 12))
-                                                .foregroundColor(Color(hex: "909399"))
+                                                .foregroundColor(AppColor.textSecondary)
                                         }
                                         .padding(12)
-                                        .background(Color(hex: "F5F7FA"))
+                                        .background(AppColor.backgroundLight)
                                         .cornerRadius(8)
                                     }
                                 }
@@ -176,7 +177,7 @@ struct FeedbackView: View {
                             VStack(alignment: .leading, spacing: 12) {
                                 Text("反馈类型")
                                     .font(.system(size: 16, weight: .bold))
-                                    .foregroundColor(Color(hex: "303133"))
+                                    .foregroundColor(AppColor.textPrimary)
 
                                 HStack(spacing: 12) {
                                     ForEach(FeedbackType.allCases, id: \.self) { type in
@@ -194,21 +195,21 @@ struct FeedbackView: View {
                             VStack(alignment: .leading, spacing: 12) {
                                 Text("评分（可选）")
                                     .font(.system(size: 16, weight: .bold))
-                                    .foregroundColor(Color(hex: "303133"))
+                                    .foregroundColor(AppColor.textPrimary)
 
                                 HStack(spacing: 8) {
                                     ForEach(1..<6, id: \.self) { index in
                                         Button(action: { rating = index }) {
                                             Text("★")
                                                 .font(.system(size: 24))
-                                                .foregroundColor(index <= rating ? Color(hex: "FFD700") : Color(hex: "E0E0E0"))
+                                                .foregroundColor(index <= rating ? AppColor.gold : AppColor.divider)
                                         }
                                     }
 
                                     if rating > 0 {
                                         Text("\(rating)星")
                                             .font(.system(size: 14))
-                                            .foregroundColor(Color(hex: "909399"))
+                                            .foregroundColor(AppColor.textSecondary)
                                     }
                                 }
                             }
@@ -218,16 +219,16 @@ struct FeedbackView: View {
                                 HStack(spacing: 4) {
                                     Text("反馈内容")
                                         .font(.system(size: 16, weight: .bold))
-                                        .foregroundColor(Color(hex: "303133"))
+                                        .foregroundColor(AppColor.textPrimary)
                                     Text("*")
                                         .font(.system(size: 14))
-                                        .foregroundColor(Color(hex: "F56C6C"))
+                                        .foregroundColor(AppColor.error)
                                 }
 
                                 TextEditor(text: $content)
                                     .font(.system(size: 14))
                                     .padding(12)
-                                    .background(Color(hex: "F5F7FA"))
+                                    .background(AppColor.backgroundLight)
                                     .cornerRadius(8)
                                     .frame(height: 120)
 
@@ -235,7 +236,7 @@ struct FeedbackView: View {
                                     Spacer()
                                     Text("\(content.count)/500")
                                         .font(.system(size: 12))
-                                        .foregroundColor(Color(hex: "909399"))
+                                        .foregroundColor(AppColor.textSecondary)
                                 }
                             }
 
@@ -243,12 +244,12 @@ struct FeedbackView: View {
                             VStack(alignment: .leading, spacing: 12) {
                                 Text("联系方式（可选）")
                                     .font(.system(size: 16, weight: .bold))
-                                    .foregroundColor(Color(hex: "303133"))
+                                    .foregroundColor(AppColor.textPrimary)
 
                                 TextField("留下您的联系方式，方便我们回复", text: $contact)
                                     .font(.system(size: 14))
                                     .padding(12)
-                                    .background(Color(hex: "F5F7FA"))
+                                    .background(AppColor.backgroundLight)
                                     .cornerRadius(8)
                             }
 
@@ -256,7 +257,7 @@ struct FeedbackView: View {
                             VStack(alignment: .leading, spacing: 12) {
                                 Text("图片附件（可选）")
                                     .font(.system(size: 16, weight: .bold))
-                                    .foregroundColor(Color(hex: "303133"))
+                                    .foregroundColor(AppColor.textPrimary)
 
                                 HStack(spacing: 12) {
                                     ForEach(Array(images.enumerated()), id: \.offset) { index, image in
@@ -277,7 +278,7 @@ struct FeedbackView: View {
 
                                 Text("最多上传3张图片")
                                     .font(.system(size: 12))
-                                    .foregroundColor(Color(hex: "909399"))
+                                    .foregroundColor(AppColor.textSecondary)
                             }
 
                             // 提交按钮
@@ -290,8 +291,8 @@ struct FeedbackView: View {
                                     .background(
                                         LinearGradient(
                                             colors: canSubmit ?
-                                                [Color(hex: "667eea"), Color(hex: "764ba2")] :
-                                                [Color(hex: "C0C4CC"), Color(hex: "C0C4CC")],
+                                                [AppColor.primary, AppColor.primaryGradientEnd] :
+                                                [AppColor.disabledText, AppColor.disabledText],
                                             startPoint: .topLeading,
                                             endPoint: .bottomTrailing
                                         )
@@ -301,30 +302,6 @@ struct FeedbackView: View {
                             .disabled(!canSubmit || isSubmitting)
                         }
                         .padding(.top, 20)
-                    }
-
-                    // 历史反馈入口
-                    if appState.isLoggedIn {
-                        Button(action: { }) {
-                            HStack {
-                                Text("📋")
-                                    .font(.system(size: 20))
-
-                                Text("查看我的反馈记录")
-                                    .font(.system(size: 14))
-                                    .foregroundColor(Color(hex: "303133"))
-
-                                Spacer()
-
-                                Text("→")
-                                    .font(.system(size: 14))
-                                    .foregroundColor(Color(hex: "667eea"))
-                            }
-                            .padding(12)
-                            .background(Color.white)
-                            .cornerRadius(12)
-                        }
-                        .padding(.bottom, 20)
                     }
                 }
                 .padding(.horizontal, 16)
@@ -442,11 +419,11 @@ struct LoginPrompt: View {
 
             Text("提交反馈需要先登录")
                 .font(.system(size: 18, weight: .bold))
-                .foregroundColor(Color(hex: "303133"))
+                .foregroundColor(AppColor.textPrimary)
 
             Text("登录后可以更好地追踪反馈处理进度")
                 .font(.system(size: 14))
-                .foregroundColor(Color(hex: "909399"))
+                .foregroundColor(AppColor.textSecondary)
         }
     }
 }
@@ -460,30 +437,30 @@ struct CardInfoSection: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("关联卡片")
                 .font(.system(size: 16, weight: .bold))
-                .foregroundColor(Color(hex: "303133"))
+                .foregroundColor(AppColor.textPrimary)
 
             HStack(spacing: 8) {
                 Text("#\(cardId)")
                     .font(.system(size: 12))
-                    .foregroundColor(Color(hex: "667eea"))
+                    .foregroundColor(AppColor.primary)
                     .padding(.horizontal, 6)
                     .padding(.vertical, 2)
-                    .background(Color(hex: "F0F5FF"))
+                    .background(AppColor.infoLight)
                     .cornerRadius(4)
 
                 Text(content.isEmpty ? "卡片\(cardId)" : content)
                     .font(.system(size: 14))
-                    .foregroundColor(Color(hex: "303133"))
+                    .foregroundColor(AppColor.textPrimary)
                     .lineLimit(1)
 
                 Spacer()
 
                 Text("✓")
                     .font(.system(size: 14))
-                    .foregroundColor(Color(hex: "667eea"))
+                    .foregroundColor(AppColor.primary)
             }
             .padding(12)
-            .background(Color(hex: "F5F7FA"))
+            .background(AppColor.backgroundLight)
             .cornerRadius(8)
         }
     }
@@ -499,14 +476,14 @@ struct TypeButton: View {
         Button(action: action) {
             Text(type.label)
                 .font(.system(size: 14, weight: isSelected ? .medium : .regular))
-                .foregroundColor(isSelected ? .white : Color(hex: "606266"))
+                .foregroundColor(isSelected ? .white : AppColor.textMedium)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
                 .background(
                     RoundedRectangle(cornerRadius: 10)
                         .fill(isSelected ?
-                              LinearGradient(colors: [Color(hex: "667eea"), Color(hex: "764ba2")], startPoint: .topLeading, endPoint: .bottomTrailing) :
-                              LinearGradient(colors: [Color(hex: "F5F7FA"), Color(hex: "F5F7FA")], startPoint: .topLeading, endPoint: .bottomTrailing)
+                              LinearGradient(colors: [AppColor.primary, AppColor.primaryGradientEnd], startPoint: .topLeading, endPoint: .bottomTrailing) :
+                              LinearGradient(colors: [AppColor.backgroundLight, AppColor.backgroundLight], startPoint: .topLeading, endPoint: .bottomTrailing)
                         )
                 )
         }
@@ -533,7 +510,7 @@ struct ImagePreview: View {
                     .font(.system(size: 12, weight: .bold))
                     .foregroundColor(.white)
                     .padding(4)
-                    .background(Color(hex: "F56C6C"))
+                    .background(AppColor.error)
                     .cornerRadius(10)
             }
             .offset(x: 4, y: -4)
@@ -550,55 +527,67 @@ struct UploadButton: View {
             VStack(spacing: 8) {
                 Text("+")
                     .font(.system(size: 24))
-                    .foregroundColor(Color(hex: "909399"))
+                    .foregroundColor(AppColor.textSecondary)
 
                 Text("上传图片")
                     .font(.system(size: 12))
-                    .foregroundColor(Color(hex: "909399"))
+                    .foregroundColor(AppColor.textSecondary)
             }
             .frame(width: 80, height: 80)
-            .background(Color(hex: "F5F7FA"))
+            .background(AppColor.backgroundLight)
             .cornerRadius(8)
         }
     }
 }
 
-// 图片选择器（简化版）
+// 图片选择器（支持多选，最多 maxCount 张）
 struct ImagePicker: UIViewControllerRepresentable {
     let images: [UIImage]
     let maxCount: Int
     let onSelect: ([UIImage]) -> Void
 
-    func makeUIViewController(context: Context) -> UIImagePickerController {
-        let picker = UIImagePickerController()
+    func makeUIViewController(context: Context) -> PHPickerViewController {
+        var config = PHPickerConfiguration()
+        config.selectionLimit = maxCount
+        config.filter = .images
+        let picker = PHPickerViewController(configuration: config)
         picker.delegate = context.coordinator
-        picker.sourceType = .photoLibrary
-        picker.mediaTypes = ["public.image"]
         return picker
     }
 
-    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
+    func updateUIViewController(_ uiViewController: PHPickerViewController, context: Context) {}
 
     func makeCoordinator() -> Coordinator {
         Coordinator(onSelect: onSelect)
     }
 
-    class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
+    class Coordinator: NSObject, PHPickerViewControllerDelegate {
         var onSelect: ([UIImage]) -> Void
 
         init(onSelect: @escaping ([UIImage]) -> Void) {
             self.onSelect = onSelect
         }
 
-        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-            if let image = info[.originalImage] as? UIImage {
-                onSelect([image])
+        func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
+            guard !results.isEmpty else {
+                picker.dismiss(animated: true)
+                return
             }
-            picker.dismiss(animated: true)
-        }
-
-        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-            picker.dismiss(animated: true)
+            var images: [UIImage] = []
+            let group = DispatchGroup()
+            for result in results {
+                group.enter()
+                result.itemProvider.loadObject(ofClass: UIImage.self) { object, _ in
+                    if let image = object as? UIImage {
+                        images.append(image)
+                    }
+                    group.leave()
+                }
+            }
+            group.notify(queue: .main) {
+                picker.dismiss(animated: true)
+                self.onSelect(images)
+            }
         }
     }
 }

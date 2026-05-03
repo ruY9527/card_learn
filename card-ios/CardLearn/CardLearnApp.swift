@@ -42,8 +42,8 @@ class AppState: ObservableObject {
     }
 
     func checkLoginStatus() {
-        if let savedUser = UserDefaults.standard.string(forKey: "userInfo"),
-           let savedToken = UserDefaults.standard.string(forKey: "token"),
+        if let savedUser = UserDefaults.standard.string(forKey: AppKey.userInfo),
+           let savedToken = UserDefaults.standard.string(forKey: AppKey.token),
            !savedToken.isEmpty {
             let decoder = JSONDecoder()
             if let data = savedUser.data(using: .utf8),
@@ -56,10 +56,10 @@ class AppState: ObservableObject {
         }
         
         // 恢复专业选择
-        if let savedMajorId = UserDefaults.standard.object(forKey: "selected_major_id") as? Int {
+        if let savedMajorId = UserDefaults.standard.object(forKey: AppKey.selectedMajorId) as? Int {
             self.selectedMajorId = savedMajorId
         }
-        if let savedMajorName = UserDefaults.standard.string(forKey: "selected_major_name") {
+        if let savedMajorName = UserDefaults.standard.string(forKey: AppKey.selectedMajorName) {
             self.selectedMajorName = savedMajorName
         }
     }
@@ -73,9 +73,9 @@ class AppState: ObservableObject {
         let encoder = JSONEncoder()
         if let data = try? encoder.encode(user),
            let userString = String(data: data, encoding: .utf8) {
-            UserDefaults.standard.set(userString, forKey: "userInfo")
+            UserDefaults.standard.set(userString, forKey: AppKey.userInfo)
         }
-        UserDefaults.standard.set(token, forKey: "token")
+        UserDefaults.standard.set(token, forKey: AppKey.token)
     }
 
     func logout() {
@@ -84,28 +84,28 @@ class AppState: ObservableObject {
         self.token = ""
         self.stats = StudyStats()
 
-        UserDefaults.standard.removeObject(forKey: "userInfo")
-        UserDefaults.standard.removeObject(forKey: "token")
+        UserDefaults.standard.removeObject(forKey: AppKey.userInfo)
+        UserDefaults.standard.removeObject(forKey: AppKey.token)
     }
     
     // 保存专业选择
     func saveSelectedMajor(majorId: Int, majorName: String) {
         self.selectedMajorId = majorId
         self.selectedMajorName = majorName
-        UserDefaults.standard.set(majorId, forKey: "selected_major_id")
-        UserDefaults.standard.set(majorName, forKey: "selected_major_name")
+        UserDefaults.standard.set(majorId, forKey: AppKey.selectedMajorId)
+        UserDefaults.standard.set(majorName, forKey: AppKey.selectedMajorName)
     }
     
     // 清除专业选择
     func clearSelectedMajor() {
         self.selectedMajorId = nil
         self.selectedMajorName = nil
-        UserDefaults.standard.removeObject(forKey: "selected_major_id")
-        UserDefaults.standard.removeObject(forKey: "selected_major_name")
+        UserDefaults.standard.removeObject(forKey: AppKey.selectedMajorId)
+        UserDefaults.standard.removeObject(forKey: AppKey.selectedMajorName)
     }
 
     func loadStats() {
-        if let savedStats = UserDefaults.standard.string(forKey: "stats"),
+        if let savedStats = UserDefaults.standard.string(forKey: AppKey.stats),
            let data = savedStats.data(using: .utf8) {
             let decoder = JSONDecoder()
             if let stats = try? decoder.decode(StudyStats.self, from: data) {
@@ -118,7 +118,7 @@ class AppState: ObservableObject {
         let encoder = JSONEncoder()
         if let data = try? encoder.encode(stats),
            let statsString = String(data: data, encoding: .utf8) {
-            UserDefaults.standard.set(statsString, forKey: "stats")
+            UserDefaults.standard.set(statsString, forKey: AppKey.stats)
         }
     }
 }

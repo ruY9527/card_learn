@@ -89,6 +89,10 @@ public class SecurityConfig {
                 "/api/miniprogram/sprint-config",
                 "/api/miniprogram/study-history/**"
             ).permitAll()
+            // 放行接口 - 学习服务API
+            .antMatchers(
+                "/api/learning/**"
+            ).permitAll()
             // 其他请求需要认证
             .anyRequest().authenticated()
             .and()

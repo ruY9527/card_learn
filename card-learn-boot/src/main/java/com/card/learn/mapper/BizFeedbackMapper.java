@@ -16,8 +16,10 @@ public interface BizFeedbackMapper extends BaseMapper<BizFeedback> {
     /**
      * 分页查询反馈（关联用户和卡片信息）
      */
-    Page<FeedbackVO> selectFeedbackWithDetails(Page<FeedbackVO> page, 
-            @Param("type") String type, 
+    Page<FeedbackVO> selectFeedbackWithDetails(Page<FeedbackVO> page,
+            @Param("type") String type,
             @Param("status") String status);
+
+    Page<BizFeedback> selectPageByUserId(Page<BizFeedback> page, @Param("userId") Long userId);
 
 }

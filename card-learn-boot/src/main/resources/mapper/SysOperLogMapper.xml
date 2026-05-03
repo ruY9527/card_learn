@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.card.learn.mapper.SysOperLogMapper">
+
+    <select id="selectPageByCondition" resultType="com.card.learn.entity.SysOperLog">
+        SELECT * FROM sys_oper_log
+        <where>
+            <if test="title != null and title != ''">
+                AND title LIKE CONCAT('%', #{title}, '%')
+            </if>
+        </where>
+        ORDER BY oper_time DESC
+    </select>
+
+    <delete id="deleteAll">
+        DELETE FROM sys_oper_log
+    </delete>
+
+</mapper>

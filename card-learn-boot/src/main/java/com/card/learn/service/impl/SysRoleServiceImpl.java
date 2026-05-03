@@ -1,6 +1,5 @@
 package com.card.learn.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.card.learn.entity.SysRoleMenu;
@@ -30,14 +29,13 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
     @Autowired
     private SysUserRoleMapper userRoleMapper;
 
+    @Autowired
+    private SysRoleMapper roleMapper;
+
     @Override
     public Page<SysRole> pageRoles(String roleName, Integer pageNum, Integer pageSize) {
-        LambdaQueryWrapper<SysRole> wrapper = new LambdaQueryWrapper<>();
-        if (roleName != null && !roleName.isEmpty()) {
-            wrapper.like(SysRole::getRoleName, roleName);
-        }
-        wrapper.orderByAsc(SysRole::getCreateTime);
-        return page(new Page<>(pageNum, pageSize), wrapper);
+        Page<SysRole> page = new Page<>(pageNum, pageSize);
+        return roleMapper.selectPageByCondition(page, roleName);
     }
 
     @Override
@@ -58,14 +56,12 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
 
     @Override
     public List<SysRole> selectRolesByUserId(Long userId) {
-        LambdaQueryWrapper<SysUserRole> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(SysUserRole::getUserId, userId);
-        List<SysUserRole> userRoles = userRoleMapper.selectList(wrapper);
+        List<SysUserRole> userRoles = userRoleMapper.selectByUserId(userId);
         if (userRoles.isEmpty()) {
             return Collections.emptyList();
         }
         List<Long> roleIds = userRoles.stream().map(SysUserRole::getRoleId).collect(Collectors.toList());
-        return listByIds(roleIds);
+        return roleMapper.selectBatchIds(roleIds);
     }
 
 }

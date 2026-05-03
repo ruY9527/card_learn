@@ -9,6 +9,7 @@ import com.card.learn.vo.UserLearnRankVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -25,7 +26,7 @@ public interface BizUserProgressMapper extends BaseMapper<BizUserProgress> {
     /**
      * 每日学习趋势
      */
-    List<DailyLearnTrendVO> selectDailyTrend(@Param("days") Integer days, @Param("userId") Long userId);
+    List<DailyLearnTrendVO> selectDailyTrend(@Param("startDate") String startDate, @Param("userId") Long userId);
 
     /**
      * 用户学习排行榜
@@ -36,4 +37,8 @@ public interface BizUserProgressMapper extends BaseMapper<BizUserProgress> {
      * 科目维度学习统计
      */
     List<SubjectLearnStatsVO> selectSubjectStats(@Param("userId") Long userId);
+
+    BizUserProgress selectByUserIdAndCardId(@Param("userId") Long userId, @Param("cardId") Long cardId);
+
+    Long countByCondition(@Param("userId") Long userId, @Param("minStatus") Integer minStatus, @Param("maxStatus") Integer maxStatus, @Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
 }

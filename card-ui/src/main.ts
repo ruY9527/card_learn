@@ -8,6 +8,8 @@ import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 import App from './App.vue'
 import router from './router'
 import './styles/index.scss'
+import './styles/variables.scss'
+import './styles/dark-theme.scss'
 
 const app = createApp(App)
 

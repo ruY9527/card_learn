@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.card.learn.mapper.BizTagMapper">
+
+    <select id="selectPageByCondition" resultType="com.card.learn.entity.BizTag">
+        SELECT * FROM biz_tag
+        <where>
+            <if test="tagName != null and tagName != ''">
+                AND tag_name LIKE CONCAT('%', #{tagName}, '%')
+            </if>
+            <if test="subjectId != null">
+                AND subject_id = #{subjectId}
+            </if>
+        </where>
+        ORDER BY tag_id ASC
+    </select>
+
+</mapper>

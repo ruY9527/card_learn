@@ -10,17 +10,42 @@ class APIService {
         EnvConfig.config
     }
 
+    // MARK: - Cache
+
+    private var cachedSprintConfig: SprintConfig?
+    private var sprintConfigFetchTime: Date?
+    private let sprintConfigCacheTTL: TimeInterval = 300
+
+    // MARK: - Retry
+
+    private func retry<T>(maxRetries: Int = 2, delay: TimeInterval = 1.0, operation: @escaping () async throws -> T) async throws -> T {
+        var lastError: Error?
+        for attempt in 0...maxRetries {
+            do {
+                return try await operation()
+            } catch {
+                lastError = error
+                if attempt < maxRetries {
+                    try? await Task.sleep(nanoseconds: UInt64(delay * Double(attempt + 1) * 1_000_000_000))
+                }
+            }
+        }
+        throw lastError ?? APIError.networkError
+    }
+
     // MARK: - 小程序 API
     
     // 获取专业列表
     func getMajorList() async throws -> [Major] {
-        let url = URL(string: config.getApiUrl(path: "/api/miniprogram/majors"))!
-        let (data, _) = try await session.data(from: url)
-        let response = try JSONDecoder().decode(APIResponse<[Major]>.self, from: data)
-        if response.code == 200, let majors = response.data {
-            return majors
+        return try await retry {
+            let url = URL(string: self.config.getApiUrl(path: "/api/miniprogram/majors"))!
+            let (data, _) = try await self.session.data(from: url)
+            let response = try JSONDecoder().decode(APIResponse<[Major]>.self, from: data)
+            if response.code == 200, let majors = response.data {
+                return majors
+            }
+            throw APIError.serverError(response.message ?? "获取专业失败")
         }
-        throw APIError.serverError(response.message ?? "获取专业失败")
     }
 
     // 获取科目列表
@@ -38,32 +63,34 @@ class APIService {
     }
 
     // 分页获取卡片列表
-    func getCardPage(subjectId: Int?, frontContent: String?, appUserId: Int?, status: String?, pageNum: Int = 1, pageSize: Int = 20) async throws -> PageResponse<Card> {
-        var urlComponents = URLComponents(string: config.getApiUrl(path: "/api/miniprogram/cards"))!
-        var queryItems: [URLQueryItem] = [
-            URLQueryItem(name: "pageNum", value: String(pageNum)),
-            URLQueryItem(name: "pageSize", value: String(pageSize))
-        ]
-        if let subjectId = subjectId {
-            queryItems.append(URLQueryItem(name: "subjectId", value: String(subjectId)))
-        }
-        if let frontContent = frontContent, !frontContent.isEmpty {
-            queryItems.append(URLQueryItem(name: "frontContent", value: frontContent))
-        }
-        if let appUserId = appUserId {
-            queryItems.append(URLQueryItem(name: "userId", value: String(appUserId)))
-        }
-        if let status = status {
-            queryItems.append(URLQueryItem(name: "status", value: status))
-        }
-        urlComponents.queryItems = queryItems
+    func getCardPage(subjectId: Int?, frontContent: String?, appUserId: Int?, status: String?, pageNum: Int = 1, pageSize: Int = AppPageSize.cards) async throws -> PageResponse<Card> {
+        return try await retry {
+            var urlComponents = URLComponents(string: self.config.getApiUrl(path: "/api/miniprogram/cards"))!
+            var queryItems: [URLQueryItem] = [
+                URLQueryItem(name: "pageNum", value: String(pageNum)),
+                URLQueryItem(name: "pageSize", value: String(pageSize))
+            ]
+            if let subjectId = subjectId {
+                queryItems.append(URLQueryItem(name: "subjectId", value: String(subjectId)))
+            }
+            if let frontContent = frontContent, !frontContent.isEmpty {
+                queryItems.append(URLQueryItem(name: "frontContent", value: frontContent))
+            }
+            if let appUserId = appUserId {
+                queryItems.append(URLQueryItem(name: "userId", value: String(appUserId)))
+            }
+            if let status = status {
+                queryItems.append(URLQueryItem(name: "status", value: status))
+            }
+            urlComponents.queryItems = queryItems
 
-        let (data, _) = try await session.data(from: urlComponents.url!)
-        let response = try JSONDecoder().decode(APIResponse<PageResponse<Card>>.self, from: data)
-        if response.code == 200, let pageData = response.data {
-            return pageData
+            let (data, _) = try await self.session.data(from: urlComponents.url!)
+            let response = try JSONDecoder().decode(APIResponse<PageResponse<Card>>.self, from: data)
+            if response.code == 200, let pageData = response.data {
+                return pageData
+            }
+            throw APIError.serverError(response.message ?? "获取卡片失败")
         }
-        throw APIError.serverError(response.message ?? "获取卡片失败")
     }
 
     // 获取卡片详情
@@ -114,13 +141,30 @@ class APIService {
 
     // 获取冲刺配置
     func getSprintConfig() async throws -> SprintConfig {
-        let url = URL(string: config.getApiUrl(path: "/api/miniprogram/sprint-config"))!
-        let (data, _) = try await session.data(from: url)
-        let response = try JSONDecoder().decode(APIResponse<SprintConfig>.self, from: data)
-        if response.code == 200, let sprintConfig = response.data {
-            return sprintConfig
+        if let cached = cachedSprintConfig,
+           let fetchTime = sprintConfigFetchTime,
+           Date().timeIntervalSince(fetchTime) < sprintConfigCacheTTL {
+            return cached
         }
-        throw APIError.serverError(response.message ?? "获取冲刺配置失败")
+
+        let config = try await retry {
+            let url = URL(string: self.config.getApiUrl(path: "/api/miniprogram/sprint-config"))!
+            let (data, _) = try await self.session.data(from: url)
+            let response = try JSONDecoder().decode(APIResponse<SprintConfig>.self, from: data)
+            if response.code == 200, let sprintConfig = response.data {
+                return sprintConfig
+            }
+            throw APIError.serverError(response.message ?? "获取冲刺配置失败")
+        }
+
+        cachedSprintConfig = config
+        sprintConfigFetchTime = Date()
+        return config
+    }
+
+    func invalidateSprintConfigCache() {
+        cachedSprintConfig = nil
+        sprintConfigFetchTime = nil
     }
 
     // 获取推荐卡片
@@ -217,7 +261,7 @@ class APIService {
     }
 
     // 获取用户反馈列表
-    func getUserFeedbackList(appUserId: Int, pageNum: Int = 1, pageSize: Int = 10, token: String) async throws -> PageResponse<Feedback> {
+    func getUserFeedbackList(appUserId: Int, pageNum: Int = 1, pageSize: Int = AppPageSize.feedback, token: String) async throws -> PageResponse<Feedback> {
         var urlComponents = URLComponents(string: config.getApiUrl(path: "/api/miniprogram/feedback/list"))!
         urlComponents.queryItems = [
             URLQueryItem(name: "userId", value: String(appUserId)),
@@ -239,7 +283,7 @@ class APIService {
     // MARK: - 进度卡片 API
     
     // 获取进度卡片列表（已学习、已掌握、待复习）
-    func getProgressCards(appUserId: Int, status: String, pageNum: Int = 1, pageSize: Int = 20) async throws -> PageResponse<Card> {
+    func getProgressCards(appUserId: Int, status: String, pageNum: Int = 1, pageSize: Int = AppPageSize.cards) async throws -> PageResponse<Card> {
         var urlComponents = URLComponents(string: config.getApiUrl(path: "/api/miniprogram/cards"))!
         urlComponents.queryItems = [
             URLQueryItem(name: "userId", value: String(appUserId)),
@@ -287,7 +331,7 @@ class APIService {
     }
 
     // 获取我的卡片列表
-    func getMyCards(auditStatus: String?, pageNum: Int = 1, pageSize: Int = 10, token: String) async throws -> PageResponse<MyCard> {
+    func getMyCards(auditStatus: String?, pageNum: Int = 1, pageSize: Int = AppPageSize.myCards, token: String) async throws -> PageResponse<MyCard> {
         var urlComponents = URLComponents(string: config.getApiUrl(path: "/api/miniprogram/card/my"))!
         var queryItems: [URLQueryItem] = [
             URLQueryItem(name: "pageNum", value: String(pageNum)),
@@ -362,7 +406,7 @@ class APIService {
     }
 
     // 获取卡片评论列表
-    func getCardComments(cardId: Int, pageNum: Int = 1, pageSize: Int = 10) async throws -> PageResponse<Comment> {
+    func getCardComments(cardId: Int, pageNum: Int = 1, pageSize: Int = AppPageSize.comments) async throws -> PageResponse<Comment> {
         var urlComponents = URLComponents(string: config.getApiUrl(path: "/api/miniprogram/comment/list/\(cardId)"))!
         urlComponents.queryItems = [
             URLQueryItem(name: "pageNum", value: String(pageNum)),
@@ -386,6 +430,99 @@ class APIService {
             return stats
         }
         throw APIError.serverError(response.message ?? "获取评论统计失败")
+    }
+
+    // MARK: - SM-2 学习进度相关 API
+
+    // 获取用户SM-2进度
+    func getSM2Progress(cardId: Int, appUserId: Int?) async throws -> SM2Progress {
+        var urlComponents = URLComponents(string: config.getApiUrl(path: "/api/learning/sm2/progress"))!
+        var queryItems = [URLQueryItem(name: "cardId", value: String(cardId))]
+        if let appUserId = appUserId {
+            queryItems.append(URLQueryItem(name: "userId", value: String(appUserId)))
+        }
+        urlComponents.queryItems = queryItems
+        let (data, _) = try await session.data(from: urlComponents.url!)
+        let response = try JSONDecoder().decode(APIResponse<SM2Progress>.self, from: data)
+        if response.code == 200, let progress = response.data {
+            return progress
+        }
+        throw APIError.serverError(response.message ?? "获取SM2进度失败")
+    }
+
+    // 提交复习结果（SM-2）
+    func submitSM2Review(request: ReviewSubmitRequest, token: String?) async throws -> Bool {
+        let url = URL(string: config.getApiUrl(path: "/api/learning/review"))!
+        var urlRequest = URLRequest(url: url)
+        urlRequest.httpMethod = "POST"
+        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        if let token = token {
+            urlRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        urlRequest.httpBody = try JSONEncoder().encode(request)
+
+        let (data, _) = try await session.data(for: urlRequest)
+        let response = try JSONDecoder().decode(APIResponse<String>.self, from: data)
+        return response.code == 200
+    }
+
+    // 获取复习计划
+    func getReviewPlan(appUserId: Int?) async throws -> [ReviewPlanResponse] {
+        var urlComponents = URLComponents(string: config.getApiUrl(path: "/api/learning/plan"))!
+        if let appUserId = appUserId {
+            urlComponents.queryItems = [URLQueryItem(name: "userId", value: String(appUserId))]
+        }
+        let (data, _) = try await session.data(from: urlComponents.url!)
+        let response = try JSONDecoder().decode(APIResponse<[ReviewPlanResponse]>.self, from: data)
+        if response.code == 200, let plans = response.data {
+            return plans
+        }
+        throw APIError.serverError(response.message ?? "获取复习计划失败")
+    }
+
+    // 获取科目进度
+    func getSubjectProgress(appUserId: Int?) async throws -> [SubjectProgressResponse] {
+        var urlComponents = URLComponents(string: config.getApiUrl(path: "/api/learning/subject-progress"))!
+        if let appUserId = appUserId {
+            urlComponents.queryItems = [URLQueryItem(name: "userId", value: String(appUserId))]
+        }
+        let (data, _) = try await session.data(from: urlComponents.url!)
+        let response = try JSONDecoder().decode(APIResponse<[SubjectProgressResponse]>.self, from: data)
+        if response.code == 200, let progress = response.data {
+            return progress
+        }
+        throw APIError.serverError(response.message ?? "获取科目进度失败")
+    }
+
+    // 获取学习统计（Streak等）
+    func getLearningStats(appUserId: Int?) async throws -> LearningStatsResponse {
+        var urlComponents = URLComponents(string: config.getApiUrl(path: "/api/learning/stats"))!
+        if let appUserId = appUserId {
+            urlComponents.queryItems = [URLQueryItem(name: "userId", value: String(appUserId))]
+        }
+        let (data, _) = try await session.data(from: urlComponents.url!)
+        let response = try JSONDecoder().decode(APIResponse<LearningStatsResponse>.self, from: data)
+        if response.code == 200, let stats = response.data {
+            return stats
+        }
+        throw APIError.serverError(response.message ?? "获取学习统计失败")
+    }
+
+    // 注册设备（推送）
+    func registerDevice(userId: Int, deviceToken: String, deviceType: String) async throws -> Bool {
+        let url = URL(string: config.getApiUrl(path: "/api/learning/device/register"))!
+        var urlRequest = URLRequest(url: url)
+        urlRequest.httpMethod = "POST"
+        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        let body: [String: Any] = [
+            "userId": userId,
+            "deviceToken": deviceToken,
+            "deviceType": deviceType
+        ]
+        urlRequest.httpBody = try JSONSerialization.data(withJSONObject: body)
+        let (data, _) = try await session.data(for: urlRequest)
+        let response = try JSONDecoder().decode(APIResponse<String>.self, from: data)
+        return response.code == 200
     }
 }
 

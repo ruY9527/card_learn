@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.card.learn.dto.CardAuditDTO;
 import com.card.learn.dto.CardCreateDTO;
+import com.card.learn.dto.CardQueryDTO;
 import com.card.learn.entity.BizCard;
 import com.card.learn.vo.CardAuditVO;
 import com.card.learn.vo.CardVO;
@@ -17,12 +18,12 @@ public interface IBizCardService extends IService<BizCard> {
     /**
      * 分页查询卡片列表
      */
-    Page<BizCard> pageCards(Long subjectId, String frontContent, Integer pageNum, Integer pageSize);
+    Page<BizCard> pageCards(CardQueryDTO queryDTO);
 
     /**
      * 分页查询卡片列表（包含科目名称）
      */
-    Page<CardVO> pageCardsWithSubjectName(Long subjectId, String frontContent, Integer pageNum, Integer pageSize);
+    Page<CardVO> pageCardsWithSubjectName(CardQueryDTO queryDTO);
 
     /**
      * 用户录入卡片（待审批状态）

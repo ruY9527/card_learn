@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.card.learn.mapper.BizReviewPlanMapper">
+
+    <!-- 获取用户复习计划（带卡片信息） -->
+    <select id="selectReviewPlan" resultType="com.card.learn.vo.ReviewPlanVO">
+        SELECT
+            rp.card_id AS cardId,
+            DATE_FORMAT(rp.scheduled_date, '%Y-%m-%d') AS scheduledDate,
+            c.front_content AS frontContent,
+            c.back_content AS backContent,
+            s.subject_name AS subjectName,
+            c.difficulty_level AS difficultyLevel
+        FROM biz_review_plan rp
+        INNER JOIN biz_card c ON rp.card_id = c.card_id AND c.del_flag = '0'
+        LEFT JOIN biz_subject s ON c.subject_id = s.subject_id
+        WHERE rp.user_id = #{userId}
+          AND rp.status = '0'
+          AND rp.scheduled_date <![CDATA[ <= ]]> #{startDate}
+        ORDER BY rp.scheduled_date ASC, rp.card_id ASC
+    </select>
+
+    <!-- 各科目卡片总数（含专业信息） -->
+    <select id="selectSubjectCardTotals" resultType="com.card.learn.vo.SubjectTotalVO">
+        SELECT
+            s.subject_id AS subjectId,
+            s.subject_name AS subjectName,
+            s.major_id AS majorId,
+            m.major_name AS majorName,
+            COUNT(c.card_id) AS totalCards
+        FROM biz_subject s
+        LEFT JOIN biz_major m ON s.major_id = m.major_id
+        LEFT JOIN biz_card c ON s.subject_id = c.subject_id AND c.del_flag = '0'
+        GROUP BY s.subject_id, s.subject_name, s.major_id, m.major_name
+    </select>
+
+    <!-- 管理端：分页查询所有用户的复习计划 -->
+    <select id="selectAdminReviewPlan" resultType="com.card.learn.vo.AdminReviewPlanVO">
+        SELECT
+            rp.id,
+            rp.user_id AS userId,
+            COALESCE(u.nickname, '未知用户') AS nickname,
+            u.avatar,
+            rp.card_id AS cardId,
+            DATE_FORMAT(rp.scheduled_date, '%Y-%m-%d') AS scheduledDate,
+            c.front_content AS frontContent,
+            c.back_content AS backContent,
+            s.subject_name AS subjectName,
+            c.difficulty_level AS difficultyLevel,
+            rp.status
+        FROM biz_review_plan rp
+        INNER JOIN biz_card c ON rp.card_id = c.card_id AND c.del_flag = '0'
+        LEFT JOIN biz_subject s ON c.subject_id = s.subject_id
+        LEFT JOIN sys_user u ON rp.user_id = u.user_id
+        <where>
+            <if test="userId != null">
+                AND rp.user_id = #{userId}
+            </if>
+            <if test="status != null and status != ''">
+                AND rp.status = #{status}
+            </if>
+            <if test="scheduledDate != null and scheduledDate != ''">
+                AND rp.scheduled_date = #{scheduledDate}
+            </if>
+        </where>
+        ORDER BY rp.scheduled_date DESC, rp.user_id ASC, rp.card_id ASC
+    </select>
+
+    <!-- 各科目各状态进度数 -->
+    <select id="selectSubjectStatusCounts" resultType="com.card.learn.vo.SubjectStatusCountVO">
+        SELECT
+            c.subject_id AS subjectId,
+            p.status,
+            COUNT(*) AS count
+        FROM biz_card c
+        INNER JOIN biz_user_progress p ON c.card_id = p.card_id
+        WHERE c.del_flag = '0'
+          AND p.user_id = #{userId}
+        GROUP BY c.subject_id, p.status
+    </select>
+
+    <select id="selectPendingByUserAndCard" resultType="com.card.learn.entity.BizReviewPlan">
+        SELECT * FROM biz_review_plan
+        WHERE user_id = #{userId} AND card_id = #{cardId} AND status = '0'
+    </select>
+
+    <select id="selectLatestPendingByUserAndCard" resultType="com.card.learn.entity.BizReviewPlan">
+        SELECT * FROM biz_review_plan
+        WHERE user_id = #{userId} AND card_id = #{cardId} AND status = '0'
+        ORDER BY scheduled_date DESC
+        LIMIT 1
+    </select>
+
+</mapper>

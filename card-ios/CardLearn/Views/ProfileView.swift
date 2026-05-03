@@ -37,7 +37,7 @@ struct ProfileView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("学习统计")
                             .font(.system(size: 18, weight: .bold))
-                            .foregroundColor(Color(hex: "303133"))
+                            .foregroundColor(AppColor.textPrimary)
                             .padding(.horizontal, 16)
 
                         StatsGrid(
@@ -59,7 +59,7 @@ struct ProfileView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("设置")
                             .font(.system(size: 18, weight: .bold))
-                            .foregroundColor(Color(hex: "303133"))
+                            .foregroundColor(AppColor.textPrimary)
                             .padding(.horizontal, 16)
 
                         SettingsSection()
@@ -70,7 +70,7 @@ struct ProfileView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("知识贡献")
                             .font(.system(size: 18, weight: .bold))
-                            .foregroundColor(Color(hex: "303133"))
+                            .foregroundColor(AppColor.textPrimary)
                             .padding(.horizontal, 16)
 
                         ContributionSection(
@@ -97,7 +97,7 @@ struct ProfileView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("帮助与反馈")
                             .font(.system(size: 18, weight: .bold))
-                            .foregroundColor(Color(hex: "303133"))
+                            .foregroundColor(AppColor.textPrimary)
                             .padding(.horizontal, 16)
 
                         FeedbackSection(
@@ -189,7 +189,7 @@ struct SprintCard: View {
         .frame(maxWidth: .infinity)
         .background(
             LinearGradient(
-                colors: [Color(hex: "667eea"), Color(hex: "764ba2")],
+                colors: [AppColor.primary, AppColor.primaryGradientEnd],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
@@ -214,8 +214,8 @@ struct UserCard: View {
                 ZStack {
                     Circle()
                         .fill(isLoggedIn ?
-                              LinearGradient(colors: [Color(hex: "667eea"), Color(hex: "764ba2")], startPoint: .topLeading, endPoint: .bottomTrailing) :
-                              LinearGradient(colors: [Color(hex: "E0E0E0"), Color(hex: "E0E0E0")], startPoint: .topLeading, endPoint: .bottomTrailing)
+                              LinearGradient(colors: [AppColor.primary, AppColor.primaryGradientEnd], startPoint: .topLeading, endPoint: .bottomTrailing) :
+                              LinearGradient(colors: [AppColor.divider, AppColor.divider], startPoint: .topLeading, endPoint: .bottomTrailing)
                         )
                         .frame(width: 60, height: 60)
 
@@ -227,11 +227,11 @@ struct UserCard: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(isLoggedIn ? userInfo?.nickname ?? "" : "游客模式")
                         .font(.system(size: 18, weight: .bold))
-                        .foregroundColor(Color(hex: "303133"))
+                        .foregroundColor(AppColor.textPrimary)
 
                     Text(isLoggedIn ? "已登录" : "点击登录保存学习进度")
                         .font(.system(size: 12))
-                        .foregroundColor(Color(hex: "909399"))
+                        .foregroundColor(AppColor.textSecondary)
                 }
 
                 Spacer()
@@ -240,10 +240,10 @@ struct UserCard: View {
                     Button(action: logout) {
                         Text("退出")
                             .font(.system(size: 14))
-                            .foregroundColor(Color(hex: "F56C6C"))
+                            .foregroundColor(AppColor.error)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 6)
-                            .background(Color(hex: "FEF0F0"))
+                            .background(AppColor.errorLight)
                             .cornerRadius(8)
                     }
                 }
@@ -269,9 +269,9 @@ struct StatsGrid: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            StatItem(value: learned, label: "已学习", color: Color(hex: "409EFF"), onTap: { onTap("learned") })
-            StatItem(value: mastered, label: "已掌握", color: Color(hex: "67C23A"), onTap: { onTap("mastered") })
-            StatItem(value: review, label: "待复习", color: Color(hex: "E6A23C"), onTap: { onTap("review") })
+            StatItem(value: learned, label: "已学习", color: AppColor.info, onTap: { onTap("learned") })
+            StatItem(value: mastered, label: "已掌握", color: AppColor.success, onTap: { onTap("mastered") })
+            StatItem(value: review, label: "待复习", color: AppColor.warning, onTap: { onTap("review") })
         }
     }
 }
@@ -291,7 +291,7 @@ struct StatItem: View {
 
                 Text(label)
                     .font(.system(size: 12))
-                    .foregroundColor(Color(hex: "909399"))
+                    .foregroundColor(AppColor.textSecondary)
 
                 Text("点击查看")
                     .font(.system(size: 10))
@@ -308,43 +308,66 @@ struct StatItem: View {
 
 // 设置区域
 struct SettingsSection: View {
-    @State private var notificationEnabled: Bool = UserDefaults.standard.bool(forKey: "notification")
-    @State private var soundEnabled: Bool = UserDefaults.standard.bool(forKey: "sound")
+    @State private var notificationEnabled: Bool = UserDefaults.standard.bool(forKey: AppKey.notification)
+    @State private var soundEnabled: Bool = UserDefaults.standard.bool(forKey: AppKey.sound)
 
     var body: some View {
         VStack(spacing: 12) {
             SettingItem(label: "学习提醒", isOn: notificationEnabled) {
                 notificationEnabled.toggle()
-                UserDefaults.standard.set(notificationEnabled, forKey: "notification")
+                UserDefaults.standard.set(notificationEnabled, forKey: AppKey.notification)
             }
 
             SettingItem(label: "音效", isOn: soundEnabled) {
                 soundEnabled.toggle()
-                UserDefaults.standard.set(soundEnabled, forKey: "sound")
+                UserDefaults.standard.set(soundEnabled, forKey: AppKey.sound)
             }
 
-            Button(action: clearCache) {
+#if DEBUG
+            HStack {
+                Text("环境切换")
+                    .font(.system(size: 14))
+                    .foregroundColor(AppColor.textPrimary)
+
+                Spacer()
+
+                Picker("", selection: Binding(
+                    get: { EnvConfig.current == .production ? "production" : "development" },
+                    set: {
+                        EnvConfig.current = $0 == "production" ? .production : .development
+                    }
+                )) {
+                    Text("开发").tag("development")
+                    Text("生产").tag("production")
+                }
+                .pickerStyle(.segmented)
+                .frame(width: 120)
+            }
+            .padding(12)
+            .background(Color.white)
+            .cornerRadius(12)
+#endif
+
+            Button(action: {}) {
                 HStack {
                     Text("清除缓存")
                         .font(.system(size: 14))
-                        .foregroundColor(Color(hex: "303133"))
+                        .foregroundColor(AppColor.textSecondary)
 
                     Spacer()
 
-                    Text("12KB")
+                    Text("0 KB")
                         .font(.system(size: 12))
-                        .foregroundColor(Color(hex: "909399"))
+                        .foregroundColor(AppColor.textSecondary)
                 }
                 .padding(12)
                 .background(Color.white)
                 .cornerRadius(12)
             }
+            .disabled(true)
         }
     }
 
-    private func clearCache() {
-        // 清除缓存逻辑
-    }
 }
 
 struct SettingItem: View {
@@ -356,7 +379,7 @@ struct SettingItem: View {
         HStack {
             Text(label)
                 .font(.system(size: 14))
-                .foregroundColor(Color(hex: "303133"))
+                .foregroundColor(AppColor.textPrimary)
 
             Spacer()
 
@@ -365,7 +388,7 @@ struct SettingItem: View {
                 set: { _ in onChange() }
             ))
             .labelsHidden()
-            .tint(Color(hex: "409EFF"))
+            .tint(AppColor.info)
         }
         .padding(12)
         .background(Color.white)
@@ -388,13 +411,13 @@ struct ContributionSection: View {
 
                     Text("添加卡片")
                         .font(.system(size: 14))
-                        .foregroundColor(Color(hex: "303133"))
+                        .foregroundColor(AppColor.textPrimary)
 
                     Spacer()
 
                     Text("贡献知识")
                         .font(.system(size: 12))
-                        .foregroundColor(Color(hex: "43e97b"))
+                        .foregroundColor(AppColor.accentGreen)
                 }
                 .padding(12)
                 .background(Color.white)
@@ -409,13 +432,13 @@ struct ContributionSection: View {
 
                         Text("我的卡片")
                             .font(.system(size: 14))
-                            .foregroundColor(Color(hex: "303133"))
+                            .foregroundColor(AppColor.textPrimary)
 
                         Spacer()
 
                         Text("→")
                             .font(.system(size: 14))
-                            .foregroundColor(Color(hex: "667eea"))
+                            .foregroundColor(AppColor.primary)
                     }
                     .padding(12)
                     .background(Color.white)
@@ -441,13 +464,13 @@ struct FeedbackSection: View {
 
                     Text("提交反馈")
                         .font(.system(size: 14))
-                        .foregroundColor(Color(hex: "303133"))
+                        .foregroundColor(AppColor.textPrimary)
 
                     Spacer()
 
                     Text("→")
                         .font(.system(size: 14))
-                        .foregroundColor(Color(hex: "667eea"))
+                        .foregroundColor(AppColor.primary)
                 }
                 .padding(12)
                 .background(Color.white)
@@ -462,13 +485,13 @@ struct FeedbackSection: View {
 
                         Text("我的反馈记录")
                             .font(.system(size: 14))
-                            .foregroundColor(Color(hex: "303133"))
+                            .foregroundColor(AppColor.textPrimary)
 
                         Spacer()
 
                         Text("→")
                             .font(.system(size: 14))
-                            .foregroundColor(Color(hex: "667eea"))
+                            .foregroundColor(AppColor.primary)
                     }
                     .padding(12)
                     .background(Color.white)

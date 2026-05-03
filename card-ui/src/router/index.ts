@@ -109,6 +109,12 @@ const routes: RouteRecordRaw[] = [
         name: 'StudyHistory',
         component: () => import('@/views/stats/study-history/index.vue'),
         meta: { title: '学习记录' }
+      },
+      {
+        path: 'stats/review-plan',
+        name: 'ReviewPlan',
+        component: () => import('@/views/stats/review-plan/index.vue'),
+        meta: { title: '复习计划' }
       }
     ]
   }

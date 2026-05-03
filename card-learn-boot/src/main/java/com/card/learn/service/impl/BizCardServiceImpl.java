@@ -1,10 +1,10 @@
 package com.card.learn.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.card.learn.dto.CardAuditDTO;
 import com.card.learn.dto.CardCreateDTO;
+import com.card.learn.dto.CardQueryDTO;
 import com.card.learn.entity.BizCard;
 import com.card.learn.entity.BizCardTag;
 import com.card.learn.entity.BizTag;
@@ -42,25 +42,15 @@ public class BizCardServiceImpl extends ServiceImpl<BizCardMapper, BizCard> impl
     private IBizTagService tagService;
 
     @Override
-    public Page<BizCard> pageCards(Long subjectId, String frontContent, Integer pageNum, Integer pageSize) {
-        LambdaQueryWrapper<BizCard> wrapper = new LambdaQueryWrapper<>();
-        if (subjectId != null) {
-            wrapper.eq(BizCard::getSubjectId, subjectId);
-        }
-        if (frontContent != null && !frontContent.trim().isEmpty()) {
-            wrapper.like(BizCard::getFrontContent, frontContent.trim());
-        }
-        // 只查询已通过的卡片（供学习使用），兼容 audit_status 为 NULL 的系统内置卡片
-        wrapper.and(w -> w.eq(BizCard::getAuditStatus, "1").or().isNull(BizCard::getAuditStatus));
-        // 按card_id升序排列，让旧卡片（有标签的）排在前面
-        wrapper.orderByAsc(BizCard::getCardId);
-        return page(new Page<>(pageNum, pageSize), wrapper);
+    public Page<BizCard> pageCards(CardQueryDTO queryDTO) {
+        Page<BizCard> page = new Page<>(queryDTO.getPageNum(), queryDTO.getPageSize());
+        return cardMapper.selectPageCardList(page, queryDTO.getSubjectId(), queryDTO.getFrontContent());
     }
 
     @Override
-    public Page<CardVO> pageCardsWithSubjectName(Long subjectId, String frontContent, Integer pageNum, Integer pageSize) {
-        Page<CardVO> page = new Page<>(pageNum, pageSize);
-        return cardMapper.selectCardsWithSubjectName(page, subjectId, frontContent);
+    public Page<CardVO> pageCardsWithSubjectName(CardQueryDTO queryDTO) {
+        Page<CardVO> page = new Page<>(queryDTO.getPageNum(), queryDTO.getPageSize());
+        return cardMapper.selectCardsWithSubjectName(page, queryDTO.getSubjectId(), queryDTO.getFrontContent());
     }
 
     @Override

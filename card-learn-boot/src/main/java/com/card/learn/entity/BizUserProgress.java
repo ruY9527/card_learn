@@ -30,6 +30,7 @@ public class BizUserProgress implements Serializable {
     /** 建议下次复习时间 */
     private LocalDateTime nextReviewTime;
 
+    @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updateTime;
 
 }

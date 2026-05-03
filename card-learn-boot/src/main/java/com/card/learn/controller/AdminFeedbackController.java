@@ -2,6 +2,7 @@ package com.card.learn.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.card.learn.common.Result;
+import com.card.learn.dto.FeedbackQueryDTO;
 import com.card.learn.entity.BizFeedback;
 import com.card.learn.service.IBizFeedbackService;
 import com.card.learn.vo.FeedbackVO;
@@ -26,13 +27,8 @@ public class AdminFeedbackController {
      */
     @GetMapping("/page")
     @ApiOperation("分页查询反馈")
-    public Result<Page<FeedbackVO>> page(
-            @RequestParam(required = false) String type,
-            @RequestParam(required = false) String status,
-            @RequestParam(defaultValue = "1") Integer pageNum,
-            @RequestParam(defaultValue = "10") Integer pageSize) {
-        Page<FeedbackVO> page = feedbackService.pageFeedback(type, status, pageNum, pageSize);
-        return Result.success(page);
+    public Result<Page<FeedbackVO>> page(FeedbackQueryDTO queryDTO) {
+        return Result.success(feedbackService.pageFeedback(queryDTO));
     }
 
     /**

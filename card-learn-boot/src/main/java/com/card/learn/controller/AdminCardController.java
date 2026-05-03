@@ -2,6 +2,8 @@ package com.card.learn.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.card.learn.common.Result;
+import com.card.learn.dto.AuditCardQueryDTO;
+import com.card.learn.dto.BatchAuditDTO;
 import com.card.learn.dto.CardAuditDTO;
 import com.card.learn.entity.BizCardDraft;
 import com.card.learn.service.IBizCardDraftService;
@@ -32,12 +34,8 @@ public class AdminCardController {
      */
     @GetMapping("/page")
     @ApiOperation("分页查询待审批卡片")
-    public Result<Page<CardAuditVO>> page(
-            @RequestParam(required = false) String auditStatus,
-            @RequestParam(defaultValue = "1") Integer pageNum,
-            @RequestParam(defaultValue = "10") Integer pageSize) {
-        Page<CardAuditVO> page = draftService.pagePendingDrafts(auditStatus, pageNum, pageSize);
-        return Result.success(page);
+    public Result<Page<CardAuditVO>> page(AuditCardQueryDTO queryDTO) {
+        return Result.success(draftService.pagePendingDrafts(queryDTO));
     }
 
     /**
@@ -89,13 +87,13 @@ public class AdminCardController {
      */
     @PostMapping("/batch/pass")
     @ApiOperation("批量审批通过")
-    public Result<String> batchPass(@RequestBody List<Long> draftIds, @RequestParam Long auditUserId) {
+    public Result<String> batchPass(@RequestBody List<Long> draftIds, BatchAuditDTO auditDTO) {
         int passCount = 0;
         for (Long draftId : draftIds) {
             CardAuditDTO dto = new CardAuditDTO();
             dto.setCardId(draftId);
             dto.setAuditStatus("1");
-            dto.setAuditUserId(auditUserId);
+            dto.setAuditUserId(auditDTO.getAuditUserId());
             try {
                 draftService.auditDraftCard(dto);
                 passCount++;
@@ -111,17 +109,14 @@ public class AdminCardController {
      */
     @PostMapping("/batch/reject")
     @ApiOperation("批量审批拒绝")
-    public Result<String> batchReject(
-            @RequestBody List<Long> draftIds,
-            @RequestParam Long auditUserId,
-            @RequestParam(required = false) String auditRemark) {
+    public Result<String> batchReject(@RequestBody List<Long> draftIds, BatchAuditDTO auditDTO) {
         int rejectCount = 0;
         for (Long draftId : draftIds) {
             CardAuditDTO dto = new CardAuditDTO();
             dto.setCardId(draftId);
             dto.setAuditStatus("2");
-            dto.setAuditUserId(auditUserId);
-            dto.setAuditRemark(auditRemark);
+            dto.setAuditUserId(auditDTO.getAuditUserId());
+            dto.setAuditRemark(auditDTO.getAuditRemark());
             try {
                 draftService.auditDraftCard(dto);
                 rejectCount++;

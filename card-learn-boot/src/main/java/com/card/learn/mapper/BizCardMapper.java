@@ -30,4 +30,6 @@ public interface BizCardMapper extends BaseMapper<BizCard> {
      */
     Page<MyCardVO> selectMyCards(Page<MyCardVO> page, @Param("createUserId") Long createUserId);
 
+    Page<BizCard> selectPageCardList(Page<BizCard> page, @Param("subjectId") Long subjectId, @Param("frontContent") String frontContent);
+
 }

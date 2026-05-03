@@ -1,8 +1,9 @@
 package com.card.learn.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.card.learn.dto.FeedbackQueryDTO;
+import com.card.learn.dto.UserFeedbackQueryDTO;
 import com.card.learn.entity.BizFeedback;
 import com.card.learn.mapper.BizFeedbackMapper;
 import com.card.learn.service.IBizFeedbackService;
@@ -23,9 +24,9 @@ public class BizFeedbackServiceImpl extends ServiceImpl<BizFeedbackMapper, BizFe
     private BizFeedbackMapper feedbackMapper;
 
     @Override
-    public Page<FeedbackVO> pageFeedback(String type, String status, Integer pageNum, Integer pageSize) {
-        Page<FeedbackVO> page = new Page<>(pageNum, pageSize);
-        return feedbackMapper.selectFeedbackWithDetails(page, type, status);
+    public Page<FeedbackVO> pageFeedback(FeedbackQueryDTO queryDTO) {
+        Page<FeedbackVO> page = new Page<>(queryDTO.getPageNum(), queryDTO.getPageSize());
+        return feedbackMapper.selectFeedbackWithDetails(page, queryDTO.getType(), queryDTO.getStatus());
     }
 
     @Override
@@ -41,11 +42,9 @@ public class BizFeedbackServiceImpl extends ServiceImpl<BizFeedbackMapper, BizFe
     }
 
     @Override
-    public Page<BizFeedback> pageUserFeedback(Long userId, Integer pageNum, Integer pageSize) {
-        LambdaQueryWrapper<BizFeedback> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(BizFeedback::getUserId, userId);
-        wrapper.orderByDesc(BizFeedback::getCreateTime);
-        return page(new Page<>(pageNum, pageSize), wrapper);
+    public Page<BizFeedback> pageUserFeedback(UserFeedbackQueryDTO queryDTO) {
+        Page<BizFeedback> page = new Page<>(queryDTO.getPageNum(), queryDTO.getPageSize());
+        return feedbackMapper.selectPageByUserId(page, queryDTO.getUserId());
     }
 
 }

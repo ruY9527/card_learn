@@ -3,8 +3,10 @@ package com.card.learn.service.impl;
 import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.card.learn.dto.AuditCardQueryDTO;
 import com.card.learn.dto.CardAuditDTO;
 import com.card.learn.dto.CardCreateDTO;
+import com.card.learn.dto.MyCardQueryDTO;
 import com.card.learn.entity.BizCard;
 import com.card.learn.entity.BizCardDraft;
 import com.card.learn.entity.BizCardTag;
@@ -71,9 +73,9 @@ public class BizCardDraftServiceImpl extends ServiceImpl<BizCardDraftMapper, Biz
     }
 
     @Override
-    public Page<CardAuditVO> pagePendingDrafts(String auditStatus, Integer pageNum, Integer pageSize) {
-        Page<CardAuditVO> page = new Page<>(pageNum, pageSize);
-        Page<CardAuditVO> result = draftMapper.selectPendingDrafts(page, auditStatus);
+    public Page<CardAuditVO> pagePendingDrafts(AuditCardQueryDTO queryDTO) {
+        Page<CardAuditVO> page = new Page<>(queryDTO.getPageNum(), queryDTO.getPageSize());
+        Page<CardAuditVO> result = draftMapper.selectPendingDrafts(page, queryDTO.getAuditStatus());
         
         // 解析标签信息
         if (!CollectionUtils.isEmpty(result.getRecords())) {
@@ -166,9 +168,9 @@ public class BizCardDraftServiceImpl extends ServiceImpl<BizCardDraftMapper, Biz
     }
 
     @Override
-    public Page<MyCardVO> pageMyDrafts(Long createUserId, String auditStatus, Integer pageNum, Integer pageSize) {
-        Page<MyCardVO> page = new Page<>(pageNum, pageSize);
-        return draftMapper.selectMyDrafts(page, createUserId, auditStatus);
+    public Page<MyCardVO> pageMyDrafts(Long createUserId, MyCardQueryDTO queryDTO) {
+        Page<MyCardVO> page = new Page<>(queryDTO.getPageNum(), queryDTO.getPageSize());
+        return draftMapper.selectMyDrafts(page, createUserId, queryDTO.getAuditStatus());
     }
 
     @Override

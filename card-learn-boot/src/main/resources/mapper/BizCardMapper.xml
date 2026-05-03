@@ -140,4 +140,22 @@
         ORDER BY c.create_time DESC
     </select>
 
+    <sql id="auditStatusCondition">
+        (audit_status = '1' OR audit_status IS NULL)
+    </sql>
+
+    <select id="selectPageCardList" resultType="com.card.learn.entity.BizCard">
+        SELECT * FROM biz_card
+        <where>
+            AND <include refid="auditStatusCondition"/>
+            <if test="subjectId != null">
+                AND subject_id = #{subjectId}
+            </if>
+            <if test="frontContent != null and frontContent != ''">
+                AND front_content LIKE CONCAT('%', #{frontContent}, '%')
+            </if>
+        </where>
+        ORDER BY card_id ASC
+    </select>
+
 </mapper>

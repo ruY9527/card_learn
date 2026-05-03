@@ -2,6 +2,7 @@ package com.card.learn.service.impl;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.card.learn.dto.SubjectQueryDTO;
 import com.card.learn.entity.BizSubject;
 import com.card.learn.mapper.BizSubjectMapper;
 import com.card.learn.service.IBizSubjectService;
@@ -26,9 +27,9 @@ public class BizSubjectServiceImpl extends ServiceImpl<BizSubjectMapper, BizSubj
     }
 
     @Override
-    public Page<SubjectVO> pageSubjects(Long majorId, String subjectName, Integer pageNum, Integer pageSize) {
-        Page<SubjectVO> page = new Page<>(pageNum, pageSize);
-        return subjectMapper.selectSubjectsPage(page, majorId, subjectName);
+    public Page<SubjectVO> pageSubjects(SubjectQueryDTO queryDTO) {
+        Page<SubjectVO> page = new Page<>(queryDTO.getPageNum(), queryDTO.getPageSize());
+        return subjectMapper.selectSubjectsPage(page, queryDTO.getMajorId(), queryDTO.getSubjectName());
     }
 
 }

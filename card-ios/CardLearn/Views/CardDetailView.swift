@@ -36,14 +36,14 @@ struct CardDetailView: View {
                 Button(action: goToPrev) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 20))
-                        .foregroundColor(Color(hex: "667eea"))
+                        .foregroundColor(AppColor.primary)
                 }
                 
                 Spacer()
                 
                 Text(subjectName)
                     .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(Color(hex: "303133"))
+                    .foregroundColor(AppColor.textPrimary)
                     .onTapGesture(count: 2) {
                         dismiss()
                     }
@@ -53,7 +53,7 @@ struct CardDetailView: View {
                 Button(action: goToNext) {
                     Image(systemName: "chevron.right")
                         .font(.system(size: 20))
-                        .foregroundColor(Color(hex: "667eea"))
+                        .foregroundColor(AppColor.primary)
                 }
             }
             .padding(.horizontal, 16)
@@ -64,14 +64,14 @@ struct CardDetailView: View {
             HStack(spacing: 4) {
                 ForEach(0..<min(totalCount, 10), id: \.self) { index in
                     Circle()
-                        .fill(index <= currentCardIndex ? Color(hex: "667eea") : Color(hex: "E0E0E0"))
+                        .fill(index <= currentCardIndex ? AppColor.primary : AppColor.divider)
                         .frame(width: 8, height: 8)
                 }
                 
                 if totalCount > 10 {
                     Text("...")
                         .font(.system(size: 12))
-                        .foregroundColor(Color(hex: "909399"))
+                        .foregroundColor(AppColor.textSecondary)
                 }
             }
             .padding(.vertical, 12)
@@ -79,7 +79,7 @@ struct CardDetailView: View {
             // 进度文字
             Text("\(currentCardIndex + 1) / \(totalCount)")
                 .font(.system(size: 14))
-                .foregroundColor(Color(hex: "909399"))
+                .foregroundColor(AppColor.textSecondary)
                 .padding(.bottom, 12)
             
             // 卡片滑动区域
@@ -92,7 +92,7 @@ struct CardDetailView: View {
                                 HStack {
                                     Text("← 上一张")
                                         .font(.system(size: 14))
-                                        .foregroundColor(Color(hex: "667eea"))
+                                        .foregroundColor(AppColor.primary)
                                         .padding(.leading, 20)
 
                                     Spacer()
@@ -105,7 +105,7 @@ struct CardDetailView: View {
 
                                     Text("下一张 →")
                                         .font(.system(size: 14))
-                                        .foregroundColor(Color(hex: "667eea"))
+                                        .foregroundColor(AppColor.primary)
                                         .padding(.trailing, 20)
                                 }
                             }
@@ -154,10 +154,10 @@ struct CardDetailView: View {
                                 ForEach(tags, id: \.self) { tag in
                                     Text(tag)
                                         .font(.system(size: 12))
-                                        .foregroundColor(Color(hex: "909399"))
+                                        .foregroundColor(AppColor.textSecondary)
                                         .padding(.horizontal, 10)
                                         .padding(.vertical, 4)
-                                        .background(Color(hex: "F5F7FA"))
+                                        .background(AppColor.backgroundLight)
                                         .cornerRadius(6)
                                 }
                             }
@@ -181,11 +181,11 @@ struct CardDetailView: View {
                     GeometryReader { geometry in
                         ZStack(alignment: .leading) {
                             RoundedRectangle(cornerRadius: 4)
-                                .fill(Color(hex: "E0E0E0"))
+                                .fill(AppColor.divider)
                                 .frame(height: 8)
 
                             RoundedRectangle(cornerRadius: 4)
-                                .fill(Color(hex: "667eea"))
+                                .fill(AppColor.primary)
                                 .frame(width: geometry.size.width * CGFloat(progress) / 100, height: 8)
                         }
                     }
@@ -194,13 +194,13 @@ struct CardDetailView: View {
                     HStack {
                         Text("\(progress)%")
                             .font(.system(size: 12))
-                            .foregroundColor(Color(hex: "667eea"))
+                            .foregroundColor(AppColor.primary)
 
                         Spacer()
 
                         Text("剩余 \(totalCount - currentCardIndex - 1) 张")
                             .font(.system(size: 12))
-                            .foregroundColor(Color(hex: "909399"))
+                            .foregroundColor(AppColor.textSecondary)
                     }
                 }
                 .padding(16)
@@ -209,15 +209,15 @@ struct CardDetailView: View {
                 // 加载状态
                 VStack(spacing: 12) {
                     ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: Color(hex: "667eea")))
+                        .progressViewStyle(CircularProgressViewStyle(tint: AppColor.primary))
                     
                     Text("加载中...")
                         .font(.system(size: 14))
-                        .foregroundColor(Color(hex: "909399"))
+                        .foregroundColor(AppColor.textSecondary)
                 }
             }
         }
-        .background(Color(hex: "F5F7FA"))
+        .background(AppColor.backgroundLight)
         .navigationBarHidden(true)
         .navigationDestination(isPresented: $showFeedback) {
             if let card = currentCard {
@@ -255,30 +255,80 @@ struct CardDetailView: View {
     
     private func handleStatus(_ status: Int) {
         guard let card = currentCard else { return }
-        
+
         Task {
             do {
                 let userId = appState.userInfo?.userId
-                let _ = try await apiService.updateProgress(
+
+                // 同时调用两个接口：更新进度 + 提交SM-2复习（创建复习计划）
+                async let progressResult = apiService.updateProgress(
                     cardId: card.cardId,
                     appUserId: userId,
                     status: status,
                     token: appState.token
                 )
-                
+
+                // 映射status到SM-2 quality: 0->0(忘记), 1->3(困难), 2->5(完美)
+                let quality: Int
+                switch status {
+                case 1: quality = 3
+                case 2: quality = 5
+                default: quality = 0
+                }
+
+                // 获取当前SM-2状态，计算下次复习参数
+                let sm2State: SM2Result
+                do {
+                    let progress = try await apiService.getSM2Progress(
+                        cardId: card.cardId,
+                        appUserId: userId
+                    )
+                    sm2State = SM2Result(
+                        interval: progress.interval ?? 1,
+                        easeFactor: progress.easeFactor ?? 2.5,
+                        repetitions: progress.repetitions ?? 0,
+                        nextReviewDate: Date()
+                    )
+                } catch {
+                    sm2State = .initial
+                }
+
+                let reviewResult = SM2Algorithm.shared.calculate(
+                    quality: ReviewQuality(rawValue: quality) ?? .blackout,
+                    previous: sm2State
+                )
+
+                let isoFormatter = ISO8601DateFormatter()
+                isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+                let nextReviewTime = isoFormatter.string(from: reviewResult.nextReviewDate)
+
+                let request = ReviewSubmitRequest(
+                    cardId: card.cardId,
+                    userId: userId ?? 0,
+                    quality: quality,
+                    easeFactor: reviewResult.easeFactor,
+                    repetitions: reviewResult.repetitions,
+                    interval: reviewResult.interval,
+                    nextReviewTime: nextReviewTime
+                )
+
+                async let reviewSubmit = apiService.submitSM2Review(
+                    request: request,
+                    token: appState.token
+                )
+
+                let _ = try await progressResult
+                let _ = try await reviewSubmit
+
                 // 更新本地统计
                 updateLocalStats(status)
-                
-                // 显示成功提示
-                showToast(status)
-                
+
                 // 自动跳转到下一张
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                     goToNext()
                 }
             } catch {
                 updateLocalStats(status)
-                showToast(status)
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                     goToNext()
                 }
@@ -312,9 +362,6 @@ struct CardDetailView: View {
         appState.saveStats()
     }
     
-    private func showToast(_ status: Int) {
-        // 在 SwiftUI 中可以通过其他方式显示 Toast
-    }
     
     private func updateProgress() {
         progress = Int(Double(currentCardIndex + 1) / Double(totalCount) * 100)
@@ -371,7 +418,7 @@ struct CardFrontView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
-                BadgeView(text: "问题", color: Color(hex: "409EFF"))
+                BadgeView(text: "问题", color: AppColor.info)
                 
                 Spacer()
                 
@@ -379,13 +426,13 @@ struct CardFrontView: View {
                     ForEach(1..<6, id: \.self) { index in
                         Text("★")
                             .font(.system(size: 12))
-                            .foregroundColor(index <= difficulty ? Color(hex: "FFD700") : Color(hex: "E0E0E0"))
+                            .foregroundColor(index <= difficulty ? AppColor.gold : AppColor.divider)
                     }
                 }
                 
                 Text("难度")
                     .font(.system(size: 12))
-                    .foregroundColor(Color(hex: "909399"))
+                    .foregroundColor(AppColor.textSecondary)
             }
             
             ScrollView {
@@ -403,7 +450,7 @@ struct CardFrontView: View {
                     
                     Text("点击翻转查看答案")
                         .font(.system(size: 12))
-                        .foregroundColor(Color(hex: "409EFF"))
+                        .foregroundColor(AppColor.info)
                 }
             }
         }
@@ -425,7 +472,7 @@ struct CardBackView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
-                BadgeView(text: "答案", color: Color(hex: "67C23A"))
+                BadgeView(text: "答案", color: AppColor.success)
                 
                 Spacer()
                 
@@ -433,13 +480,13 @@ struct CardBackView: View {
                     ForEach(1..<6, id: \.self) { index in
                         Text("★")
                             .font(.system(size: 12))
-                            .foregroundColor(index <= difficulty ? Color(hex: "FFD700") : Color(hex: "E0E0E0"))
+                            .foregroundColor(index <= difficulty ? AppColor.gold : AppColor.divider)
                     }
                 }
                 
                 Text("难度")
                     .font(.system(size: 12))
-                    .foregroundColor(Color(hex: "909399"))
+                    .foregroundColor(AppColor.textSecondary)
             }
             
             ScrollView {
@@ -455,7 +502,7 @@ struct CardBackView: View {
                     
                     Text("点击返回问题")
                         .font(.system(size: 12))
-                        .foregroundColor(Color(hex: "409EFF"))
+                        .foregroundColor(AppColor.info)
                 }
                 
                 Spacer()
@@ -467,7 +514,7 @@ struct CardBackView: View {
                         
                         Text("纠错反馈")
                             .font(.system(size: 12))
-                            .foregroundColor(Color(hex: "409EFF"))
+                            .foregroundColor(AppColor.info)
                     }
                 }
             }
@@ -505,8 +552,8 @@ struct StatusButtons: View {
             StatusButton(
                 icon: "✗",
                 label: "不熟",
-                color: Color(hex: "F56C6C"),
-                bgColor: Color(hex: "FEF0F0")
+                color: AppColor.error,
+                bgColor: AppColor.errorLight
             ) {
                 onSelect(0)
             }
@@ -514,8 +561,8 @@ struct StatusButtons: View {
             StatusButton(
                 icon: "~",
                 label: "模糊",
-                color: Color(hex: "E6A23C"),
-                bgColor: Color(hex: "FDF6EC")
+                color: AppColor.warning,
+                bgColor: AppColor.warningLight
             ) {
                 onSelect(1)
             }
@@ -523,8 +570,8 @@ struct StatusButtons: View {
             StatusButton(
                 icon: "✓",
                 label: "掌握",
-                color: Color(hex: "67C23A"),
-                bgColor: Color(hex: "F0F9EB")
+                color: AppColor.success,
+                bgColor: AppColor.successLight
             ) {
                 onSelect(2)
             }
@@ -567,7 +614,7 @@ struct MarkdownText: View {
     let fontSize: CGFloat
     let textColor: Color
 
-    init(_ content: String, fontSize: CGFloat = 16, textColor: Color = Color(hex: "303133")) {
+    init(_ content: String, fontSize: CGFloat = 16, textColor: Color = AppColor.textPrimary) {
         self.content = content
         self.fontSize = fontSize
         self.textColor = textColor

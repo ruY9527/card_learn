@@ -107,11 +107,11 @@ struct StudyView: View {
                         if isLoading {
                             HStack(spacing: 8) {
                                 ProgressView()
-                                    .progressViewStyle(CircularProgressViewStyle(tint: Color(hex: "667eea")))
+                                    .progressViewStyle(CircularProgressViewStyle(tint: AppColor.primary))
                                     .scaleEffect(0.8)
                                 Text("加载中...")
                                     .font(.system(size: 13))
-                                    .foregroundColor(Color(hex: "909399"))
+                                    .foregroundColor(AppColor.textSecondary)
                             }
                             .padding(.vertical, 12)
                         }
@@ -231,7 +231,7 @@ struct SearchSection: View {
             HStack(spacing: 8) {
                 Image(systemName: "magnifyingglass")
                     .font(.system(size: 15))
-                    .foregroundColor(Color(hex: "C0C4CC"))
+                    .foregroundColor(AppColor.disabledText)
 
                 TextField("搜索卡片内容", text: $keyword)
                     .focused(isFocused)
@@ -245,7 +245,7 @@ struct SearchSection: View {
                     Button(action: onClear) {
                         Image(systemName: "xmark.circle.fill")
                             .font(.system(size: 15))
-                            .foregroundColor(Color(hex: "C0C4CC"))
+                            .foregroundColor(AppColor.disabledText)
                     }
                 }
             }
@@ -260,7 +260,7 @@ struct SearchSection: View {
                     .font(.system(size: 15, weight: .medium))
                     .foregroundColor(.white)
                     .frame(width: 44, height: 44)
-                    .background(Color(hex: "667eea"))
+                    .background(AppColor.primary)
                     .cornerRadius(12)
             }
         }
@@ -280,7 +280,7 @@ struct HeaderSection: View {
     var body: some View {
         ZStack {
             LinearGradient(
-                colors: [Color(hex: "667eea"), Color(hex: "764ba2")],
+                colors: [AppColor.primary, AppColor.primaryGradientEnd],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
@@ -293,9 +293,9 @@ struct HeaderSection: View {
                 HStack(spacing: 0) {
                     StatBox(value: learned, label: "已学习", color: .white)
                         .onTapGesture { onStatTap("learned") }
-                    StatBox(value: mastered, label: "已掌握", color: Color(hex: "43e97b"))
+                    StatBox(value: mastered, label: "已掌握", color: AppColor.accentGreen)
                         .onTapGesture { onStatTap("mastered") }
-                    StatBox(value: review, label: "待复习", color: Color(hex: "FFD700"))
+                    StatBox(value: review, label: "待复习", color: AppColor.gold)
                         .onTapGesture { onStatTap("review") }
                     StatBox(value: total, label: "总卡片", color: .white.opacity(0.8))
                         .onTapGesture { onStatTap("all") }
@@ -359,13 +359,13 @@ struct QuickStartButton: View {
             .padding(16)
             .background(
                 LinearGradient(
-                    colors: [Color(hex: "43e97b"), Color(hex: "38f9d7")],
+                    colors: [AppColor.accentGreen, AppColor.accentGreenEnd],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
             )
             .cornerRadius(16)
-            .shadow(color: Color(hex: "43e97b").opacity(0.3), radius: 10, x: 0, y: 5)
+            .shadow(color: AppColor.accentGreen.opacity(0.3), radius: 10, x: 0, y: 5)
         }
         .padding(.horizontal, 16)
     }
@@ -415,14 +415,14 @@ struct FilterTabItem: View {
         Button(action: action) {
             Text(title)
                 .font(.system(size: 13, weight: isSelected ? .medium : .regular))
-                .foregroundColor(isSelected ? .white : Color(hex: "606266"))
+                .foregroundColor(isSelected ? .white : AppColor.textMedium)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
                 .background(
                     RoundedRectangle(cornerRadius: 10)
                         .fill(isSelected ?
-                              LinearGradient(colors: [Color(hex: "667eea"), Color(hex: "764ba2")], startPoint: .topLeading, endPoint: .bottomTrailing) :
-                              LinearGradient(colors: [Color(hex: "F5F7FA"), Color(hex: "F5F7FA")], startPoint: .topLeading, endPoint: .bottomTrailing)
+                              LinearGradient(colors: [AppColor.primary, AppColor.primaryGradientEnd], startPoint: .topLeading, endPoint: .bottomTrailing) :
+                              LinearGradient(colors: [AppColor.backgroundLight, AppColor.backgroundLight], startPoint: .topLeading, endPoint: .bottomTrailing)
                         )
                 )
         }
@@ -445,29 +445,29 @@ struct CardListItem: View {
             
             Text(card.frontContent)
                 .font(.system(size: 15))
-                .foregroundColor(Color(hex: "303133"))
+                .foregroundColor(AppColor.textPrimary)
                 .lineLimit(3)
             
             HStack {
                 if let subjectName = card.subjectName {
                     Text(subjectName)
                         .font(.system(size: 11))
-                        .foregroundColor(Color(hex: "667eea"))
+                        .foregroundColor(AppColor.primary)
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
-                        .background(Color(hex: "F0F5FF"))
+                        .background(AppColor.infoLight)
                         .cornerRadius(4)
                 }
                 
                 Text("#\(card.cardId)")
                     .font(.system(size: 11))
-                    .foregroundColor(Color(hex: "909399"))
+                    .foregroundColor(AppColor.textSecondary)
                 
                 Spacer()
                 
                 Text("点击查看 →")
                     .font(.system(size: 12))
-                    .foregroundColor(Color(hex: "667eea"))
+                    .foregroundColor(AppColor.primary)
             }
             
             if let tags = card.tags, !tags.isEmpty {
@@ -475,10 +475,10 @@ struct CardListItem: View {
                     ForEach(tags, id: \.self) { tag in
                         Text(tag)
                             .font(.system(size: 11))
-                            .foregroundColor(Color(hex: "909399"))
+                            .foregroundColor(AppColor.textSecondary)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 2)
-                            .background(Color(hex: "F5F7FA"))
+                            .background(AppColor.backgroundLight)
                             .cornerRadius(4)
                     }
                 }
@@ -497,14 +497,14 @@ struct DifficultyBadge: View {
     var body: some View {
         Text("难度 \(level)")
             .font(.system(size: 11))
-            .foregroundColor(level <= 2 ? Color(hex: "4CAF50") :
-                             level == 3 ? Color(hex: "FF9800") :
-                             Color(hex: "F44336"))
+            .foregroundColor(level <= 2 ? AppColor.green :
+                             level == 3 ? AppColor.orange :
+                             AppColor.danger)
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
-            .background(level <= 2 ? Color(hex: "E8F5E9") :
-                        level == 3 ? Color(hex: "FFF3E0") :
-                        Color(hex: "FFEBEE"))
+            .background(level <= 2 ? AppColor.greenLight :
+                        level == 3 ? AppColor.orangeLight :
+                        AppColor.dangerLight)
             .cornerRadius(4)
     }
 }
@@ -515,56 +515,15 @@ struct StatusBadge: View {
     var body: some View {
         Text(status == 2 ? "✓ 掌握" : status == 1 ? "~ 模糊" : "✗ 未学")
             .font(.system(size: 11))
-            .foregroundColor(status == 2 ? Color(hex: "4CAF50") :
-                             status == 1 ? Color(hex: "FFC107") :
-                             Color(hex: "9E9E9E"))
+            .foregroundColor(status == 2 ? AppColor.green :
+                             status == 1 ? AppColor.amber :
+                             AppColor.neutralGray)
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
-            .background(status == 2 ? Color(hex: "E8F5E9") :
-                        status == 1 ? Color(hex: "FFF8E1") :
-                        Color(hex: "F5F5F5"))
+            .background(status == 2 ? AppColor.greenLight :
+                        status == 1 ? AppColor.amberLight :
+                        AppColor.backgroundGray)
             .cornerRadius(4)
-    }
-}
-
-// 加载更多按钮
-struct LoadMoreButton: View {
-    let action: () -> Void
-    
-    var body: some View {
-        Button(action: action) {
-            Text("加载更多")
-                .font(.system(size: 14))
-                .foregroundColor(Color(hex: "667eea"))
-        }
-        .padding(.vertical, 16)
-    }
-}
-
-// 已加载全部提示
-struct AllLoadedText: View {
-    let total: Int
-    
-    var body: some View {
-        Text("已加载全部 \(total) 张卡片")
-            .font(.system(size: 13))
-            .foregroundColor(Color(hex: "909399"))
-            .padding(.vertical, 16)
-    }
-}
-
-// 加载状态
-struct LoadingSection: View {
-    var body: some View {
-        VStack(spacing: 12) {
-            ProgressView()
-                .progressViewStyle(CircularProgressViewStyle(tint: Color(hex: "667eea")))
-            
-            Text("加载中...")
-                .font(.system(size: 14))
-                .foregroundColor(Color(hex: "909399"))
-        }
-        .padding(.vertical, 50)
     }
 }
 
@@ -581,12 +540,12 @@ struct EmptyState: View {
                  tab == "learned" ? "还没有学习过的卡片" :
                  "所有卡片都已学习")
                 .font(.system(size: 16))
-                .foregroundColor(Color(hex: "606266"))
+                .foregroundColor(AppColor.textMedium)
             
             if tab == "all" {
                 Text("请通过管理后台添加知识点卡片")
                     .font(.system(size: 13))
-                    .foregroundColor(Color(hex: "909399"))
+                    .foregroundColor(AppColor.textSecondary)
             }
         }
         .padding(.vertical, 50)

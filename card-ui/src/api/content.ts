@@ -1,5 +1,5 @@
 import request from './request'
-import type { Major, Subject, Card, Tag, SysUser, Feedback, FeedbackVO, PageResult, CardAuditVO, LearningStats, DailyLearnTrend, UserLearnRank, SubjectLearnStats, StudiedCard, StudyHistoryRecord } from './types'
+import type { Major, Subject, Card, Tag, SysUser, Feedback, FeedbackVO, PageResult, CardAuditVO, LearningStats, DailyLearnTrend, UserLearnRank, SubjectLearnStats, StudiedCard, StudyHistoryRecord, AdminReviewPlan } from './types'
 
 // 专业相关
 export const getMajorList = () => {
@@ -260,4 +260,13 @@ export const getStudiedCards = (params: { userId?: number; pageNum: number; page
  */
 export const getCardStudyHistory = (params: { cardId: number; userId?: number; pageNum?: number; pageSize?: number }) => {
   return request.get<any, { data: { cardId: number; frontContent: string; records: StudyHistoryRecord[]; total: number } }>(`/miniprogram/study-history/card/${params.cardId}`, { params: { userId: params.userId, pageNum: params.pageNum || 1, pageSize: params.pageSize || 50 } })
+}
+
+// ==================== 复习计划管理 ====================
+
+/**
+ * 管理端-分页查询复习计划
+ */
+export const getAdminReviewPlan = (params: { userId?: number; status?: string; scheduledDate?: string; pageNum: number; pageSize: number }) => {
+  return request.get<any, PageResult<AdminReviewPlan>>('/learning/admin/review-plan', { params })
 }

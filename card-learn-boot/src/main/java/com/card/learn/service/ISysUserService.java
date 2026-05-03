@@ -2,6 +2,7 @@ package com.card.learn.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.card.learn.dto.UserQueryDTO;
 import com.card.learn.entity.SysUser;
 
 import java.util.List;
@@ -19,7 +20,7 @@ public interface ISysUserService extends IService<SysUser> {
     /**
      * 分页查询用户
      */
-    Page<SysUser> pageUsers(String username, String status, Integer pageNum, Integer pageSize);
+    Page<SysUser> pageUsers(UserQueryDTO queryDTO);
 
     /**
      * 分配角色

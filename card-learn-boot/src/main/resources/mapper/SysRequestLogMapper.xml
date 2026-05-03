@@ -2,4 +2,34 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.card.learn.mapper.SysRequestLogMapper">
 
+    <sql id="queryCondition">
+        <if test="dto.requestMethod != null and dto.requestMethod != ''">
+            AND request_method = #{dto.requestMethod}
+        </if>
+        <if test="dto.requestUrl != null and dto.requestUrl != ''">
+            AND request_url LIKE CONCAT('%', #{dto.requestUrl}, '%')
+        </if>
+        <if test="dto.status != null and dto.status != ''">
+            AND status = #{dto.status}
+        </if>
+        <if test="dto.startTime != null and dto.startTime != ''">
+            AND create_time <![CDATA[ >= ]]> #{dto.startTime}
+        </if>
+        <if test="dto.endTime != null and dto.endTime != ''">
+            AND create_time <![CDATA[ <= ]]> #{dto.endTime}
+        </if>
+    </sql>
+
+    <select id="selectPageByCondition" resultType="com.card.learn.entity.SysRequestLog">
+        SELECT * FROM sys_request_log
+        <where>
+            <include refid="queryCondition"/>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+    <delete id="deleteByCreateTimeBefore">
+        DELETE FROM sys_request_log WHERE create_time <![CDATA[ < ]]> #{threshold}
+    </delete>
+
 </mapper>

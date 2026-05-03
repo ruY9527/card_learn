@@ -182,15 +182,15 @@ struct StatsSection: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            StatBox(value: stats.total ?? 0, label: "全部", color: Color(hex: "667eea"))
-            StatBox(value: stats.pending ?? 0, label: "待审批", color: Color(hex: "FF9800"))
-            StatBox(value: stats.passed ?? 0, label: "已通过", color: Color(hex: "4CAF50"))
-            StatBox(value: stats.rejected ?? 0, label: "已拒绝", color: Color(hex: "F44336"))
+            StatBox(value: stats.total ?? 0, label: "全部", color: AppColor.primary)
+            StatBox(value: stats.pending ?? 0, label: "待审批", color: AppColor.orange)
+            StatBox(value: stats.passed ?? 0, label: "已通过", color: AppColor.green)
+            StatBox(value: stats.rejected ?? 0, label: "已拒绝", color: AppColor.danger)
         }
         .padding(16)
         .background(
             LinearGradient(
-                colors: [Color(hex: "667eea"), Color(hex: "764ba2")],
+                colors: [AppColor.primary, AppColor.primaryGradientEnd],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
@@ -264,14 +264,14 @@ struct StatusTabItem: View {
         Button(action: action) {
             Text(title)
                 .font(.system(size: 12, weight: isSelected ? .medium : .regular))
-                .foregroundColor(isSelected ? .white : Color(hex: "606266"))
+                .foregroundColor(isSelected ? .white : AppColor.textMedium)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 6)
                 .background(
                     RoundedRectangle(cornerRadius: 8)
                         .fill(isSelected ?
-                              Color(hex: "667eea") :
-                              Color(hex: "F5F7FA"))
+                              AppColor.primary :
+                              AppColor.backgroundLight)
                 )
         }
     }
@@ -296,10 +296,10 @@ struct MyCardItem: View {
 
                 Text("难度 \(card.difficultyLevel ?? 2)")
                     .font(.system(size: 12))
-                    .foregroundColor(Color(hex: "909399"))
+                    .foregroundColor(AppColor.textSecondary)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
-                    .background(Color(hex: "F5F7FA"))
+                    .background(AppColor.backgroundLight)
                     .cornerRadius(4)
 
                 Spacer()
@@ -307,20 +307,20 @@ struct MyCardItem: View {
                 if let subjectName = card.subjectName {
                     Text(subjectName)
                         .font(.system(size: 12))
-                        .foregroundColor(Color(hex: "667eea"))
+                        .foregroundColor(AppColor.primary)
                 }
             }
 
             // 正面内容
             Text(card.frontContent)
                 .font(.system(size: 15))
-                .foregroundColor(Color(hex: "303133"))
+                .foregroundColor(AppColor.textPrimary)
                 .lineLimit(3)
 
             // 背面内容（预览）
             Text(card.backContent)
                 .font(.system(size: 13))
-                .foregroundColor(Color(hex: "606266"))
+                .foregroundColor(AppColor.textMedium)
                 .lineLimit(2)
 
             // 审核备注（如果有）
@@ -330,10 +330,10 @@ struct MyCardItem: View {
                         .font(.system(size: 12))
                     Text("审核备注：\(remark)")
                         .font(.system(size: 12))
-                        .foregroundColor(Color(hex: "F44336"))
+                        .foregroundColor(AppColor.danger)
                 }
                 .padding(10)
-                .background(Color(hex: "FFF3E0"))
+                .background(AppColor.orangeLight)
                 .cornerRadius(8)
             }
 
@@ -342,7 +342,7 @@ struct MyCardItem: View {
                 if let createTime = card.createTime {
                     Text(createTime)
                         .font(.system(size: 11))
-                        .foregroundColor(Color(hex: "909399"))
+                        .foregroundColor(AppColor.textSecondary)
                 }
 
                 Spacer()
@@ -351,10 +351,10 @@ struct MyCardItem: View {
                     Button(action: onDelete) {
                         Text("删除")
                             .font(.system(size: 12))
-                            .foregroundColor(Color(hex: "F44336"))
+                            .foregroundColor(AppColor.danger)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 6)
-                            .background(Color(hex: "FFEBEE"))
+                            .background(AppColor.dangerLight)
                             .cornerRadius(6)
                     }
                 }
@@ -364,46 +364,6 @@ struct MyCardItem: View {
         .background(Color.white)
         .cornerRadius(12)
         .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
-    }
-}
-
-// 加载更多按钮
-struct MyLoadMoreButton: View {
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            Text("加载更多")
-                .font(.system(size: 14))
-                .foregroundColor(Color(hex: "667eea"))
-        }
-        .padding(.vertical, 16)
-    }
-}
-
-// 已加载全部提示
-struct MyAllLoadedText: View {
-    let total: Int
-
-    var body: some View {
-        Text("已加载全部 \(total) 张卡片")
-            .font(.system(size: 13))
-            .foregroundColor(Color(hex: "909399"))
-            .padding(.vertical, 16)
-    }
-}
-
-// 加载状态
-struct MyLoadingSection: View {
-    var body: some View {
-        VStack(spacing: 12) {
-            ProgressView()
-                .progressViewStyle(CircularProgressViewStyle(tint: Color(hex: "667eea")))
-            Text("加载中...")
-                .font(.system(size: 14))
-                .foregroundColor(Color(hex: "909399"))
-        }
-        .padding(.vertical, 50)
     }
 }
 
@@ -421,19 +381,14 @@ struct EmptyMyCardsState: View {
                  tab == "1" ? "没有已通过的卡片" :
                  "没有已拒绝的卡片")
                 .font(.system(size: 16))
-                .foregroundColor(Color(hex: "606266"))
+                .foregroundColor(AppColor.textMedium)
 
             if tab == "all" {
                 Text("点击下方按钮添加知识点卡片")
                     .font(.system(size: 13))
-                    .foregroundColor(Color(hex: "909399"))
+                    .foregroundColor(AppColor.textSecondary)
             }
         }
         .padding(.vertical, 50)
     }
-}
-
-#Preview {
-    MyCardsView()
-        .environmentObject(AppState())
 }

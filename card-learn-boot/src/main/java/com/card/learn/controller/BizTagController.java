@@ -2,6 +2,7 @@ package com.card.learn.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.card.learn.common.Result;
+import com.card.learn.dto.TagQueryDTO;
 import com.card.learn.entity.BizTag;
 import com.card.learn.service.IBizTagService;
 import com.card.learn.vo.TagVO;
@@ -25,12 +26,8 @@ public class BizTagController {
 
     @GetMapping("/page")
     @ApiOperation("分页查询标签")
-    public Result<Page<TagVO>> page(
-            @RequestParam(required = false) String tagName,
-            @RequestParam(required = false) Long subjectId,
-            @RequestParam(defaultValue = "1") Integer pageNum,
-            @RequestParam(defaultValue = "10") Integer pageSize) {
-        return Result.success(tagService.pageTags(tagName, subjectId, pageNum, pageSize));
+    public Result<Page<TagVO>> page(TagQueryDTO queryDTO) {
+        return Result.success(tagService.pageTags(queryDTO));
     }
 
     @GetMapping("/list")

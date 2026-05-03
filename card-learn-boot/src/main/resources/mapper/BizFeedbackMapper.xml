@@ -49,4 +49,10 @@
         ORDER BY f.create_time DESC
     </select>
 
+    <select id="selectPageByUserId" resultType="com.card.learn.entity.BizFeedback">
+        SELECT * FROM biz_feedback
+        WHERE user_id = #{userId}
+        ORDER BY create_time DESC
+    </select>
+
 </mapper>

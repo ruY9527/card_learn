@@ -2,6 +2,7 @@ package com.card.learn.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.card.learn.dto.CommentQueryDTO;
 import com.card.learn.entity.BizCardComment;
 import com.card.learn.mapper.CommentStats;
 import com.card.learn.vo.CommentVO;
@@ -14,7 +15,7 @@ public interface IBizCardCommentService extends IService<BizCardComment> {
     /**
      * 分页查询评论列表（包含卡片信息）
      */
-    Page<CommentVO> pageComments(Long cardId, String commentType, String status, Integer pageNum, Integer pageSize);
+    Page<CommentVO> pageComments(CommentQueryDTO queryDTO);
 
     /**
      * 提交评论（劣质评论自动生成反馈）

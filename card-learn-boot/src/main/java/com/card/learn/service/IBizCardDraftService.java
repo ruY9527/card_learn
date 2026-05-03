@@ -2,8 +2,10 @@ package com.card.learn.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.card.learn.dto.AuditCardQueryDTO;
 import com.card.learn.dto.CardAuditDTO;
 import com.card.learn.dto.CardCreateDTO;
+import com.card.learn.dto.MyCardQueryDTO;
 import com.card.learn.entity.BizCardDraft;
 import com.card.learn.vo.CardAuditVO;
 import com.card.learn.vo.MyCardVO;
@@ -21,7 +23,7 @@ public interface IBizCardDraftService extends IService<BizCardDraft> {
     /**
      * 分页查询待审批卡片列表
      */
-    Page<CardAuditVO> pagePendingDrafts(String auditStatus, Integer pageNum, Integer pageSize);
+    Page<CardAuditVO> pagePendingDrafts(AuditCardQueryDTO queryDTO);
 
     /**
      * 审批卡片（通过时迁移到正式表，拒绝时更新状态）
@@ -31,7 +33,7 @@ public interface IBizCardDraftService extends IService<BizCardDraft> {
     /**
      * 获取用户录入的卡片列表（我的卡片）
      */
-    Page<MyCardVO> pageMyDrafts(Long createUserId, String auditStatus, Integer pageNum, Integer pageSize);
+    Page<MyCardVO> pageMyDrafts(Long createUserId, MyCardQueryDTO queryDTO);
 
     /**
      * 获取待审批卡片数量

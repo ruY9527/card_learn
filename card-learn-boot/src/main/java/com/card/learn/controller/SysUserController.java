@@ -2,6 +2,7 @@ package com.card.learn.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.card.learn.common.Result;
+import com.card.learn.dto.UserQueryDTO;
 import com.card.learn.entity.SysUser;
 import com.card.learn.entity.SysRole;
 import com.card.learn.service.ISysUserService;
@@ -35,12 +36,8 @@ public class SysUserController {
 
     @GetMapping("/page")
     @ApiOperation("分页查询用户")
-    public Result<Page<SysUser>> page(
-            @RequestParam(required = false) String username,
-            @RequestParam(required = false) String status,
-            @RequestParam(defaultValue = "1") Integer pageNum,
-            @RequestParam(defaultValue = "10") Integer pageSize) {
-        return Result.success(userService.pageUsers(username, status, pageNum, pageSize));
+    public Result<Page<SysUser>> page(UserQueryDTO queryDTO) {
+        return Result.success(userService.pageUsers(queryDTO));
     }
 
     @GetMapping("/list")
