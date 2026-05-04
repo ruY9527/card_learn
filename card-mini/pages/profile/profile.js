@@ -396,6 +396,13 @@ Page({
     })
   },
 
+  // 去我的笔记
+  goNoteList() {
+    wx.navigateTo({
+      url: '/pages/note-list/note-list'
+    })
+  },
+
   // 去我的添加记录
   goMyCards() {
     if (!this.data.isLoggedIn) {

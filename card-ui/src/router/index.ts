@@ -99,6 +99,12 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '评论管理' }
       },
       {
+        path: 'note',
+        name: 'Note',
+        component: () => import('@/views/note/index.vue'),
+        meta: { title: '笔记管理' }
+      },
+      {
         path: 'stats/learning',
         name: 'LearningStats',
         component: () => import('@/views/stats/learning/index.vue'),

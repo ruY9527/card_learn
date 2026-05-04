@@ -10,19 +10,23 @@
         <result column="avg_rating" property="avgRating"/>
     </resultMap>
 
-    <!-- 分页查询评论列表（关联卡片信息） -->
+    <!-- 分页查询评论列表（关联卡片信息，含点赞状态） -->
     <select id="selectCommentsWithCardInfo" resultType="com.card.learn.vo.CommentVO">
         SELECT
             c.comment_id,
             c.card_id,
             c.user_id,
-            c.user_nickname,
+            COALESCE(c.user_nickname, u.nickname, u.username) AS user_nickname,
             c.content,
             c.rating,
             c.comment_type,
             c.status,
             c.admin_reply,
             c.feedback_id,
+            c.is_note,
+            c.like_count,
+            c.dislike_count,
+            c.reply_count,
             c.create_time,
             c.update_time,
             card.front_content AS card_front_content,
@@ -38,20 +42,28 @@
                 WHEN '2' THEN '已隐藏'
                 ELSE '未知'
             END AS status_text
+            <if test="userId != null">
+                , COALESCE(cl.like_type, 0) AS like_status
+            </if>
         FROM biz_card_comment c
+        LEFT JOIN sys_user u ON c.user_id = u.user_id
         LEFT JOIN biz_card card ON c.card_id = card.card_id
         LEFT JOIN biz_subject sub ON card.subject_id = sub.subject_id
-        WHERE 1=1
-        <if test="cardId != null">
-            AND c.card_id = #{cardId}
+        <if test="userId != null">
+            LEFT JOIN biz_comment_like cl ON c.comment_id = cl.comment_id AND cl.user_id = #{userId}
         </if>
-        <if test="commentType != null and commentType != ''">
-            AND c.comment_type = #{commentType}
-        </if>
-        <if test="status != null and status != ''">
-            AND c.status = #{status}
-        </if>
-        ORDER BY c.create_time DESC
+        <where>
+            <if test="cardId != null">
+                AND c.card_id = #{cardId}
+            </if>
+            <if test="commentType != null and commentType != ''">
+                AND c.comment_type = #{commentType}
+            </if>
+            <if test="status != null and status != ''">
+                AND c.status = #{status}
+            </if>
+        </where>
+        ORDER BY c.like_count DESC, c.reply_count DESC, c.create_time DESC
     </select>
 
     <!-- 获取卡片评论统计 -->
@@ -63,6 +75,55 @@
             AVG(rating) AS avgRating
         FROM biz_card_comment
         WHERE card_id = #{cardId} AND status = '0'
+    </select>
+
+    <!-- 分页查询用户的笔记列表 -->
+    <select id="selectMyNotes" resultType="com.card.learn.vo.NoteVO">
+        SELECT
+            c.comment_id,
+            c.card_id,
+            c.user_id,
+            COALESCE(c.user_nickname, u.nickname, u.username) AS user_nickname,
+            c.content,
+            c.rating,
+            c.like_count,
+            c.reply_count,
+            c.create_time,
+            c.update_time,
+            card.front_content AS card_front_content,
+            sub.subject_name
+        FROM biz_card_comment c
+        LEFT JOIN sys_user u ON c.user_id = u.user_id
+        INNER JOIN biz_card card ON c.card_id = card.card_id AND card.del_flag = '0'
+        LEFT JOIN biz_subject sub ON card.subject_id = sub.subject_id
+        WHERE c.is_note = 1
+          AND c.status = '0'
+        <if test="userId != null">
+            AND c.user_id = #{userId}
+        </if>
+        <if test="username != null and username != ''">
+            AND c.user_id IN (
+                SELECT user_id FROM sys_user
+                WHERE nickname LIKE CONCAT('%', #{username}, '%')
+                   OR username LIKE CONCAT('%', #{username}, '%')
+            )
+        </if>
+        <if test="subjectId != null">
+            AND card.subject_id = #{subjectId}
+        </if>
+        <if test="cardId != null">
+            AND c.card_id = #{cardId}
+        </if>
+        <if test="startDate != null and startDate != ''">
+            AND c.create_time <![CDATA[ >= ]]> CONCAT(#{startDate}, ' 00:00:00')
+        </if>
+        <if test="endDate != null and endDate != ''">
+            AND c.create_time <![CDATA[ < ]]> CONCAT(#{endDate}, ' 23:59:59')
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND (c.content LIKE CONCAT('%', #{keyword}, '%') OR card.front_content LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        ORDER BY c.comment_id ASC
     </select>
 
 </mapper>

@@ -1,0 +1,82 @@
+<view class="container">
+  <!-- 筛选栏 -->
+  <view class="filter-bar">
+    <view class="filter-row">
+      <picker mode="selector" range="{{subjects}}" range-key="subjectName" value="{{subjectIndex}}" bindchange="bindSubjectChange">
+        <view class="filter-picker">
+          <text>{{subjects[subjectIndex].subjectName || '全部科目'}}</text>
+          <text class="arrow">▼</text>
+        </view>
+      </picker>
+      <view class="filter-btn" bindtap="handleExport">
+        <text>导出</text>
+      </view>
+    </view>
+
+    <view class="filter-row">
+      <view class="search-box">
+        <input class="search-input" placeholder="搜索笔记..." value="{{keyword}}" bindinput="onSearchInput" bindconfirm="onSearch" />
+      </view>
+    </view>
+
+    <view class="filter-row date-row">
+      <picker mode="date" value="{{startDate}}" bindchange="onStartDateChange">
+        <view class="date-picker">{{startDate || '开始日期'}}</view>
+      </picker>
+      <text class="date-sep">至</text>
+      <picker mode="date" value="{{endDate}}" bindchange="onEndDateChange">
+        <view class="date-picker">{{endDate || '结束日期'}}</view>
+      </picker>
+      <view class="clear-btn" bindtap="clearFilter" wx:if="{{subjectIndex > 0 || keyword || startDate || endDate}}">
+        <text>清除</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 笔记列表 -->
+  <view class="note-list" wx:if="{{notes.length > 0}}">
+    <view class="note-item" wx:for="{{notes}}" wx:key="commentId">
+      <view class="note-header">
+        <view class="note-subject" wx:if="{{item.subjectName}}">
+          <text>{{item.subjectName}}</text>
+        </view>
+        <text class="note-time">{{item.createTime}}</text>
+      </view>
+
+      <view class="note-card" data-card-id="{{item.cardId}}" bindtap="goCardDetail">
+        <text class="card-content">{{item.cardFrontContent}}</text>
+      </view>
+
+      <view class="note-content">
+        <text>{{item.content}}</text>
+      </view>
+
+      <view class="note-footer">
+        <view class="note-stats">
+          <text class="stat-item">♥ {{item.likeCount || 0}}</text>
+          <text class="stat-item">💬 {{item.replyCount || 0}}</text>
+        </view>
+        <view class="note-actions">
+          <view class="delete-btn" data-id="{{item.commentId}}" data-index="{{index}}" bindtap="handleDelete">
+            <text>删除</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{!loading && notes.length === 0}}">
+    <text class="empty-icon">📝</text>
+    <text class="empty-text">暂无笔记</text>
+    <text class="empty-hint">在卡片评论时勾选"同时保存为笔记"即可创建笔记</text>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading-more" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+  <view class="no-more" wx:if="{{!hasMore && notes.length > 0}}">
+    <text>没有更多了</text>
+  </view>
+</view>

@@ -17,7 +17,7 @@ struct HomeView: View {
     @State private var showCardDetail: Bool = false
     @State private var selectedCard: Card?
 
-    private let apiService = APIService.shared
+    private let apiService = CardApiService.shared
 
     var body: some View {
         NavigationStack {

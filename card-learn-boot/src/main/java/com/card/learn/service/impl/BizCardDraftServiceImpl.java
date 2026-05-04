@@ -57,7 +57,7 @@ public class BizCardDraftServiceImpl extends ServiceImpl<BizCardDraftMapper, Biz
         draft.setFrontContent(dto.getFrontContent());
         draft.setBackContent(dto.getBackContent());
         draft.setDifficultyLevel(dto.getDifficultyLevel() != null ? dto.getDifficultyLevel() : 2);
-        draft.setCreateUserId(dto.getCreateUserId());
+        draft.setCreateBy(dto.getCreateBy());
         draft.setAuditStatus("0"); // 待审批
         
         // 将标签ID列表存为JSON字符串
@@ -126,7 +126,7 @@ public class BizCardDraftServiceImpl extends ServiceImpl<BizCardDraftMapper, Biz
             card.setBackContent(draft.getBackContent());
             card.setDifficultyLevel(draft.getDifficultyLevel());
             card.setAuditStatus("1"); // 已通过
-            card.setCreateUserId(draft.getCreateUserId());
+            card.setCreateBy(draft.getCreateBy());
             card.setCreateTime(LocalDateTime.now());
             
             cardService.save(card);
@@ -168,9 +168,9 @@ public class BizCardDraftServiceImpl extends ServiceImpl<BizCardDraftMapper, Biz
     }
 
     @Override
-    public Page<MyCardVO> pageMyDrafts(Long createUserId, MyCardQueryDTO queryDTO) {
+    public Page<MyCardVO> pageMyDrafts(Long createBy, MyCardQueryDTO queryDTO) {
         Page<MyCardVO> page = new Page<>(queryDTO.getPageNum(), queryDTO.getPageSize());
-        return draftMapper.selectMyDrafts(page, createUserId, queryDTO.getAuditStatus());
+        return draftMapper.selectMyDrafts(page, createBy, queryDTO.getAuditStatus());
     }
 
     @Override
@@ -182,14 +182,14 @@ public class BizCardDraftServiceImpl extends ServiceImpl<BizCardDraftMapper, Biz
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void updateMyDraftCard(Long draftId, CardCreateDTO dto, Long createUserId) {
+    public void updateMyDraftCard(Long draftId, CardCreateDTO dto, Long createBy) {
         BizCardDraft draft = getById(draftId);
         if (draft == null) {
             throw new RuntimeException("临时卡片不存在");
         }
         
         // 校验是否是用户自己的卡片
-        if (!draft.getCreateUserId().equals(createUserId)) {
+        if (!draft.getCreateBy().equals(createBy)) {
             throw new RuntimeException("无权限修改此卡片");
         }
         
@@ -214,14 +214,14 @@ public class BizCardDraftServiceImpl extends ServiceImpl<BizCardDraftMapper, Biz
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void deleteMyDraftCard(Long draftId, Long createUserId) {
+    public void deleteMyDraftCard(Long draftId, Long createBy) {
         BizCardDraft draft = getById(draftId);
         if (draft == null) {
             throw new RuntimeException("临时卡片不存在");
         }
         
         // 校验是否是用户自己的卡片
-        if (!draft.getCreateUserId().equals(createUserId)) {
+        if (!draft.getCreateBy().equals(createBy)) {
             throw new RuntimeException("无权限删除此卡片");
         }
         

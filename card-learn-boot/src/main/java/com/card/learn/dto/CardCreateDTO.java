@@ -34,6 +34,6 @@ public class CardCreateDTO implements Serializable {
     private List<Long> tagIds;
 
     /** 创建用户ID（小程序用户） */
-    private Long createUserId;
+    private Long createBy;
 
 }

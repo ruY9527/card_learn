@@ -223,6 +223,12 @@
           <text class="section-label">评价内容（可选）</text>
           <textarea class="comment-input" placeholder="请输入您的评价或建议..." value="{{commentContent}}" bindinput="onCommentInput" maxlength="200"></textarea>
         </view>
+
+        <!-- 保存为笔记 -->
+        <view class="note-section">
+          <checkbox class="note-checkbox" checked="{{saveAsNote}}" bindchange="toggleSaveAsNote" color="#409EFF" />
+          <text class="note-label" bindtap="toggleSaveAsNote">同时保存为笔记</text>
+        </view>
       </view>
 
       <view class="modal-footer">

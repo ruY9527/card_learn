@@ -8,7 +8,9 @@
     "pages/feedback-list/feedback-list",
     "pages/my-cards/my-cards",
     "pages/progress-cards/progress-cards",
-    "pages/add-card/add-card"
+    "pages/add-card/add-card",
+    "pages/comment-list/comment-list",
+    "pages/note-list/note-list"
   ],
   "window": {
     "navigationBarTextStyle": "black",

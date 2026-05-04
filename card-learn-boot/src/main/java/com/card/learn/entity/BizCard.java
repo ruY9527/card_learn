@@ -34,8 +34,8 @@ public class BizCard implements Serializable {
     /** 审批状态（0待审批 1已通过 2已拒绝） */
     private String auditStatus;
 
-    /** 创建用户ID（系统创建为NULL，用户录入则有值） */
-    private Long createUserId;
+    /** 创建人（系统创建为NULL，用户录入则有值） */
+    private Long createBy;
 
     /** 审批人ID */
     private Long auditUserId;
@@ -59,7 +59,7 @@ public class BizCard implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updateTime;
 
-    /** 更新人ID */
-    private Long updateUserId;
+    /** 修改人 */
+    private Long updateBy;
 
 }

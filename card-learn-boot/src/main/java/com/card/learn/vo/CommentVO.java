@@ -55,6 +55,21 @@ public class CommentVO implements Serializable {
     /** 关联的反馈ID */
     private Long feedbackId;
 
+    /** 是否作为笔记 */
+    private Integer isNote;
+
+    /** 点赞数 */
+    private Integer likeCount;
+
+    /** 不喜欢数 */
+    private Integer dislikeCount;
+
+    /** 回复数 */
+    private Integer replyCount;
+
+    /** 当前用户点赞状态：0=无, 1=喜欢, 2=不喜欢 */
+    private Integer likeStatus;
+
     /** 创建时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;

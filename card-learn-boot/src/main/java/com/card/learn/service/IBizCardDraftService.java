@@ -33,7 +33,7 @@ public interface IBizCardDraftService extends IService<BizCardDraft> {
     /**
      * 获取用户录入的卡片列表（我的卡片）
      */
-    Page<MyCardVO> pageMyDrafts(Long createUserId, MyCardQueryDTO queryDTO);
+    Page<MyCardVO> pageMyDrafts(Long createBy, MyCardQueryDTO queryDTO);
 
     /**
      * 获取待审批卡片数量
@@ -43,11 +43,11 @@ public interface IBizCardDraftService extends IService<BizCardDraft> {
     /**
      * 用户修改自己的卡片（仅限待审批状态）
      */
-    void updateMyDraftCard(Long draftId, CardCreateDTO dto, Long createUserId);
+    void updateMyDraftCard(Long draftId, CardCreateDTO dto, Long createBy);
 
     /**
      * 用户删除自己的卡片（仅限待审批状态）
      */
-    void deleteMyDraftCard(Long draftId, Long createUserId);
+    void deleteMyDraftCard(Long draftId, Long createBy);
 
 }

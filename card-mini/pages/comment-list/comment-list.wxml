@@ -1,0 +1,109 @@
+<view class="container">
+  <!-- 评论列表 -->
+  <view class="comment-list" wx:if="{{comments.length > 0}}">
+    <view class="comment-item" wx:for="{{comments}}" wx:key="commentId">
+      <!-- 评论头部 -->
+      <view class="comment-header">
+        <view class="user-info">
+          <text class="nickname">{{item.userNickname || '匿名用户'}}</text>
+          <text class="time">{{item.createTime}}</text>
+        </view>
+        <view class="comment-type {{item.commentType == 'QUALITY' ? 'type-quality' : item.commentType == 'POOR' ? 'type-poor' : 'type-neutral'}}">
+          {{item.commentType == 'QUALITY' ? '优质' : item.commentType == 'POOR' ? '劣质' : '中性'}}
+        </view>
+      </view>
+
+      <!-- 评分 -->
+      <view class="rating" wx:if="{{item.rating}}">
+        <text wx:for="{{5}}" wx:for-item="star" wx:key="*this" class="star {{star < item.rating ? 'star-active' : ''}}">★</text>
+      </view>
+
+      <!-- 评论内容 -->
+      <view class="comment-content">
+        <text>{{item.content}}</text>
+      </view>
+
+      <!-- 操作栏 -->
+      <view class="comment-actions">
+        <view class="action-btn" data-id="{{item.commentId}}" data-index="{{index}}" bindtap="toggleLike">
+          <text class="action-icon {{item.likeStatus ? 'liked' : ''}}">♥</text>
+          <text class="action-text">{{item.likeCount || 0}}</text>
+        </view>
+        <view class="action-btn" data-comment-id="{{item.commentId}}" data-nickname="{{item.userNickname}}" bindtap="showReplyModal">
+          <text class="action-icon">💬</text>
+          <text class="action-text">回复</text>
+        </view>
+        <view class="action-btn" data-id="{{item.commentId}}" data-index="{{index}}" bindtap="toggleReplies" wx:if="{{item.replyCount > 0}}">
+          <text class="action-icon">▼</text>
+          <text class="action-text">{{item.replyCount}}条回复</text>
+        </view>
+      </view>
+
+      <!-- 回复列表（懒加载） -->
+      <view class="replies-section" wx:if="{{expandedReplies[item.commentId]}}">
+        <view class="reply-loading" wx:if="{{replyLoading[item.commentId]}}">
+          <text>加载中...</text>
+        </view>
+        <view class="reply-list" wx:else>
+          <view class="reply-item" wx:for="{{item.replies}}" wx:for-item="reply" wx:key="replyId">
+            <view class="reply-header">
+              <text class="reply-nickname">{{reply.userNickname || '匿名用户'}}</text>
+              <text class="reply-time">{{reply.createTime}}</text>
+            </view>
+            <view class="reply-content">
+              <text>{{reply.content}}</text>
+            </view>
+            <view class="reply-actions">
+              <view class="action-btn" data-reply-id="{{reply.replyId}}" data-comment-index="{{index}}" data-reply-index="{{replyIndex}}" bindtap="toggleReplyLike">
+                <text class="action-icon {{reply.likeStatus ? 'liked' : ''}}">♥</text>
+                <text class="action-text">{{reply.likeCount || 0}}</text>
+              </view>
+            </view>
+
+            <!-- 子回复 -->
+            <view class="children-section" wx:if="{{reply.hasMoreChildren}}">
+              <view class="load-children-btn" data-parent-id="{{reply.replyId}}" data-comment-index="{{index}}" data-reply-index="{{replyIndex}}" bindtap="loadChildren">
+                查看{{reply.children ? '更多' : ''}}子回复
+              </view>
+            </view>
+            <view class="children-list" wx:if="{{reply.children && reply.children.length > 0}}">
+              <view class="child-reply" wx:for="{{reply.children}}" wx:for-item="child" wx:key="replyId">
+                <text class="child-nickname">{{child.userNickname}}</text>
+                <text class="child-content">{{child.content}}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{!loading && comments.length === 0}}">
+    <text class="empty-icon">💬</text>
+    <text class="empty-text">暂无评论</text>
+    <text class="empty-hint">成为第一个评论的人吧</text>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading-more" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+  <view class="no-more" wx:if="{{!hasMore && comments.length > 0}}">
+    <text>没有更多了</text>
+  </view>
+
+  <!-- 回复弹窗 -->
+  <view class="reply-dialog-mask" wx:if="{{showReplyDialog}}" bindtap="hideReplyModal" catchtouchmove="preventTouchMove">
+    <view class="reply-dialog" catchtap="">
+      <view class="dialog-header">
+        <text class="dialog-title">{{replyTarget}}</text>
+        <text class="dialog-close" bindtap="hideReplyModal">✕</text>
+      </view>
+      <textarea class="reply-input" placeholder="写下你的回复..." value="{{replyContent}}" bindinput="onReplyInput" maxlength="500" auto-focus></textarea>
+      <view class="dialog-footer">
+        <button class="submit-btn" bindtap="submitReply">发送</button>
+      </view>
+    </view>
+  </view>
+</view>

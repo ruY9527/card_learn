@@ -4,7 +4,7 @@ const { getUserFeedbackList, getFeedbackById } = require('../../utils/request')
 Page({
   data: {
     isLoggedIn: false,
-    appUserId: null,
+    userId: null,
 
     feedbackList: [],
     pageNum: 1,
@@ -48,7 +48,7 @@ Page({
 
     this.setData({
       isLoggedIn,
-      appUserId: isLoggedIn ? userInfo.userId : null
+      userId: isLoggedIn ? userInfo.userId : null
     })
   },
 
@@ -69,7 +69,7 @@ Page({
 
     try {
       const res = await getUserFeedbackList(
-        this.data.appUserId,
+        this.data.userId,
         this.data.pageNum,
         this.data.pageSize
       )

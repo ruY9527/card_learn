@@ -33,7 +33,10 @@ public class BizCardTag implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updateTime;
 
-    /** 更新人ID */
-    private Long updateUserId;
+    /** 创建人 */
+    private Long createBy;
+
+    /** 修改人 */
+    private Long updateBy;
 
 }

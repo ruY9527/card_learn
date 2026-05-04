@@ -38,7 +38,7 @@ public class CardVO implements Serializable {
     private String auditStatusText;
 
     /** 创建用户ID */
-    private Long createUserId;
+    private Long createBy;
 
     /** 创建用户昵称 */
     private String createUserNickname;

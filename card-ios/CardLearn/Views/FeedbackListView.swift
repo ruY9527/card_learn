@@ -9,7 +9,7 @@ struct FeedbackListView: View {
     @State private var showError: Bool = false
     @State private var errorMessage: String = ""
 
-    private let apiService = APIService.shared
+    private let apiService = FeedbackApiService.shared
     private let typeMap: [String: String] = [
         "SUGGESTION": "建议",
         "ERROR": "纠错",

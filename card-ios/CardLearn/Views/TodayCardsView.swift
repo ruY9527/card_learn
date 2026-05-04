@@ -16,7 +16,7 @@ struct TodayCardsView: View {
     @State private var showCardDetail: Bool = false
     @State private var selectedCardIndex: Int = 0
 
-    private let apiService = APIService.shared
+    private let apiService = CardApiService.shared
 
     private var title: String {
         switch type {

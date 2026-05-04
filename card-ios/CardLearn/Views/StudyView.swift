@@ -26,7 +26,7 @@ struct StudyView: View {
     @State private var navigateToProgressCards: Bool = false
     @State private var progressCardsType: String = "learned"
     
-    private let apiService = APIService.shared
+    private let apiService = CardApiService.shared
     
     var body: some View {
         NavigationStack {

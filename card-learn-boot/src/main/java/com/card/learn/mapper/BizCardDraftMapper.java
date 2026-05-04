@@ -22,6 +22,6 @@ public interface BizCardDraftMapper extends BaseMapper<BizCardDraft> {
     /**
      * 分页查询用户录入的卡片（我的卡片）
      */
-    Page<MyCardVO> selectMyDrafts(Page<MyCardVO> page, @Param("createUserId") Long createUserId, @Param("auditStatus") String auditStatus);
+    Page<MyCardVO> selectMyDrafts(Page<MyCardVO> page, @Param("createBy") Long createBy, @Param("auditStatus") String auditStatus);
 
 }

@@ -28,7 +28,7 @@ public interface BizCardMapper extends BaseMapper<BizCard> {
     /**
      * 分页查询用户录入的卡片（我的卡片）
      */
-    Page<MyCardVO> selectMyCards(Page<MyCardVO> page, @Param("createUserId") Long createUserId);
+    Page<MyCardVO> selectMyCards(Page<MyCardVO> page, @Param("createBy") Long createBy);
 
     Page<BizCard> selectPageCardList(Page<BizCard> page, @Param("subjectId") Long subjectId, @Param("frontContent") String frontContent);
 

@@ -13,7 +13,7 @@ struct LoginModal: View {
     
     let onSuccess: () -> Void
     
-    private let apiService = APIService.shared
+    private let apiService = AuthApiService.shared
     
     var body: some View {
         NavigationStack {

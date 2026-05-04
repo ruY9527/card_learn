@@ -15,10 +15,12 @@ struct CardDetailView: View {
     @State private var dragOffset: CGFloat = 0
     @State private var isDragging: Bool = false
     @State private var showFeedback: Bool = false
+    @State private var showComments: Bool = false
+    @State private var commentCount: Int = 0
     @State private var showError: Bool = false
     @State private var errorMessage: String = ""
 
-    private let apiService = APIService.shared
+    private let apiService = LearningApiService.shared
     
     private var currentCard: Card? {
         if currentCardIndex >= 0 && currentCardIndex < cardList.count {
@@ -118,6 +120,7 @@ struct CardDetailView: View {
                                 backContent: card.backContent,
                                 difficulty: card.difficultyLevel ?? 1,
                                 isFlipped: isFlipped,
+                                commentCount: commentCount,
                                 onTap: {
                                     withAnimation(.easeInOut(duration: 0.3)) {
                                         isFlipped.toggle()
@@ -125,6 +128,9 @@ struct CardDetailView: View {
                                 },
                                 onFeedbackTap: {
                                     showFeedback = true
+                                },
+                                onCommentTap: {
+                                    showComments = true
                                 }
                             )
                             .offset(x: dragOffset)
@@ -226,9 +232,19 @@ struct CardDetailView: View {
                 FeedbackView(cardId: card.cardId, cardContent: card.frontContent)
             }
         }
+        .sheet(isPresented: $showComments) {
+            if let card = currentCard {
+                CommentSheetView(cardId: card.cardId, userId: appState.userInfo?.userId ?? 0)
+            }
+        }
         .onAppear {
             currentCardIndex = currentIndex
             updateProgress()
+            fetchCommentCount()
+        }
+        .onChange(of: currentCardIndex) { _ in
+            commentCount = 0
+            fetchCommentCount()
         }
         .alert("提交失败", isPresented: $showError) {
             Button("确定", role: .cancel) {}
@@ -323,6 +339,20 @@ struct CardDetailView: View {
     private func updateProgress() {
         progress = Int(Double(currentCardIndex + 1) / Double(totalCount) * 100)
     }
+
+    private func fetchCommentCount() {
+        guard let card = currentCard else { return }
+        Task {
+            do {
+                let stats = try await CommentApiService.shared.getCommentStats(cardId: card.cardId)
+                await MainActor.run {
+                    commentCount = stats.totalComments ?? 0
+                }
+            } catch {
+                // Silent fail
+            }
+        }
+    }
 }
 
 // 3D翻转卡片视图
@@ -331,9 +361,11 @@ struct FlipCardView: View {
     let backContent: String
     let difficulty: Int
     let isFlipped: Bool
+    let commentCount: Int
     let onTap: () -> Void
     let onFeedbackTap: () -> Void
-    
+    let onCommentTap: () -> Void
+
     var body: some View {
         ZStack {
             // 卡片正面
@@ -347,13 +379,15 @@ struct FlipCardView: View {
                     .degrees(isFlipped ? 180 : 0),
                     axis: (x: 0, y: 1, z: 0)
                 )
-            
+
             // 卡片反面
             CardBackView(
                 content: backContent,
                 difficulty: difficulty,
+                commentCount: commentCount,
                 onTap: onTap,
-                onFeedbackTap: onFeedbackTap
+                onFeedbackTap: onFeedbackTap,
+                onCommentTap: onCommentTap
             )
                 .opacity(isFlipped ? 1 : 0)
                 .rotation3DEffect(
@@ -371,47 +405,47 @@ struct CardFrontView: View {
     let content: String
     let difficulty: Int
     let onTap: () -> Void
-    
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: 0) {
+            // Top bar: badge + difficulty
             HStack {
                 BadgeView(text: "问题", color: AppColor.info)
-                
                 Spacer()
-                
                 HStack(spacing: 2) {
                     ForEach(1..<6, id: \.self) { index in
                         Text("★")
-                            .font(.system(size: 12))
+                            .font(.system(size: 11))
                             .foregroundColor(index <= difficulty ? AppColor.gold : AppColor.divider)
                     }
                 }
-                
                 Text("难度")
-                    .font(.system(size: 12))
+                    .font(.system(size: 11))
                     .foregroundColor(AppColor.textSecondary)
             }
-            
+            .padding(.horizontal, 16)
+            .padding(.top, 12)
+            .padding(.bottom, 8)
+
+            // Content area: takes all available space
             ScrollView {
                 MarkdownText(content, fontSize: 16)
                     .lineSpacing(6)
+                    .padding(.horizontal, 16)
             }
-            .frame(maxHeight: .infinity)
-            
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .layoutPriority(1)
+
+            // Bottom hint
             HStack {
                 Spacer()
-                
-                VStack(spacing: 4) {
-                    Text("👆")
-                        .font(.system(size: 20))
-                    
-                    Text("点击翻转查看答案")
-                        .font(.system(size: 12))
-                        .foregroundColor(AppColor.info)
-                }
+                Text("点击翻转查看答案")
+                    .font(.system(size: 11))
+                    .foregroundColor(AppColor.info.opacity(0.6))
+                Spacer()
             }
+            .padding(.vertical, 8)
         }
-        .padding(16)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.white)
         .cornerRadius(16)
@@ -423,60 +457,94 @@ struct CardFrontView: View {
 struct CardBackView: View {
     let content: String
     let difficulty: Int
+    let commentCount: Int
     let onTap: () -> Void
     let onFeedbackTap: () -> Void
-    
+    let onCommentTap: () -> Void
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: 0) {
+            // Top bar: badge + difficulty
             HStack {
                 BadgeView(text: "答案", color: AppColor.success)
-                
                 Spacer()
-                
                 HStack(spacing: 2) {
                     ForEach(1..<6, id: \.self) { index in
                         Text("★")
-                            .font(.system(size: 12))
+                            .font(.system(size: 11))
                             .foregroundColor(index <= difficulty ? AppColor.gold : AppColor.divider)
                     }
                 }
-                
                 Text("难度")
-                    .font(.system(size: 12))
+                    .font(.system(size: 11))
                     .foregroundColor(AppColor.textSecondary)
             }
-            
+            .padding(.horizontal, 16)
+            .padding(.top, 12)
+            .padding(.bottom, 8)
+
+            // Content area: takes all available space
             ScrollView {
                 MarkdownText(content, fontSize: 16)
                     .lineSpacing(6)
+                    .padding(.horizontal, 16)
             }
-            .frame(maxHeight: .infinity)
-            
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .layoutPriority(1)
+
+            // Bottom action bar
             HStack {
-                VStack(spacing: 4) {
-                    Text("👆")
-                        .font(.system(size: 20))
-                    
-                    Text("点击返回问题")
-                        .font(.system(size: 12))
-                        .foregroundColor(AppColor.info)
-                }
-                
+                Color.clear.frame(width: 60)
+
                 Spacer()
-                
-                Button(action: onFeedbackTap) {
-                    HStack(spacing: 4) {
-                        Text("📝")
-                            .font(.system(size: 14))
-                        
-                        Text("纠错反馈")
-                            .font(.system(size: 12))
-                            .foregroundColor(AppColor.info)
+
+                Button(action: onCommentTap) {
+                    ZStack(alignment: .topTrailing) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "bubble.left.fill")
+                                .font(.system(size: 14))
+                            Text("评论")
+                                .font(.system(size: 13, weight: .medium))
+                        }
+                        .foregroundColor(AppColor.primary)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .background(AppColor.primary.opacity(0.1))
+                        .cornerRadius(20)
+
+                        if commentCount > 0 {
+                            Text(commentCount > 99 ? "99+" : "\(commentCount)")
+                                .font(.system(size: 10, weight: .bold))
+                                .foregroundColor(.white)
+                                .padding(.horizontal, commentCount > 99 ? 5 : 6)
+                                .padding(.vertical, 2)
+                                .background(AppColor.error)
+                                .cornerRadius(10)
+                                .offset(x: 8, y: -6)
+                        }
                     }
                 }
+
+                Spacer()
+
+                Button(action: onFeedbackTap) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "exclamationmark.bubble")
+                            .font(.system(size: 13))
+                        Text("纠错")
+                            .font(.system(size: 12))
+                    }
+                    .foregroundColor(AppColor.textSecondary)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(AppColor.backgroundLight)
+                    .cornerRadius(16)
+                }
+                .frame(width: 70)
             }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
         }
-        .padding(16)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.white)
         .cornerRadius(16)

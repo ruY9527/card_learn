@@ -206,7 +206,7 @@ const getSubjectList = (majorId) =>
  * @param {Object} params - 参数
  * @param {number} params.subjectId - 科目ID（可选）
  * @param {string} params.frontContent - 正面内容关键词（可选）
- * @param {number} params.appUserId - 用户ID（可选）
+ * @param {number} params.userId - 用户ID（可选）
  * @param {string} params.status - 状态筛选：all/learned/unlearned/mastered/review
  * @param {number} params.pageNum - 页码
  * @param {number} params.pageSize - 每页数量
@@ -216,44 +216,44 @@ const getCardPage = (params) =>
 
 /**
  * 获取已学习卡片列表
- * @param {number} appUserId - 用户ID
+ * @param {number} userId - 用户ID
  * @param {number} pageNum - 页码
  * @param {number} pageSize - 每页数量
  */
-const getLearnedCards = (appUserId, pageNum = 1, pageSize = 20) =>
-  request({ url: '/api/miniprogram/cards', data: { userId: appUserId, status: 'learned', pageNum, pageSize } })
+const getLearnedCards = (userId, pageNum = 1, pageSize = 20) =>
+  request({ url: '/api/miniprogram/cards', data: { userId: userId, status: 'learned', pageNum, pageSize } })
 
 /**
  * 获取已掌握卡片列表
- * @param {number} appUserId - 用户ID
+ * @param {number} userId - 用户ID
  * @param {number} pageNum - 页码
  * @param {number} pageSize - 每页数量
  */
-const getMasteredCards = (appUserId, pageNum = 1, pageSize = 20) =>
-  request({ url: '/api/miniprogram/cards', data: { userId: appUserId, status: 'mastered', pageNum, pageSize } })
+const getMasteredCards = (userId, pageNum = 1, pageSize = 20) =>
+  request({ url: '/api/miniprogram/cards', data: { userId: userId, status: 'mastered', pageNum, pageSize } })
 
 /**
  * 获取待复习卡片列表
- * @param {number} appUserId - 用户ID
+ * @param {number} userId - 用户ID
  * @param {number} pageNum - 页码
  * @param {number} pageSize - 每页数量
  */
-const getReviewCardsList = (appUserId, pageNum = 1, pageSize = 20) =>
-  request({ url: '/api/miniprogram/cards', data: { userId: appUserId, status: 'review', pageNum, pageSize } })
+const getReviewCardsList = (userId, pageNum = 1, pageSize = 20) =>
+  request({ url: '/api/miniprogram/cards', data: { userId: userId, status: 'review', pageNum, pageSize } })
 
 /**
  * 获取卡片详情
  * @param {number} cardId - 卡片ID
- * @param {number} appUserId - 用户ID（可选）
+ * @param {number} userId - 用户ID（可选）
  */
-const getCardById = (cardId, appUserId) =>
-  request({ url: `/api/miniprogram/cards/${cardId}`, data: { userId: appUserId } })
+const getCardById = (cardId, userId) =>
+  request({ url: `/api/miniprogram/cards/${cardId}`, data: { userId: userId } })
 
 /**
  * 更新学习进度
  * @param {Object} data - 进度数据
  * @param {number} data.cardId - 卡片ID
- * @param {number} data.appUserId - 用户ID（可选，游客模式可不传）
+ * @param {number} data.userId - 用户ID（可选，游客模式可不传）
  * @param {number} data.status - 状态 0未学/1模糊/2掌握
  */
 const updateProgress = (data) =>
@@ -261,32 +261,32 @@ const updateProgress = (data) =>
 
 /**
  * 获取学习统计
- * @param {number} appUserId - 用户ID（可选）
+ * @param {number} userId - 用户ID（可选）
  */
-const getProgressStats = (appUserId) =>
-  request({ url: '/api/miniprogram/stats', data: { userId: appUserId } })
+const getProgressStats = (userId) =>
+  request({ url: '/api/miniprogram/stats', data: { userId: userId } })
 
 /**
  * 获取科目学习统计
  * @param {number} subjectId - 科目ID
- * @param {number} appUserId - 用户ID（可选）
+ * @param {number} userId - 用户ID（可选）
  */
-const getSubjectStats = (subjectId, appUserId) =>
-  request({ url: `/api/miniprogram/subjects/${subjectId}/stats`, data: { userId: appUserId } })
+const getSubjectStats = (subjectId, userId) =>
+  request({ url: `/api/miniprogram/subjects/${subjectId}/stats`, data: { userId: userId } })
 
 /**
  * 获取待复习卡片
- * @param {number} appUserId - 用户ID（可选）
+ * @param {number} userId - 用户ID（可选）
  */
-const getReviewCards = (appUserId) =>
-  request({ url: '/api/miniprogram/review', data: { userId: appUserId } })
+const getReviewCards = (userId) =>
+  request({ url: '/api/miniprogram/review', data: { userId: userId } })
 
 // ==================== 反馈相关API（需登录） ====================
 
 /**
  * 提交反馈
  * @param {Object} data - 反馈数据
- * @param {number} data.appUserId - 用户ID（必填）
+ * @param {number} data.userId - 用户ID（必填）
  * @param {number} data.cardId - 卡片ID（可选，卡片纠错时必填）
  * @param {string} data.type - 反馈类型：SUGGESTION/ERROR/FUNCTION/OTHER
  * @param {number} data.rating - 评分 1-5（可选）
@@ -299,12 +299,12 @@ const submitFeedback = (data) =>
 
 /**
  * 获取用户反馈列表
- * @param {number} appUserId - 用户ID
+ * @param {number} userId - 用户ID
  * @param {number} pageNum - 页码
  * @param {number} pageSize - 每页数量
  */
-const getUserFeedbackList = (appUserId, pageNum = 1, pageSize = 10) =>
-  request({ url: '/api/miniprogram/feedback/list', data: { userId: appUserId, pageNum, pageSize }, needAuth: true })
+const getUserFeedbackList = (userId, pageNum = 1, pageSize = 10) =>
+  request({ url: '/api/miniprogram/feedback/list', data: { userId: userId, pageNum, pageSize }, needAuth: true })
 
 /**
  * 获取反馈详情
@@ -364,7 +364,7 @@ const deleteMyCard = (id) =>
  * 提交评论
  * @param {Object} data - 评论数据
  * @param {number} data.cardId - 卡片ID
- * @param {number} data.appUserId - 用户ID
+ * @param {number} data.userId - 用户ID
  * @param {string} data.content - 评论内容
  * @param {number} data.rating - 评分1-5
  * @param {string} data.commentType - 评论类型：QUALITY/POOR/NEUTRAL
@@ -387,6 +387,93 @@ const getCardComments = (cardId, pageNum = 1, pageSize = 10) =>
  */
 const getCommentStats = (cardId) =>
   request({ url: `/api/miniprogram/comment/stats/${cardId}` })
+
+// ==================== 回复相关API ====================
+
+/**
+ * 提交回复
+ * @param {number} commentId - 评论ID
+ * @param {Object} data - 回复数据
+ */
+const submitReply = (commentId, data) =>
+  request({ url: `/api/miniprogram/reply/${commentId}`, method: 'POST', data, needAuth: true })
+
+/**
+ * 获取评论的回复列表
+ * @param {number} commentId - 评论ID
+ * @param {number} userId - 用户ID（可选，用于判断点赞状态）
+ * @param {number} pageNum - 页码
+ * @param {number} pageSize - 每页数量
+ */
+const getReplyList = (commentId, userId, pageNum = 1, pageSize = 10) =>
+  request({ url: `/api/miniprogram/reply/list/${commentId}`, data: { userId, pageNum, pageSize } })
+
+/**
+ * 获取子回复列表
+ * @param {number} parentReplyId - 父回复ID
+ * @param {number} userId - 用户ID（可选）
+ */
+const getChildrenReplies = (parentReplyId, userId) =>
+  request({ url: `/api/miniprogram/reply/children/${parentReplyId}`, data: { userId } })
+
+/**
+ * 删除回复
+ * @param {number} replyId - 回复ID
+ * @param {number} userId - 用户ID
+ */
+const deleteReply = (replyId, userId) =>
+  request({ url: `/api/miniprogram/reply/${replyId}`, method: 'DELETE', data: { userId }, needAuth: true })
+
+// ==================== 点赞相关API ====================
+
+/**
+ * 点赞/取消点赞评论
+ * @param {number} commentId - 评论ID
+ * @param {number} userId - 用户ID
+ */
+const toggleCommentLike = (commentId, userId) =>
+  request({ url: `/api/miniprogram/like/comment/${commentId}`, method: 'POST', data: { userId }, needAuth: true })
+
+/**
+ * 点赞/取消点赞回复
+ * @param {number} replyId - 回复ID
+ * @param {number} userId - 用户ID
+ */
+const toggleReplyLike = (replyId, userId) =>
+  request({ url: `/api/miniprogram/like/reply/${replyId}`, method: 'POST', data: { userId }, needAuth: true })
+
+// ==================== 笔记相关API ====================
+
+/**
+ * 获取我的笔记列表
+ * @param {Object} params - 查询参数
+ */
+const getMyNotes = (params) =>
+  request({ url: '/api/miniprogram/note/my', data: params, needAuth: true })
+
+/**
+ * 编辑笔记
+ * @param {number} noteId - 笔记ID
+ * @param {number} userId - 用户ID
+ * @param {string} content - 笔记内容
+ */
+const editNote = (noteId, userId, content) =>
+  request({ url: `/api/miniprogram/note/${noteId}`, method: 'PUT', data: { userId, content }, needAuth: true })
+
+/**
+ * 删除笔记
+ * @param {number} noteId - 笔记ID
+ * @param {number} userId - 用户ID
+ */
+const deleteNote = (noteId, userId) =>
+  request({ url: `/api/miniprogram/note/${noteId}`, method: 'DELETE', data: { userId }, needAuth: true })
+
+/**
+ * 导出笔记
+ * @param {Object} params - 查询参数
+ */
+const exportNotes = (params) =>
+  request({ url: '/api/miniprogram/note/export', data: params, needAuth: true })
 
 /**
  * 简化复习提交（服务端自动计算SM-2）
@@ -426,5 +513,15 @@ module.exports = {
   submitComment,
   getCardComments,
   getCommentStats,
+  submitReply,
+  getReplyList,
+  getChildrenReplies,
+  deleteReply,
+  toggleCommentLike,
+  toggleReplyLike,
+  getMyNotes,
+  editNote,
+  deleteNote,
+  exportNotes,
   submitReview
 }

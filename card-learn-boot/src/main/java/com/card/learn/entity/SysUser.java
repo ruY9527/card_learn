@@ -34,19 +34,17 @@ public class SysUser implements Serializable {
     @TableLogic
     private String delFlag;
 
-    private String createBy;
+    private Long createBy;
 
     @TableField(fill = FieldFill.INSERT)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
 
-    private String updateBy;
+    private Long updateBy;
 
     @TableField(fill = FieldFill.INSERT_UPDATE)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updateTime;
 
-    /** 更新人ID */
-    private Long updateUserId;
 
 }

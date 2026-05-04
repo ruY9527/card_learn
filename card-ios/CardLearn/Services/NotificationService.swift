@@ -35,7 +35,7 @@ final class NotificationService: NSObject {
     func handleDeviceToken(_ token: Data, userId: Int) {
         let tokenString = token.map { String(format: "%02.2hhx", $0) }.joined()
         Task {
-            try? await APIService.shared.registerDevice(
+            try? await LearningApiService.shared.registerDevice(
                 userId: userId,
                 deviceToken: tokenString,
                 deviceType: "ios"

@@ -1,6 +1,6 @@
 USE `card_learn`;
 
-INSERT INTO `biz_card` (`subject_id`, `front_content`, `back_content`, `difficulty_level`, `audit_status`, `create_user_id`) VALUES
+INSERT INTO `biz_card` (`subject_id`, `front_content`, `back_content`, `difficulty_level`, `audit_status`, `create_by`) VALUES
   (1, '什么是数据（Data）？', '**定义**：数据是信息的载体，是描述客观事物的数、字符以及所有能输入到计算机中并被计算机程序识别和处理的符号集合。
 
 **特点**：
@@ -812,7 +812,7 @@ n个结点的二叉链表有n+1个空链域。', 3, '1', 1),
 
 **生成树**：连通图的极小连通子图（n顶点n-1边）。', 2, '1', 1);
 
-INSERT INTO `biz_card` (`subject_id`, `front_content`, `back_content`, `difficulty_level`, `audit_status`, `create_user_id`) VALUES
+INSERT INTO `biz_card` (`subject_id`, `front_content`, `back_content`, `difficulty_level`, `audit_status`, `create_by`) VALUES
   (1, '图的存储结构', '**邻接矩阵**：二维数组，空间O(n²)，判断有无边O(1)，适合稠密图。
 
 **邻接表**：链表数组，空间O(n+e)，适合稀疏图。
@@ -1488,7 +1488,7 @@ $$e = \\frac{t_c}{t_a}$$', 4, '1', 1),
 
 **注意：** 直接映射无需替换算法', 4, '1', 1);
 
-INSERT INTO `biz_card` (`subject_id`, `front_content`, `back_content`, `difficulty_level`, `audit_status`, `create_user_id`) VALUES
+INSERT INTO `biz_card` (`subject_id`, `front_content`, `back_content`, `difficulty_level`, `audit_status`, `create_by`) VALUES
   (2, 'Cache写策略有哪些？', '**Cache写策略：**
 
 **1. 写回法（Write-Back）**
@@ -2363,7 +2363,7 @@ PCB是进程存在的唯一标识，操作系统通过PCB来管理进程。
    - 结合多种算法
    - 灵活性高', 4, '1', 1);
 
-INSERT INTO `biz_card` (`subject_id`, `front_content`, `back_content`, `difficulty_level`, `audit_status`, `create_user_id`) VALUES
+INSERT INTO `biz_card` (`subject_id`, `front_content`, `back_content`, `difficulty_level`, `audit_status`, `create_by`) VALUES
   (3, 'FCFS调度算法有什么特点？', '**FCFS（先来先服务）调度算法：**
 
 **特点：**
@@ -3277,7 +3277,7 @@ $$R_b = R_B \\log_2 V$$
 
 5. **介质访问控制**（对于共享介质）', 3, '1', 1);
 
-INSERT INTO `biz_card` (`subject_id`, `front_content`, `back_content`, `difficulty_level`, `audit_status`, `create_user_id`) VALUES
+INSERT INTO `biz_card` (`subject_id`, `front_content`, `back_content`, `difficulty_level`, `audit_status`, `create_by`) VALUES
   (4, '什么是封装成帧？常见的帧定界方法有哪些？', '**封装成帧：**
 将网络层的数据包加上帧头和帧尾，形成数据链路层的帧。
 
@@ -4118,7 +4118,7 @@ GET、POST、PUT、DELETE等', 3, '1', 1),
   (5, '肝硬化的临床表现是什么？', '临床表现 护理措施 级 | 表现为体力活动不受限制 不限制一般的体力活动，但避免剧烈活动 | 和现为体力活动轻度受限制，一般活动可引起气急、 | 可明病人适当从事轻体力工作和家务劳动，强 itt, RRON 调多休息 wy, | 表现为体力活动明显受限制，低于平时一般活动量邑 | 病人日常生活能自理或在他人协助下可自理 引起气急、心导，休息较长时间才能缓解 应严格限制一般的体力活动 | _W胺 | 不能从事任何体力活动，休息状态下也气急、心怪 | 应嘱病人绝对卧床休息，生活需要他人照顾', 3, '1', 1),
   (5, '肝硬化的护理措施是什么？', '护理措施 级 | 表现为体力活动不受限制 不限制一般的体力活动，但避免剧烈活动 | 和现为体力活动轻度受限制，一般活动可引起气急、 | 可明病人适当从事轻体力工作和家务劳动，强 itt, RRON 调多休息 wy, | 表现为体力活动明显受限制，低于平时一般活动量邑 | 病人日常生活能自理或在他人协助下可自理 引起气急、心导，休息较长时间才能缓解 应严格限制一般的体力活动 | _W胺 | 不能从事任何体力活动，休息状态下也气急、心怪 | 应嘱病人绝对卧床休息，生活需要他人照顾', 3, '1', 1);
 
-INSERT INTO `biz_card` (`subject_id`, `front_content`, `back_content`, `difficulty_level`, `audit_status`, `create_user_id`) VALUES
+INSERT INTO `biz_card` (`subject_id`, `front_content`, `back_content`, `difficulty_level`, `audit_status`, `create_by`) VALUES
   (5, '心力衰竭的临床表现是什么？', '临床表现 | 无，仅有高危因素 无 有 | 有，治疗无效 6min 步行试验 COMWT): 让病人在平直走廊里尽可能快地行走，测定其 6min 的步行距离; <150m 为重度心力衰竭，150一450m 为中度心力衰竭;>450m 为轻度心力衰竭。[ 中山大学、北京 协和医学院选择题 ] | EE Es 5 版《内科护理学》认为，一150m HRS RIB; 150~ 425m HP Es HRB; | 426 ~ 550m 为轻度心力衰竭。 【民考题举例 Q | 7.女性，65 岁。风湿性心脏病 15 年，近年来出现一般体力活动后胸闷气急，休息后症状缓解， 目前该病人的心功能处于NYHA (单选，苏州大学、江苏大学、杭州师范大学 ) A.工级 也.开级 C.亚级 D.IV级 8.男性，60 岁。出院前 6min 步行试验，行走距离为 220m。该病人的心力衰竭程度应为 ( BU, 湖南师范大学 ) | AME EWS 7] ESB B.轻度心力衰竭 C.P Bs B DS B (Op Oy ERBE S } 4 oF ~~ (五) nen) OOS Cn | LBNP 脑销肽) 62.37.53} =四', 4, '1', 1),
   (5, '心律失常的护理诊断是什么？', '护理诊断/问题 1.气体交换障碍 与左心衰竭致肺循环淤血有关。 2.体液过多 与右心衰竭致体循环淤血、水钠注留、低蛋白血症有关。 3.活动耐力下降 与心排血量下降有关。 4.有皮肤完整性受损的危险 与长期卧床或强迫体位、水肿、营养不良有关。', 2, '1', 1),
   (5, '心力衰竭的治疗原则是什么？', '治疗原则[ 高频考点 ] [广州医科大学、南京中医药大学简答题，安徽中医药大学、海南医 科大学案例分析题] c 急性肺水肿_ 病人取两腿下垂坐位或半卧位，以减少静脉回流 7 {1G LRP EMRE BML (BB Tm E ) et 吸入高流量 (6~8L/min) AA, MA 20%一30%乙醇湿化，降低肺泡及气管内泡沫的表面张力， 使泡沫破裂，改善肺通气 Pu, 吗啡具有镇静作用、扩张静脉及小动脉作用，可减轻心脏负担 平喘 静脉滴注氨茶碱，可缓解支气管痉挛 强心齐 左西孟旦、洋地黄、非洋地黄类正性肌力药物 多巴胺、多巴酚丁胺、米力农) 利尿齐 可迅速利尿 如叶塞米)，有效降低心脏前负荷 扩血管 硝普钠、硝酸甘油、重组人脑钠肽，维持收缩压在90一100mmHg 肢轮流结扎法 | 减少静脉回心血量有一定的作用，但须注意结扎肢体不宜固定、结扎时间不宜长，防止造成肢体坏死', 3, '1', 1),
@@ -4170,7 +4170,7 @@ INSERT INTO `biz_card` (`subject_id`, `front_content`, `back_content`, `difficul
   (5, '肝硬化的病因与发病机制是什么？', '病因与发病机制 病因 常见疾病 | gmer 静水压增高 脉受阻 胸膜毛细血管内 全人写生人人和于 胸膜毛细血管内 低蛋白血症、肝硬化、肾病综合征、 和 胶体渗透压降低 是导致蛋白减少的疾病 ] 胸膜通透性增加 主要是漏出液 膜肿瘤、肺梗死 胸膜炎症、风湿性疾病 如系统性红班狼疮、 壁层胸膜淋巴引流障碍，| 淋巴导管阻塞、发育性淋巴引流异常 损伤 主动脉瘤破裂、食管破裂、胸导管破裂 上克基证的本质是涂出，涂出液都是和 炎症 相关，风湿性疾病 hs 药物与放射治疗、液体负荷过大、中心静脉置管穿破 mentee. R, N P, 引起渗出。 nn 病。 (二)', 3, '1', 1),
   (5, '肺炎的护理措施是什么？', '护理措施 1.体位、休息与活动 呼吸衰竭的病人取半卧位或坐位，促进肺膨胀。DS 在必要时可采用俯 卧位辅助通气，以改善氧合。', 2, '1', 1);
 
-INSERT INTO `biz_card` (`subject_id`, `front_content`, `back_content`, `difficulty_level`, `audit_status`, `create_user_id`) VALUES
+INSERT INTO `biz_card` (`subject_id`, `front_content`, `back_content`, `difficulty_level`, `audit_status`, `create_by`) VALUES
   (5, '肺炎的健康教育是什么？', '健康教育正确的是 ( 多选，中山大学 ) A.避免饭后剧烈运动 Bie KASH 2h 进食 C .午餐后不宜立即卧床休息 D.睡眠时将床头抬高 20cm 下.减轻体重 oO. BAe ERED 吐注:发普,送草稿纸', 2, '1', 1),
   (5, '肺结核的并发症是什么？', '并发症 AMOR: 三联疗法，7~14d 量; 少量多餐，避免过亿，引起角酸分泌增加 CRE) Tee. 面食，可以中和胃酸 不宣食用;红烧肉、猪蹄，机械性和化学性食物 IVD Bee es Ws ee p el pec e 第七节 肠结核和结核性腹膜炎 、肠结核 ( )', 2, '1', 1),
   (5, '肝硬化的并发症是什么？', '并发症，多因食管-胃底静脉曲张破裂而出血，常在恶心、哎吐、咳嗽、负重等使腹内压 突然升高, | BER RIT EMTs ROR RAGKROR HLA? M MEER, RE Ri W CEC TEP? HOt Romie, TIE DLE. ET CHAE LATA BK TB AC 肝性脑病 RGU ik EAD 2) SA A + RE D C/A FE (G A ER | ETI KE SNEES, ISSEY EF I R 原因: BF AQ Re 8 4% EUR FSS, A SS DH _ 带菌的淋巴液漏入腹腔以及腹水抗菌能力下降引起感染 <自用性且肝类) | 致病菌;多为革兰阴性杆菌感染 症状;发热、腹痛、腹胀、腹膜刺激征、腹水迅速增长或持续不减 | 治疗: 主要针对草兰阴性杆菌并兼顾革兰阳性球菌的抗生素，如头孢哌酮或叶诺酮类药物 病人肾脏无明显器质性损害，又称功能性肾误竭，是肝硬化终未期最常见的严重并发症之一 肝肾综合征 | 机制:主要由于有效循环血容量减少、肾血管收缩和肾内血液重新分布，导致肾皮质缺血和 | CHRS) 肾小球滤过率下降，仙质血流量增加、散祥重吸收增加引起 症状: 三低 (少尿或无尿、低尿钠、稀释性低钠血症)、氮质血症滨刑医学院名词解释] 肝肺综合征 | 其定义为严重肝病伴肺血管扩张和低氧血症，', 4, '1', 1),

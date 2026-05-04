@@ -8,8 +8,9 @@ struct ProfileView: View {
     @State private var showFeedbackList: Bool = false
     @State private var showAddCard: Bool = false
     @State private var showMyCards: Bool = false
+    @State private var showMyNotes: Bool = false
 
-    private let apiService = APIService.shared
+    private let apiService = CardApiService.shared
 
     var body: some View {
         NavigationStack {
@@ -64,6 +65,13 @@ struct ProfileView: View {
                                 } else {
                                     showLoginModal = true
                                 }
+                            },
+                            onMyNotesTap: {
+                                if appState.isLoggedIn {
+                                    showMyNotes = true
+                                } else {
+                                    showLoginModal = true
+                                }
                             }
                         )
                         .padding(.horizontal, 16)
@@ -103,6 +111,9 @@ struct ProfileView: View {
             }
             .navigationDestination(isPresented: $showMyCards) {
                 MyCardsView()
+            }
+            .navigationDestination(isPresented: $showMyNotes) {
+                NoteListView()
             }
             .sheet(isPresented: $showLoginModal) {
                 LoginModal(onSuccess: {
@@ -374,6 +385,7 @@ struct ContributionSection: View {
     let isLoggedIn: Bool
     let onAddCardTap: () -> Void
     let onMyCardsTap: () -> Void
+    let onMyNotesTap: () -> Void
 
     var body: some View {
         VStack(spacing: 12) {
@@ -404,6 +416,27 @@ struct ContributionSection: View {
                             .font(.system(size: 20))
 
                         Text("我的卡片")
+                            .font(.system(size: 14))
+                            .foregroundColor(AppColor.textPrimary)
+
+                        Spacer()
+
+                        Text("→")
+                            .font(.system(size: 14))
+                            .foregroundColor(AppColor.primary)
+                    }
+                    .padding(12)
+                    .background(Color.white)
+                    .cornerRadius(12)
+                }
+
+                Button(action: onMyNotesTap) {
+                    HStack {
+                        Image(systemName: "note.text")
+                            .font(.system(size: 18))
+                            .foregroundColor(AppColor.primary)
+
+                        Text("我的笔记")
                             .font(.system(size: 14))
                             .foregroundColor(AppColor.textPrimary)
 

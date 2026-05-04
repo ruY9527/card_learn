@@ -63,7 +63,7 @@ public class BizCardServiceImpl extends ServiceImpl<BizCardMapper, BizCard> impl
         card.setBackContent(dto.getBackContent());
         card.setDifficultyLevel(dto.getDifficultyLevel() != null ? dto.getDifficultyLevel() : 2);
         card.setAuditStatus("0"); // 待审批
-        card.setCreateUserId(dto.getCreateUserId());
+        card.setCreateBy(dto.getCreateBy());
         card.setCreateTime(LocalDateTime.now());
         
         save(card);
@@ -140,9 +140,9 @@ public class BizCardServiceImpl extends ServiceImpl<BizCardMapper, BizCard> impl
     }
 
     @Override
-    public Page<MyCardVO> pageMyCards(Long createUserId, Integer pageNum, Integer pageSize) {
+    public Page<MyCardVO> pageMyCards(Long createBy, Integer pageNum, Integer pageSize) {
         Page<MyCardVO> page = new Page<>(pageNum, pageSize);
-        Page<MyCardVO> result = cardMapper.selectMyCards(page, createUserId);
+        Page<MyCardVO> result = cardMapper.selectMyCards(page, createBy);
 
         // 获取标签信息
         if (!CollectionUtils.isEmpty(result.getRecords())) {
@@ -190,14 +190,14 @@ public class BizCardServiceImpl extends ServiceImpl<BizCardMapper, BizCard> impl
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void updateMyCard(Long cardId, CardCreateDTO dto, Long createUserId) {
+    public void updateMyCard(Long cardId, CardCreateDTO dto, Long createBy) {
         BizCard card = getById(cardId);
         if (card == null) {
             throw new RuntimeException("卡片不存在");
         }
         
         // 校验是否是用户自己的卡片
-        if (!card.getCreateUserId().equals(createUserId)) {
+        if (!card.getCreateBy().equals(createBy)) {
             throw new RuntimeException("无权限修改此卡片");
         }
         
@@ -222,14 +222,14 @@ public class BizCardServiceImpl extends ServiceImpl<BizCardMapper, BizCard> impl
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void deleteMyCard(Long cardId, Long createUserId) {
+    public void deleteMyCard(Long cardId, Long createBy) {
         BizCard card = getById(cardId);
         if (card == null) {
             throw new RuntimeException("卡片不存在");
         }
         
         // 校验是否是用户自己的卡片
-        if (!card.getCreateUserId().equals(createUserId)) {
+        if (!card.getCreateBy().equals(createBy)) {
             throw new RuntimeException("无权限删除此卡片");
         }
         

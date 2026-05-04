@@ -43,7 +43,7 @@ public interface IBizCardService extends IService<BizCard> {
     /**
      * 获取用户录入的卡片列表（我的卡片）
      */
-    Page<MyCardVO> pageMyCards(Long createUserId, Integer pageNum, Integer pageSize);
+    Page<MyCardVO> pageMyCards(Long createBy, Integer pageNum, Integer pageSize);
 
     /**
      * 获取待审批卡片数量
@@ -53,11 +53,11 @@ public interface IBizCardService extends IService<BizCard> {
     /**
      * 用户修改自己的卡片（仅限待审批状态）
      */
-    void updateMyCard(Long cardId, CardCreateDTO dto, Long createUserId);
+    void updateMyCard(Long cardId, CardCreateDTO dto, Long createBy);
 
     /**
      * 用户删除自己的卡片（仅限待审批状态）
      */
-    void deleteMyCard(Long cardId, Long createUserId);
+    void deleteMyCard(Long cardId, Long createBy);
 
 }

@@ -36,6 +36,7 @@
           <el-menu-item index="/feedback">反馈管理</el-menu-item>
           <el-menu-item index="/card-audit">卡片审批</el-menu-item>
           <el-menu-item index="/comment">评论管理</el-menu-item>
+          <el-menu-item index="/note">笔记管理</el-menu-item>
         </el-sub-menu>
         <el-sub-menu index="stats">
           <template #title>

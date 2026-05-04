@@ -11,7 +11,7 @@
         <result property="difficultyLevel" column="difficulty_level"/>
         <result property="auditStatus" column="audit_status"/>
         <result property="auditStatusText" column="audit_status_text"/>
-        <result property="createUserId" column="create_user_id"/>
+        <result property="createBy" column="create_by"/>
         <result property="createUserNickname" column="create_user_nickname"/>
         <result property="auditUserId" column="audit_user_id"/>
         <result property="auditUserNickname" column="audit_user_nickname"/>
@@ -49,7 +49,7 @@
                 WHEN '2' THEN '已拒绝'
                 ELSE '未知'
             END AS audit_status_text,
-            d.create_user_id,
+            d.create_by,
             au.nickname AS create_user_nickname,
             d.audit_user_id,
             su.nickname AS audit_user_nickname,
@@ -58,7 +58,7 @@
             d.create_time
         FROM biz_card_draft d
         LEFT JOIN biz_subject s ON d.subject_id = s.subject_id
-        LEFT JOIN sys_user au ON d.create_user_id = au.user_id
+        LEFT JOIN sys_user au ON d.create_by = au.user_id
         LEFT JOIN sys_user su ON d.audit_user_id = su.user_id
         <if test="auditStatus != null and auditStatus != ''">
             WHERE d.audit_status = #{auditStatus}
@@ -86,7 +86,7 @@
             d.audit_time
         FROM biz_card_draft d
         LEFT JOIN biz_subject s ON d.subject_id = s.subject_id
-        WHERE d.create_user_id = #{createUserId}
+        WHERE d.create_by = #{createBy}
         <if test="auditStatus != null and auditStatus != ''">
             AND d.audit_status = #{auditStatus}
         </if>

@@ -60,7 +60,7 @@ public class MiniCardController {
         if (currentUserId == null) {
             return Result.error(401, "请先登录后再提交卡片");
         }
-        dto.setCreateUserId(currentUserId);
+        dto.setCreateBy(currentUserId);
         Long draftId = draftService.createDraftCard(dto);
         return Result.success("卡片提交成功，等待审核", draftId);
     }
@@ -90,7 +90,7 @@ public class MiniCardController {
         if (currentUserId == null) {
             return Result.error(401, "请先登录后再修改卡片");
         }
-        dto.setCreateUserId(currentUserId);
+        dto.setCreateBy(currentUserId);
         draftService.updateMyDraftCard(id, dto, currentUserId);
         return Result.success();
     }
@@ -124,19 +124,19 @@ public class MiniCardController {
 
         // 待审批数量
         long pendingCount = draftService.lambdaQuery()
-                .eq(BizCardDraft::getCreateUserId, currentUserId)
+                .eq(BizCardDraft::getCreateBy, currentUserId)
                 .eq(BizCardDraft::getAuditStatus, "0")
                 .count();
 
         // 已通过数量
         long passedCount = draftService.lambdaQuery()
-                .eq(BizCardDraft::getCreateUserId, currentUserId)
+                .eq(BizCardDraft::getCreateBy, currentUserId)
                 .eq(BizCardDraft::getAuditStatus, "1")
                 .count();
 
         // 已拒绝数量
         long rejectedCount = draftService.lambdaQuery()
-                .eq(BizCardDraft::getCreateUserId, currentUserId)
+                .eq(BizCardDraft::getCreateBy, currentUserId)
                 .eq(BizCardDraft::getAuditStatus, "2")
                 .count();
 

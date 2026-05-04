@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.card.learn.mapper.BizCommentLikeMapper">
+
+    <!-- 查询用户是否点赞了某条评论 -->
+    <select id="countByCommentAndUser" resultType="int">
+        SELECT COUNT(*) FROM biz_comment_like
+        WHERE comment_id = #{commentId} AND user_id = #{userId}
+    </select>
+
+    <!-- 查询用户是否点赞了某条回复 -->
+    <select id="countByReplyAndUser" resultType="int">
+        SELECT COUNT(*) FROM biz_comment_like
+        WHERE reply_id = #{replyId} AND user_id = #{userId}
+    </select>
+
+</mapper>

@@ -61,21 +61,21 @@
           </template>
         </el-table-column>
         <el-table-column prop="createTime" label="提交时间" width="160" />
-        <el-table-column label="操作" width="180" fixed="right">
+        <el-table-column label="操作" width="210" fixed="right" align="center">
           <template #default="{ row }">
-            <el-button 
-              v-if="row.auditStatus === '0'" 
-              type="success" 
-              size="small" 
-              @click="handleApprove(row)"
-            >通过</el-button>
-            <el-button 
-              v-if="row.auditStatus === '0'" 
-              type="danger" 
-              size="small" 
-              @click="handleReject(row)"
-            >拒绝</el-button>
-            <el-button type="primary" size="small" @click="handleView(row)">详情</el-button>
+            <div class="action-btns">
+              <template v-if="row.auditStatus === '0'">
+                <el-button type="success" size="small" @click="handleApprove(row)">
+                  <el-icon><Check /></el-icon>通过
+                </el-button>
+                <el-button type="danger" size="small" @click="handleReject(row)">
+                  <el-icon><Close /></el-icon>拒绝
+                </el-button>
+              </template>
+              <el-button type="primary" size="small" plain @click="handleView(row)">
+                <el-icon><View /></el-icon>详情
+              </el-button>
+            </div>
           </template>
         </el-table-column>
       </el-table>
@@ -146,12 +146,18 @@
 
       <template #footer>
         <el-button @click="dialogVisible = false">关闭</el-button>
-        <el-button 
-          v-if="currentCard?.auditStatus === '0'" 
-          type="primary" 
-          :loading="auditLoading" 
-          @click="handleAudit"
-        >提交审批</el-button>
+        <template v-if="currentCard?.auditStatus === '0'">
+          <el-button
+            type="danger"
+            :loading="auditLoading"
+            @click="auditForm.auditStatus = '2'; handleAudit()"
+          >拒绝</el-button>
+          <el-button
+            type="success"
+            :loading="auditLoading"
+            @click="auditForm.auditStatus = '1'; handleAudit()"
+          >通过</el-button>
+        </template>
       </template>
     </el-dialog>
   </div>
@@ -160,10 +166,11 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { 
-  getCardAuditPage, 
-  auditCard, 
-  getPendingCardCount 
+import { Check, Close, View } from '@element-plus/icons-vue'
+import {
+  getCardAuditPage,
+  auditCard,
+  getPendingCardCount
 } from '@/api/content'
 import type { CardAuditVO } from '@/api/types'
 import { useUserStore } from '@/store/user'
@@ -400,6 +407,16 @@ onMounted(() => {
 
     .status-select {
       width: 120px;
+    }
+  }
+
+  .action-btns {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+
+    .el-button {
+      padding: 5px 10px;
     }
   }
 

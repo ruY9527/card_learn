@@ -23,4 +23,10 @@ public class SysRoleMenu implements Serializable {
 
     private Long menuId;
 
+
+    /** 创建人 */
+    private Long createBy;
+
+    /** 修改人 */
+    private Long updateBy;
 }

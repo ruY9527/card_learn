@@ -46,7 +46,7 @@
                 AND f.status = #{status}
             </if>
         </where>
-        ORDER BY f.create_time DESC
+        ORDER BY f.id ASC
     </select>
 
     <select id="selectPageByUserId" resultType="com.card.learn.entity.BizFeedback">

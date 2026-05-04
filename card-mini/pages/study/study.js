@@ -18,7 +18,7 @@ Page({
     loading: false,
     error: false,
     errorMsg: '',
-    appUserId: null,
+    userId: null,
     searchKeyword: '' // 搜索关键词
   },
 
@@ -27,7 +27,7 @@ Page({
 
     // 获取用户信息
     const userInfo = wx.getStorageSync('userInfo')
-    const appUserId = userInfo ? userInfo.userId : null
+    const userId = userInfo ? userInfo.userId : null
 
     let subjectId = null
     if (options.subjectId) {
@@ -67,7 +67,7 @@ Page({
     this.setData({
       subjectId: subjectId,
       subjectName: subjectName,
-      appUserId: appUserId
+      userId: userId
     }, () => {
       // setData回调中确保数据已设置
       this.fetchCards()
@@ -91,7 +91,7 @@ Page({
       pageNum: this.data.pageNum,
       pageSize: this.data.pageSize,
       status: this.data.currentTab,
-      userId: this.data.appUserId
+      userId: this.data.userId
     }
 
     console.log('请求卡片参数:', params)
@@ -133,7 +133,7 @@ Page({
       return
     }
 
-    getSubjectStats(subjectId, this.data.appUserId).then(res => {
+    getSubjectStats(subjectId, this.data.userId).then(res => {
       console.log('科目统计:', res)
       if (res.data) {
         this.setData({

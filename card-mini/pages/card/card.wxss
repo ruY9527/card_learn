@@ -682,3 +682,20 @@
 .submit-btn.disabled {
   opacity: 0.5;
 }
+
+/* 笔记选项 */
+.note-section {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  padding: 16rpx 30rpx;
+}
+
+.note-checkbox {
+  transform: scale(0.8);
+}
+
+.note-label {
+  font-size: 26rpx;
+  color: #606266;
+}

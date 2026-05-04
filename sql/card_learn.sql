@@ -169,34 +169,18 @@ CREATE TABLE `biz_card_tag` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='卡片标签关联表';
 
 -- ----------------------------
--- 10. 小程序用户表 (预留)
--- ----------------------------
-DROP TABLE IF EXISTS `sys_app_user`;
-CREATE TABLE `sys_app_user` (
-  `app_user_id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '小程序用户ID',
-  `openid` varchar(100) NOT NULL COMMENT '微信OpenID',
-  `unionid` varchar(100) DEFAULT NULL COMMENT '微信UnionID',
-  `nickname` varchar(50) DEFAULT NULL COMMENT '昵称',
-  `avatar` varchar(255) DEFAULT NULL COMMENT '头像',
-  `last_login_time` datetime DEFAULT NULL COMMENT '最后登录时间',
-  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '注册时间',
-  PRIMARY KEY (`app_user_id`),
-  UNIQUE KEY `uk_openid` (`openid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='小程序用户信息表';
-
--- ----------------------------
--- 11. 用户学习进度表
+-- 10. 用户学习进度表
 -- ----------------------------
 DROP TABLE IF EXISTS `biz_user_progress`;
 CREATE TABLE `biz_user_progress` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `app_user_id` bigint(20) DEFAULT NULL COMMENT '用户ID(游客模式下可为空)',
+  `user_id` bigint(20) DEFAULT NULL COMMENT '用户ID(游客模式下可为空)',
   `card_id` bigint(20) NOT NULL COMMENT '卡片ID',
   `status` tinyint(4) DEFAULT '0' COMMENT '掌握状态(0未学 1模糊 2掌握)',
   `next_review_time` datetime DEFAULT NULL COMMENT '建议下次复习时间(艾宾浩斯逻辑)',
   `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  KEY `idx_user_card` (`app_user_id`,`card_id`)
+  KEY `idx_user_card` (`user_id`,`card_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户学习进度表';
 
 SET FOREIGN_KEY_CHECKS = 1;

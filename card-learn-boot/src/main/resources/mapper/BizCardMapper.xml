@@ -11,7 +11,7 @@
         <result property="difficultyLevel" column="difficulty_level"/>
         <result property="auditStatus" column="audit_status"/>
         <result property="auditStatusText" column="audit_status_text"/>
-        <result property="createUserId" column="create_user_id"/>
+        <result property="createBy" column="create_by"/>
         <result property="createUserNickname" column="create_user_nickname"/>
         <result property="createTime" column="create_time"/>
         <result property="updateTime" column="update_time"/>
@@ -26,7 +26,7 @@
         <result property="difficultyLevel" column="difficulty_level"/>
         <result property="auditStatus" column="audit_status"/>
         <result property="auditStatusText" column="audit_status_text"/>
-        <result property="createUserId" column="create_user_id"/>
+        <result property="createBy" column="create_by"/>
         <result property="createUserNickname" column="create_user_nickname"/>
         <result property="auditUserId" column="audit_user_id"/>
         <result property="auditUserNickname" column="audit_user_nickname"/>
@@ -64,13 +64,13 @@
                 WHEN '2' THEN '已拒绝'
                 ELSE '未知'
             END AS audit_status_text,
-            c.create_user_id,
+            c.create_by,
             au.nickname AS create_user_nickname,
             c.create_time,
             c.update_time
         FROM biz_card c
         LEFT JOIN biz_subject s ON c.subject_id = s.subject_id
-        LEFT JOIN sys_user au ON c.create_user_id = au.user_id
+        LEFT JOIN sys_user au ON c.create_by = au.user_id
         WHERE c.del_flag = '0'
         <if test="subjectId != null">
             AND c.subject_id = #{subjectId}
@@ -96,7 +96,7 @@
                 WHEN '2' THEN '已拒绝'
                 ELSE '未知'
             END AS audit_status_text,
-            c.create_user_id,
+            c.create_by,
             au.nickname AS create_user_nickname,
             c.audit_user_id,
             su.nickname AS audit_user_nickname,
@@ -105,10 +105,10 @@
             c.create_time
         FROM biz_card c
         LEFT JOIN biz_subject s ON c.subject_id = s.subject_id
-        LEFT JOIN sys_user au ON c.create_user_id = au.user_id
+        LEFT JOIN sys_user au ON c.create_by = au.user_id
         LEFT JOIN sys_user su ON c.audit_user_id = su.user_id
         WHERE c.del_flag = '0'
-        AND c.create_user_id IS NOT NULL
+        AND c.create_by IS NOT NULL
         <if test="auditStatus != null and auditStatus != ''">
             AND c.audit_status = #{auditStatus}
         </if>
@@ -136,7 +136,7 @@
         FROM biz_card c
         LEFT JOIN biz_subject s ON c.subject_id = s.subject_id
         WHERE c.del_flag = '0'
-        AND c.create_user_id = #{createUserId}
+        AND c.create_by = #{createBy}
         ORDER BY c.create_time DESC
     </select>
 

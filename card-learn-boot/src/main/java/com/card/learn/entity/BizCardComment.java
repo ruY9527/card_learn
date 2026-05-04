@@ -47,6 +47,18 @@ public class BizCardComment implements Serializable {
     /** 关联的反馈ID（劣质评论自动生成反馈时） */
     private Long feedbackId;
 
+    /** 是否作为笔记：0否 1是 */
+    private Integer isNote;
+
+    /** 点赞数（冗余） */
+    private Integer likeCount;
+
+    /** 不喜欢数（冗余） */
+    private Integer dislikeCount;
+
+    /** 回复数量（冗余） */
+    private Integer replyCount;
+
     /** 创建时间 */
     @TableField(fill = FieldFill.INSERT)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -56,4 +68,10 @@ public class BizCardComment implements Serializable {
     @TableField(fill = FieldFill.INSERT_UPDATE)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updateTime;
+
+    /** 创建人 */
+    private Long createBy;
+
+    /** 修改人 */
+    private Long updateBy;
 }

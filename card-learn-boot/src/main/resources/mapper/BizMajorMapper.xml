@@ -12,7 +12,7 @@
                 AND status = #{status}
             </if>
         </where>
-        ORDER BY create_time DESC
+        ORDER BY major_id ASC
     </select>
 
 </mapper>

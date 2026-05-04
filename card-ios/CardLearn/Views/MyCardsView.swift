@@ -11,7 +11,7 @@ struct MyCardsView: View {
     @State private var showDeleteConfirm: Bool = false
     @State private var cardToDelete: MyCard?
 
-    private let apiService = APIService.shared
+    private let apiService = UserCardApiService.shared
 
     var body: some View {
         NavigationStack {

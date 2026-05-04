@@ -94,7 +94,7 @@ def main():
     batch_size = 50
     for i in range(0, len(all_cards), batch_size):
         batch = all_cards[i:i+batch_size]
-        sql_lines.append("INSERT INTO `biz_card` (`subject_id`, `front_content`, `back_content`, `difficulty_level`, `audit_status`, `create_user_id`) VALUES")
+        sql_lines.append("INSERT INTO `biz_card` (`subject_id`, `front_content`, `back_content`, `difficulty_level`, `audit_status`, `create_by`) VALUES")
         values = []
         for sid, front, back, diff in batch:
             values.append(f"  ({sid}, {escape_sql(front)}, {escape_sql(back)}, {diff}, '1', 1)")

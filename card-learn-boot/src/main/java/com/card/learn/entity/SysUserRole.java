@@ -23,4 +23,10 @@ public class SysUserRole implements Serializable {
 
     private Long roleId;
 
+
+    /** 创建人 */
+    private Long createBy;
+
+    /** 修改人 */
+    private Long updateBy;
 }

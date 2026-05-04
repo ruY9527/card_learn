@@ -5,7 +5,7 @@ Page({
   data: {
     isLoggedIn: false,
     userInfo: null,
-    appUserId: null,
+    userId: null,
 
     // 卡片纠错模式
     cardId: null,
@@ -105,7 +105,7 @@ Page({
     this.setData({
       isLoggedIn,
       userInfo: isLoggedIn ? userInfo : null,
-      appUserId: isLoggedIn ? userInfo.userId : null
+      userId: isLoggedIn ? userInfo.userId : null
     })
 
     // 登录状态变化后重新检查是否可以提交
@@ -262,7 +262,7 @@ Page({
 
     try {
       const feedbackData = {
-        userId: this.data.appUserId,
+        userId: this.data.userId,
         cardId: this.data.cardId,
         majorId: this.data.selectedMajorId,
         subjectId: this.data.selectedSubjectId,

@@ -250,8 +250,8 @@ struct StatsView: View {
         defer { isLoading = false }
 
         do {
-            async let statsResult = APIService.shared.getLearningStats(appUserId: userId)
-            async let progressResult = APIService.shared.getSubjectProgress(appUserId: userId)
+            async let statsResult = LearningApiService.shared.getLearningStats(appUserId: userId)
+            async let progressResult = LearningApiService.shared.getSubjectProgress(appUserId: userId)
 
             stats = try await statsResult
             subjectProgress = try await progressResult

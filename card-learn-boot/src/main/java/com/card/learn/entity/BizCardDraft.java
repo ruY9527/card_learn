@@ -31,8 +31,8 @@ public class BizCardDraft implements Serializable {
     /** 难度系数(1-5) */
     private Integer difficultyLevel;
 
-    /** 创建用户ID（小程序用户） */
-    private Long createUserId;
+    /** 创建人（小程序用户） */
+    private Long createBy;
 
     /** 标签ID列表（JSON格式存储） */
     private String tagIds;
@@ -58,7 +58,7 @@ public class BizCardDraft implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updateTime;
 
-    /** 更新人ID */
-    private Long updateUserId;
+    /** 修改人 */
+    private Long updateBy;
 
 }

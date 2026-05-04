@@ -31,7 +31,8 @@ struct FeedbackView: View {
     @State private var isLoadingMajors: Bool = false
     @State private var isLoadingSubjects: Bool = false
 
-    private let apiService = APIService.shared
+    private let cardApi = CardApiService.shared
+    private let feedbackApi = FeedbackApiService.shared
 
     var body: some View {
         NavigationStack {
@@ -431,7 +432,7 @@ struct FeedbackView: View {
         isLoadingMajors = true
         Task {
             do {
-                let majors = try await apiService.getMajorList()
+                let majors = try await cardApi.getMajorList()
                 await MainActor.run {
                     majorList = majors
                     isLoadingMajors = false
@@ -456,7 +457,7 @@ struct FeedbackView: View {
         selectedCard = nil // 清空已选卡片
         Task {
             do {
-                let subjects = try await apiService.getSubjectList(majorId: majorId)
+                let subjects = try await cardApi.getSubjectList(majorId: majorId)
                 await MainActor.run {
                     subjectList = subjects
                     isLoadingSubjects = false
@@ -483,7 +484,7 @@ struct FeedbackView: View {
 
         Task {
             do {
-                try await apiService.submitFeedback(
+                try await feedbackApi.submitFeedback(
                     appUserId: userId,
                     cardId: finalCardId,
                     majorId: majorId,
@@ -706,7 +707,7 @@ struct CardPickerSheet: View {
     @State private var isLoading: Bool = false
     @State private var hasSearched: Bool = false
 
-    private let apiService = APIService.shared
+    private let cardApi = CardApiService.shared
 
     var body: some View {
         NavigationStack {
@@ -846,7 +847,7 @@ struct CardPickerSheet: View {
 
         Task {
             do {
-                let pageData = try await apiService.getCardPage(
+                let pageData = try await cardApi.getCardPage(
                     subjectId: subjectId,
                     frontContent: searchKeyword,
                     appUserId: userId,

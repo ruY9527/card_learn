@@ -17,7 +17,8 @@ struct AddCardView: View {
     @State private var errorMessage: String = ""
     @State private var showSuccess: Bool = false
 
-    private let apiService = APIService.shared
+    private let cardApi = CardApiService.shared
+    private let userCardApi = UserCardApiService.shared
 
     var body: some View {
         NavigationStack {
@@ -112,7 +113,7 @@ struct AddCardView: View {
     private func fetchMajors() {
         Task {
             do {
-                let majors = try await apiService.getMajorList()
+                let majors = try await cardApi.getMajorList()
                 await MainActor.run {
                     majorList = majors
                     // 默认选择第一个专业
@@ -135,7 +136,7 @@ struct AddCardView: View {
         selectedSubjectId = nil
         Task {
             do {
-                let subjects = try await apiService.getSubjectList(majorId: majorId)
+                let subjects = try await cardApi.getSubjectList(majorId: majorId)
                 await MainActor.run {
                     subjectList = subjects
                     isLoadingSubjects = false
@@ -168,7 +169,7 @@ struct AddCardView: View {
 
         Task {
             do {
-                let _ = try await apiService.createCard(
+                let _ = try await userCardApi.createCard(
                     subjectId: subjectId,
                     frontContent: frontContent.trimmingCharacters(in: .whitespaces),
                     backContent: backContent.trimmingCharacters(in: .whitespaces),

@@ -5,7 +5,7 @@ Page({
   data: {
     statusType: '',        // learned/mastered/review
     title: '',             // 页面标题
-    appUserId: null,
+    userId: null,
     cardList: [],
     loading: false,
     hasMore: true,
@@ -24,14 +24,14 @@ Page({
   onLoad(options) {
     const statusType = options.type || 'learned'
     const userInfo = wx.getStorageSync('userInfo')
-    const appUserId = userInfo ? userInfo.userId : null
+    const userId = userInfo ? userInfo.userId : null
 
     const statusInfo = this.data.statusMap[statusType] || this.data.statusMap.learned
 
     this.setData({
       statusType,
       title: statusInfo.title,
-      appUserId
+      userId
     })
 
     // 设置导航栏标题
@@ -48,21 +48,21 @@ Page({
     this.setData({ loading: true })
 
     try {
-      const { appUserId, statusType, pageNum, pageSize } = this.data
+      const { userId, statusType, pageNum, pageSize } = this.data
       let result
 
       switch (statusType) {
         case 'learned':
-          result = await getLearnedCards(appUserId, pageNum, pageSize)
+          result = await getLearnedCards(userId, pageNum, pageSize)
           break
         case 'mastered':
-          result = await getMasteredCards(appUserId, pageNum, pageSize)
+          result = await getMasteredCards(userId, pageNum, pageSize)
           break
         case 'review':
-          result = await getReviewCardsList(appUserId, pageNum, pageSize)
+          result = await getReviewCardsList(userId, pageNum, pageSize)
           break
         default:
-          result = await getLearnedCards(appUserId, pageNum, pageSize)
+          result = await getLearnedCards(userId, pageNum, pageSize)
       }
 
       const newCards = result.data.records || []

@@ -232,7 +232,7 @@ export interface CardAuditVO {
   difficultyLevel?: number
   auditStatus?: string
   auditStatusText?: string
-  createUserId?: number
+  createBy?: number
   createUserNickname?: string
   auditUserId?: number
   auditUserNickname?: string
@@ -249,7 +249,7 @@ export interface CardCreateDTO {
   frontContent: string
   backContent: string
   difficultyLevel?: number
-  createUserId?: number
+  createBy?: number
   tagIds?: number[]
 }
 

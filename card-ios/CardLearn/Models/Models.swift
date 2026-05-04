@@ -225,6 +225,11 @@ struct Comment: Codable, Identifiable {
     let commentTypeText: String?
     let status: String?
     let adminReply: String?
+    let isNote: Int?
+    let likeCount: Int?
+    let dislikeCount: Int?
+    let replyCount: Int?
+    let likeStatus: Int?
     let createTime: String?
 
     var id: Int { commentId }
@@ -246,12 +251,48 @@ struct Comment: Codable, Identifiable {
     }
 }
 
+// 回复模型
+struct Reply: Codable, Identifiable {
+    let replyId: Int
+    let commentId: Int
+    let userId: Int
+    let userNickname: String?
+    let content: String
+    let likeCount: Int?
+    let dislikeCount: Int?
+    let likeStatus: Int?
+    let parentReplyId: Int?
+    let children: [Reply]?
+    let hasMoreChildren: Bool?
+    let createTime: String?
+
+    var id: Int { replyId }
+}
+
 // 评论统计
 struct CommentStats: Codable {
     let totalComments: Int?
     let qualityCount: Int?
     let poorCount: Int?
     let avgRating: Double?
+}
+
+// 笔记模型
+struct Note: Codable, Identifiable {
+    let commentId: Int
+    let cardId: Int
+    let cardFrontContent: String?
+    let subjectName: String?
+    let userId: Int
+    let userNickname: String?
+    let content: String
+    let rating: Int?
+    let likeCount: Int?
+    let replyCount: Int?
+    let createTime: String?
+    let updateTime: String?
+
+    var id: Int { commentId }
 }
 
 // MARK: - SM-2 相关模型

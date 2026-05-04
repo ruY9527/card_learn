@@ -22,4 +22,10 @@ public class BizTag implements Serializable {
     /** 所属科目ID（null表示通用标签） */
     private Long subjectId;
 
+
+    /** 创建人 */
+    private Long createBy;
+
+    /** 修改人 */
+    private Long updateBy;
 }

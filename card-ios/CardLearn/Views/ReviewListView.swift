@@ -164,7 +164,7 @@ struct ReviewListView: View {
         defer { isLoading = false }
 
         do {
-            reviewPlans = try await APIService.shared.getReviewPlan(appUserId: userId)
+            reviewPlans = try await LearningApiService.shared.getReviewPlan(appUserId: userId)
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -202,7 +202,7 @@ struct ReviewListView: View {
         defer { isLoadingHistory = false }
 
         do {
-            let response = try await APIService.shared.getCardStudyHistory(cardId: cardId, userId: userId)
+            let response = try await LearningApiService.shared.getCardStudyHistory(cardId: cardId, userId: userId)
             studyHistory = response.records ?? []
         } catch {
             studyHistory = []
@@ -337,7 +337,7 @@ struct ReviewCardDetailView: View {
     @State private var showError = false
     @State private var errorMessage = ""
 
-    private let apiService = APIService.shared
+    private let apiService = LearningApiService.shared
 
     var body: some View {
         NavigationStack {

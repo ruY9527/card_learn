@@ -174,7 +174,7 @@ Page({
       frontContent: this.data.frontContent.trim(),
       backContent: this.data.backContent.trim(),
       difficultyLevel: this.data.difficultyLevel,
-      createUserId: userInfo.userId
+      createBy: userInfo.userId
     }
 
     createCardByUser(cardData).then(res => {

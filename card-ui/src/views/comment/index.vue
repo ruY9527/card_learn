@@ -57,6 +57,14 @@
           </el-tag>
         </template>
       </el-table-column>
+      <el-table-column prop="isNote" label="笔记" width="70">
+        <template #default="{ row }">
+          <el-tag v-if="row.isNote === 1" type="success" size="small">是</el-tag>
+          <el-tag v-else type="info" size="small">否</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column prop="likeCount" label="点赞" width="70" />
+      <el-table-column prop="replyCount" label="回复" width="70" />
       <el-table-column prop="createTime" label="时间" width="160" />
       <el-table-column label="操作" width="180" fixed="right">
         <template #default="{ row }">
@@ -140,6 +148,9 @@ interface Comment {
   statusText: string
   adminReply: string
   feedbackId: number
+  isNote: number
+  likeCount: number
+  replyCount: number
   createTime: string
 }
 

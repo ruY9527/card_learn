@@ -16,7 +16,7 @@ Page({
     hasMore: true,
     loading: false,
     isSingleMode: false,
-    appUserId: null,
+    userId: null,
 
     // 滑动相关
     startX: 0,
@@ -31,7 +31,8 @@ Page({
     commentType: 'NEUTRAL',
     rating: 5,
     commentContent: '',
-    canSubmit: true
+    canSubmit: true,
+    saveAsNote: false
   },
 
   onLoad(options) {
@@ -39,7 +40,7 @@ Page({
 
     // 获取用户信息
     const userInfo = wx.getStorageSync('userInfo')
-    const appUserId = userInfo ? userInfo.userId : null
+    const userId = userInfo ? userInfo.userId : null
 
     const subjectId = parseInt(options.subjectId) || 0
     const cardId = parseInt(options.cardId) || 0
@@ -53,22 +54,22 @@ Page({
       }
     }
 
-    this.setData({ appUserId })
+    this.setData({ userId })
 
     if (!subjectId && cardId) {
       this.setData({ isSingleMode: true })
-      this.loadSingleCard(cardId, appUserId)
+      this.loadSingleCard(cardId, userId)
     } else {
       this.setData({ subjectId, subjectName, isSingleMode: false })
-      this.loadCards(cardId, appUserId)
+      this.loadCards(cardId, userId)
     }
   },
 
   // 单卡模式：只加载单个卡片
-  loadSingleCard(cardId, appUserId) {
+  loadSingleCard(cardId, userId) {
     this.setData({ loading: true })
 
-    getCardById(cardId, appUserId).then(res => {
+    getCardById(cardId, userId).then(res => {
       console.log('单卡详情:', res)
 
       if (res.data) {
@@ -100,7 +101,7 @@ Page({
   },
 
   // 加载卡片列表（从学习页进入）
-  loadCards(startCardId = 0, appUserId) {
+  loadCards(startCardId = 0, userId) {
     if (this.data.loading) return
 
     this.setData({
@@ -117,7 +118,7 @@ Page({
       subjectId: this.data.subjectId,
       pageNum: 1,
       pageSize: this.data.pageSize,
-      userId: appUserId
+      userId: userId
     }).then(res => {
       console.log('卡片列表响应:', res)
 
@@ -165,7 +166,7 @@ Page({
       subjectId: this.data.subjectId,
       pageNum: this.data.pageNum,
       pageSize: this.data.pageSize,
-      userId: this.data.appUserId
+      userId: this.data.userId
     }).then(res => {
       const newCards = res.data && res.data.records ? res.data.records : []
       const total = res.data && res.data.total ? res.data.total : 0
@@ -205,9 +206,9 @@ Page({
     if (!card) return
 
     // 有用户ID时使用SM-2复习接口，否则使用旧接口（游客模式）
-    const apiCall = this.data.appUserId
-      ? submitReview({ cardId: card.cardId, userId: this.data.appUserId, status: status })
-      : updateProgress({ cardId: card.cardId, userId: this.data.appUserId, status: status })
+    const apiCall = this.data.userId
+      ? submitReview({ cardId: card.cardId, userId: this.data.userId, status: status })
+      : updateProgress({ cardId: card.cardId, userId: this.data.userId, status: status })
 
     apiCall.then((res) => {
       // 显示下次复习时间
@@ -460,7 +461,8 @@ Page({
       showCommentDialog: true,
       commentType: 'NEUTRAL',
       rating: 5,
-      commentContent: ''
+      commentContent: '',
+      saveAsNote: false
     })
   },
 
@@ -486,6 +488,11 @@ Page({
     this.setData({ commentContent: e.detail.value })
   },
 
+  // 切换保存为笔记
+  toggleSaveAsNote() {
+    this.setData({ saveAsNote: !this.data.saveAsNote })
+  },
+
   // 提交评论
   submitComment() {
     const userInfo = wx.getStorageSync('userInfo')
@@ -507,7 +514,8 @@ Page({
       userId: userInfo.userId,
       content: this.data.commentContent,
       rating: this.data.rating,
-      commentType: this.data.commentType
+      commentType: this.data.commentType,
+      isNote: this.data.saveAsNote ? 1 : 0
     }).then(res => {
       wx.showToast({
         title: '评价成功',

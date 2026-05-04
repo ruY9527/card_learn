@@ -3,8 +3,10 @@ package com.card.learn.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.card.learn.common.Result;
 import com.card.learn.dto.CommentQueryDTO;
+import com.card.learn.dto.NoteQueryDTO;
 import com.card.learn.service.IBizCardCommentService;
 import com.card.learn.vo.CommentVO;
+import com.card.learn.vo.NoteVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +29,7 @@ public class AdminCommentController {
     @GetMapping("/page")
     @ApiOperation("分页查询评论列表")
     public Result<Page<CommentVO>> page(CommentQueryDTO queryDTO) {
-        return Result.success(commentService.pageComments(queryDTO));
+        return Result.success(commentService.pageComments(queryDTO, null));
     }
 
     /**
@@ -58,5 +60,14 @@ public class AdminCommentController {
     public Result<Void> delete(@PathVariable Long commentId) {
         commentService.removeById(commentId);
         return Result.success();
+    }
+
+    /**
+     * 分页查询所有笔记（管理员）
+     */
+    @GetMapping("/notes")
+    @ApiOperation("查询所有笔记")
+    public Result<Page<NoteVO>> allNotes(NoteQueryDTO queryDTO) {
+        return Result.success(commentService.pageMyNotes(queryDTO));
     }
 }

@@ -89,7 +89,11 @@ public class SecurityConfig {
                 "/api/miniprogram/sprint-config",
                 "/api/miniprogram/study-history/**",
                 "/api/miniprogram/feedback/list",
-                "/api/miniprogram/feedback/*"
+                "/api/miniprogram/feedback/*",
+                "/api/miniprogram/comment/**",
+                "/api/miniprogram/reply/**",
+                "/api/miniprogram/like/**",
+                "/api/miniprogram/note/**"
             ).permitAll()
             // 放行接口 - 学习服务API
             .antMatchers(

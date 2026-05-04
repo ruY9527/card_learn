@@ -48,4 +48,10 @@ public class SysMenu implements Serializable {
     @TableField(exist = false)
     private List<SysMenu> children;
 
+
+    /** 创建人 */
+    private Long createBy;
+
+    /** 修改人 */
+    private Long updateBy;
 }

@@ -32,6 +32,16 @@
 		A000001D /* StatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000001D; };
 		A000001E /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000001E; };
 		A000001F /* TodayCardsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000001F; };
+		A0000020 /* CommentSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000020; };
+		A0000021 /* NoteListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000021; };
+		A0000022 /* BaseApiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000022; };
+		A0000023 /* CardApiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000023; };
+		A0000024 /* AuthApiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000024; };
+		A0000025 /* FeedbackApiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000025; };
+		A0000026 /* CommentApiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000026; };
+		A0000027 /* NoteApiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000027; };
+		A0000028 /* LearningApiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000028; };
+		A0000029 /* UserCardApiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000029; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -61,6 +71,16 @@
 		B000001D /* StatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsView.swift; sourceTree = "<group>"; };
 		B000001E /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		B000001F /* TodayCardsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayCardsView.swift; sourceTree = "<group>"; };
+		B0000020 /* CommentSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommentSheetView.swift; sourceTree = "<group>"; };
+		B0000021 /* NoteListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteListView.swift; sourceTree = "<group>"; };
+		B0000022 /* BaseApiService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseApiService.swift; sourceTree = "<group>"; };
+		B0000023 /* CardApiService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardApiService.swift; sourceTree = "<group>"; };
+		B0000024 /* AuthApiService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthApiService.swift; sourceTree = "<group>"; };
+		B0000025 /* FeedbackApiService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackApiService.swift; sourceTree = "<group>"; };
+		B0000026 /* CommentApiService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommentApiService.swift; sourceTree = "<group>"; };
+		B0000027 /* NoteApiService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteApiService.swift; sourceTree = "<group>"; };
+		B0000028 /* LearningApiService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LearningApiService.swift; sourceTree = "<group>"; };
+		B0000029 /* UserCardApiService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserCardApiService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -116,7 +136,15 @@
 		E0000005 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				B0000022 /* BaseApiService.swift */,
 				B0000003 /* APIService.swift */,
+				B0000023 /* CardApiService.swift */,
+				B0000024 /* AuthApiService.swift */,
+				B0000025 /* FeedbackApiService.swift */,
+				B0000026 /* CommentApiService.swift */,
+				B0000027 /* NoteApiService.swift */,
+				B0000028 /* LearningApiService.swift */,
+				B0000029 /* UserCardApiService.swift */,
 				B000001E /* NotificationService.swift */,
 			);
 			path = Services;
@@ -141,6 +169,8 @@
 				B000001C /* ReviewListView.swift */,
 				B000001D /* StatsView.swift */,
 				B000001F /* TodayCardsView.swift */,
+				B0000020 /* CommentSheetView.swift */,
+				B0000021 /* NoteListView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -255,6 +285,16 @@
 				A000001D /* StatsView.swift in Sources */,
 				A000001E /* NotificationService.swift in Sources */,
 				A000001F /* TodayCardsView.swift in Sources */,
+				A0000020 /* CommentSheetView.swift in Sources */,
+				A0000021 /* NoteListView.swift in Sources */,
+				A0000022 /* BaseApiService.swift in Sources */,
+				A0000023 /* CardApiService.swift in Sources */,
+				A0000024 /* AuthApiService.swift in Sources */,
+				A0000025 /* FeedbackApiService.swift in Sources */,
+				A0000026 /* CommentApiService.swift in Sources */,
+				A0000027 /* NoteApiService.swift in Sources */,
+				A0000028 /* LearningApiService.swift in Sources */,
+				A0000029 /* UserCardApiService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -313,7 +353,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "考研知识点学习";
+				INFOPLIST_KEY_CFBundleDisplayName = "考研卡片";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -381,7 +421,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "考研知识点学习";
+				INFOPLIST_KEY_CFBundleDisplayName = "考研卡片";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
