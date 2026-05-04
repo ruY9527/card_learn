@@ -7,6 +7,8 @@ struct StatsView: View {
     @State private var subjectProgress: [SubjectProgressResponse] = []
     @State private var selectedMajorId: Int? = nil
     @State private var isLoading = false
+    @State private var navigateToTodayLearned = false
+    @State private var navigateToTodayMastered = false
 
     var body: some View {
         NavigationStack {
@@ -32,6 +34,12 @@ struct StatsView: View {
             .navigationBarTitleDisplayMode(.inline)
             .refreshable {
                 await loadData()
+            }
+            .navigationDestination(isPresented: $navigateToTodayLearned) {
+                TodayCardsView(type: "todayLearned", date: todayDateString)
+            }
+            .navigationDestination(isPresented: $navigateToTodayMastered) {
+                TodayCardsView(type: "todayMastered", date: todayDateString)
             }
         }
         .task {
@@ -119,12 +127,14 @@ struct StatsView: View {
                 label: "今日学习",
                 color: AppColor.info
             )
+            .onTapGesture { navigateToTodayLearned = true }
 
             todayItem(
                 count: stats?.masteredToday ?? 0,
                 label: "今日掌握",
                 color: AppColor.success
             )
+            .onTapGesture { navigateToTodayMastered = true }
         }
     }
 
@@ -227,6 +237,12 @@ struct StatsView: View {
     }
 
     // MARK: - 数据加载
+
+    private var todayDateString: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.string(from: Date())
+    }
 
     private func loadData() async {
         guard appState.isLoggedIn, let userId = appState.userInfo?.userId else { return }

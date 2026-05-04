@@ -31,6 +31,7 @@
 		A000001C /* ReviewListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000001C; };
 		A000001D /* StatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000001D; };
 		A000001E /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000001E; };
+		A000001F /* TodayCardsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000001F; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -59,6 +60,7 @@
 		B000001C /* ReviewListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewListView.swift; sourceTree = "<group>"; };
 		B000001D /* StatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsView.swift; sourceTree = "<group>"; };
 		B000001E /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		B000001F /* TodayCardsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayCardsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -138,6 +140,7 @@
 				B000001B /* CardFlipView.swift */,
 				B000001C /* ReviewListView.swift */,
 				B000001D /* StatsView.swift */,
+				B000001F /* TodayCardsView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -251,6 +254,7 @@
 				A000001C /* ReviewListView.swift in Sources */,
 				A000001D /* StatsView.swift in Sources */,
 				A000001E /* NotificationService.swift in Sources */,
+				A000001F /* TodayCardsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -63,7 +63,7 @@ class APIService {
     }
 
     // 分页获取卡片列表
-    func getCardPage(subjectId: Int?, frontContent: String?, appUserId: Int?, status: String?, pageNum: Int = 1, pageSize: Int = AppPageSize.cards) async throws -> PageResponse<Card> {
+    func getCardPage(subjectId: Int?, frontContent: String?, appUserId: Int?, status: String?, startDate: String? = nil, endDate: String? = nil, pageNum: Int = 1, pageSize: Int = AppPageSize.cards) async throws -> PageResponse<Card> {
         return try await retry {
             var urlComponents = URLComponents(string: self.config.getApiUrl(path: "/api/miniprogram/cards"))!
             var queryItems: [URLQueryItem] = [
@@ -81,6 +81,12 @@ class APIService {
             }
             if let status = status {
                 queryItems.append(URLQueryItem(name: "status", value: status))
+            }
+            if let startDate = startDate {
+                queryItems.append(URLQueryItem(name: "startDate", value: startDate))
+            }
+            if let endDate = endDate {
+                queryItems.append(URLQueryItem(name: "endDate", value: endDate))
             }
             urlComponents.queryItems = queryItems
 

@@ -24,4 +24,10 @@ public class MiniCardQueryDTO extends PageQueryDTO {
 
     @ApiModelProperty("状态筛选：learned/mastered/review/unlearned/all")
     private String status;
+
+    @ApiModelProperty("开始日期（yyyy-MM-dd），用于按学习时间筛选")
+    private String startDate;
+
+    @ApiModelProperty("结束日期（yyyy-MM-dd），用于按学习时间筛选")
+    private String endDate;
 }

@@ -31,7 +31,10 @@ import org.springframework.web.bind.annotation.*;
 
 import com.card.learn.vo.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -382,6 +385,26 @@ public class MiniProgramController {
                     default:
                         return true;
                 }
+            }).collect(Collectors.toList());
+        }
+
+        // 按日期筛选（今日学习/今日掌握）
+        String startDate = queryDTO.getStartDate();
+        String endDate = queryDTO.getEndDate();
+        if (startDate != null && !startDate.isEmpty()) {
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            LocalDateTime startDateTime = LocalDate.parse(startDate, dtf).atStartOfDay();
+            LocalDateTime endDateTime;
+            if (endDate != null && !endDate.isEmpty()) {
+                endDateTime = LocalDate.parse(endDate, dtf).atTime(LocalTime.MAX);
+            } else {
+                endDateTime = startDateTime.plusDays(1);
+            }
+            final LocalDateTime finalStart = startDateTime;
+            final LocalDateTime finalEnd = endDateTime;
+            cardDTOs = cardDTOs.stream().filter(dto -> {
+                LocalDateTime updateTime = dto.getUpdateTime();
+                return updateTime != null && !updateTime.isBefore(finalStart) && !updateTime.isAfter(finalEnd);
             }).collect(Collectors.toList());
         }
 

@@ -80,6 +80,7 @@
     <select id="selectByUserIdAndCardId" resultType="com.card.learn.entity.BizUserProgress">
         SELECT * FROM biz_user_progress
         WHERE user_id = #{userId} AND card_id = #{cardId}
+        LIMIT 1
     </select>
 
     <select id="countByCondition" resultType="java.lang.Long">

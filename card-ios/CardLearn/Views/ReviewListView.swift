@@ -7,7 +7,6 @@ struct ReviewListView: View {
     @State private var isLoading = false
     @State private var errorMessage: String?
     @State private var selectedCard: ReviewPlanResponse?
-    @State private var showStudy = false
     @State private var showHistorySheet = false
     @State private var historyCardId: Int?
     @State private var studyHistory: [StudyHistoryRecordItem] = []
@@ -33,6 +32,13 @@ struct ReviewListView: View {
                 if let cardId = historyCardId {
                     studyHistorySheet(cardId: cardId)
                 }
+            }
+            .sheet(item: $selectedCard) { card in
+                ReviewCardDetailView(
+                    card: card,
+                    userId: appState.userInfo?.userId,
+                    onDismiss: { selectedCard = nil }
+                )
             }
         }
         .task {
@@ -75,7 +81,6 @@ struct ReviewListView: View {
                                 plan: plan,
                                 onTap: {
                                     selectedCard = plan
-                                    showStudy = true
                                 },
                                 onHistoryTap: {
                                     historyCardId = plan.cardId
@@ -315,6 +320,181 @@ struct ReviewPlanCard: View {
             .background(Color.white)
             .cornerRadius(12)
             .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+        }
+    }
+}
+
+// MARK: - 复习卡片详情
+
+struct ReviewCardDetailView: View {
+    let card: ReviewPlanResponse
+    let userId: Int?
+    let onDismiss: () -> Void
+
+    @State private var isFlipped = false
+    @State private var isSubmitting = false
+    @State private var submitted = false
+    @State private var showError = false
+    @State private var errorMessage = ""
+
+    private let apiService = APIService.shared
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 24) {
+                Spacer()
+
+                // 卡片内容
+                VStack(spacing: 16) {
+                    // 正面
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("问题")
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(AppColor.textSecondary)
+                        Text(card.frontContent)
+                            .font(.system(size: 18))
+                            .foregroundColor(AppColor.textPrimary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(20)
+                    .background(Color.white)
+                    .cornerRadius(16)
+                    .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 4)
+
+                    // 背面（点击翻转）
+                    if isFlipped {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("答案")
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundColor(AppColor.textSecondary)
+                            Text(card.backContent ?? "暂无答案")
+                                .font(.system(size: 16))
+                                .foregroundColor(AppColor.textPrimary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(20)
+                        .background(AppColor.infoLight)
+                        .cornerRadius(16)
+                        .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 3)
+                        .transition(.opacity.combined(with: .move(edge: .bottom)))
+                    }
+                }
+                .padding(.horizontal, 20)
+
+                // 翻转按钮
+                if !isFlipped {
+                    Button(action: { withAnimation(.easeInOut(duration: 0.3)) { isFlipped = true } }) {
+                        Text("查看答案")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(14)
+                            .background(AppColor.primary)
+                            .cornerRadius(12)
+                    }
+                    .padding(.horizontal, 20)
+                }
+
+                // 复习按钮
+                if isFlipped && !submitted {
+                    VStack(spacing: 12) {
+                        Text("掌握程度")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(AppColor.textSecondary)
+
+                        HStack(spacing: 12) {
+                            ReviewStatusButton(
+                                title: "不熟",
+                                color: AppColor.danger,
+                                action: { submitReview(status: 0) }
+                            )
+                            ReviewStatusButton(
+                                title: "模糊",
+                                color: AppColor.orange,
+                                action: { submitReview(status: 1) }
+                            )
+                            ReviewStatusButton(
+                                title: "掌握",
+                                color: AppColor.green,
+                                action: { submitReview(status: 2) }
+                            )
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                }
+
+                // 提交成功提示
+                if submitted {
+                    VStack(spacing: 8) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 40))
+                            .foregroundColor(AppColor.success)
+                        Text("复习记录已保存")
+                            .font(.system(size: 15, weight: .medium))
+                            .foregroundColor(AppColor.textPrimary)
+                    }
+                }
+
+                Spacer()
+            }
+            .navigationTitle("复习卡片")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("关闭") { onDismiss() }
+                        .foregroundColor(AppColor.primary)
+                }
+            }
+            .alert("提交失败", isPresented: $showError) {
+                Button("确定", role: .cancel) {}
+            } message: {
+                Text(errorMessage)
+            }
+        }
+    }
+
+    private func submitReview(status: Int) {
+        guard !isSubmitting, let userId = userId else { return }
+        isSubmitting = true
+
+        Task {
+            do {
+                _ = try await apiService.submitSimpleReview(
+                    cardId: card.cardId,
+                    userId: userId,
+                    status: status
+                )
+                await MainActor.run {
+                    submitted = true
+                    isSubmitting = false
+                }
+            } catch {
+                await MainActor.run {
+                    errorMessage = error.localizedDescription
+                    showError = true
+                    isSubmitting = false
+                }
+            }
+        }
+    }
+}
+
+struct ReviewStatusButton: View {
+    let title: String
+    let color: Color
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .padding(14)
+                .background(color)
+                .cornerRadius(12)
         }
     }
 }

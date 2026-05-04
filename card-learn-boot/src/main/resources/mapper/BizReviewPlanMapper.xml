@@ -85,6 +85,8 @@
     <select id="selectPendingByUserAndCard" resultType="com.card.learn.entity.BizReviewPlan">
         SELECT * FROM biz_review_plan
         WHERE user_id = #{userId} AND card_id = #{cardId} AND status = '0'
+        ORDER BY scheduled_date DESC
+        LIMIT 1
     </select>
 
     <select id="selectLatestPendingByUserAndCard" resultType="com.card.learn.entity.BizReviewPlan">
