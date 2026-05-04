@@ -388,7 +388,7 @@ public class MiniProgramController {
             }).collect(Collectors.toList());
         }
 
-        // 按日期筛选（今日学习/今日掌握）
+        // 按日期筛选（今日学习/今日掌握），使用半开区间 [start, end)
         String startDate = queryDTO.getStartDate();
         String endDate = queryDTO.getEndDate();
         if (startDate != null && !startDate.isEmpty()) {
@@ -396,7 +396,7 @@ public class MiniProgramController {
             LocalDateTime startDateTime = LocalDate.parse(startDate, dtf).atStartOfDay();
             LocalDateTime endDateTime;
             if (endDate != null && !endDate.isEmpty()) {
-                endDateTime = LocalDate.parse(endDate, dtf).atTime(LocalTime.MAX);
+                endDateTime = LocalDate.parse(endDate, dtf).plusDays(1).atStartOfDay();
             } else {
                 endDateTime = startDateTime.plusDays(1);
             }
@@ -404,7 +404,7 @@ public class MiniProgramController {
             final LocalDateTime finalEnd = endDateTime;
             cardDTOs = cardDTOs.stream().filter(dto -> {
                 LocalDateTime updateTime = dto.getUpdateTime();
-                return updateTime != null && !updateTime.isBefore(finalStart) && !updateTime.isAfter(finalEnd);
+                return updateTime != null && !updateTime.isBefore(finalStart) && updateTime.isBefore(finalEnd);
             }).collect(Collectors.toList());
         }
 

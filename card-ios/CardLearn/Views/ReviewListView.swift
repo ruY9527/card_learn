@@ -57,7 +57,7 @@ struct ReviewListView: View {
             Text("暂无待复习卡片")
                 .font(.system(size: 18, weight: .medium))
                 .foregroundColor(AppColor.textPrimary)
-            Text("所有卡片都已复习完毕，继续保持！")
+            Text("今日卡片都已复习完毕，继续保持！")
                 .font(.system(size: 14))
                 .foregroundColor(AppColor.textSecondary)
             Spacer()

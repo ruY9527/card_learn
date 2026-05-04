@@ -7,13 +7,13 @@
         SELECT
             (SELECT COUNT(*) FROM biz_card WHERE del_flag = '0') AS totalCards,
             COUNT(DISTINCT DATE(p.update_time)) AS learnDays,
-            COUNT(*) AS totalLearnRecords,
-            SUM(CASE WHEN p.status = 0 THEN 1 ELSE 0 END) AS unlearnedCount,
-            SUM(CASE WHEN p.status = 1 THEN 1 ELSE 0 END) AS fuzzyCount,
-            SUM(CASE WHEN p.status = 2 THEN 1 ELSE 0 END) AS masteredCount,
+            COUNT(DISTINCT p.card_id) AS totalLearnRecords,
+            COUNT(DISTINCT CASE WHEN p.status = 0 THEN p.card_id END) AS unlearnedCount,
+            COUNT(DISTINCT CASE WHEN p.status = 1 THEN p.card_id END) AS fuzzyCount,
+            COUNT(DISTINCT CASE WHEN p.status = 2 THEN p.card_id END) AS masteredCount,
             CASE
-                WHEN COUNT(*) > 0
-                THEN ROUND((SUM(CASE WHEN p.status <![CDATA[ >= ]]> 1 THEN 1 ELSE 0 END) * 100.0 / COUNT(*)), 1)
+                WHEN COUNT(DISTINCT p.card_id) > 0
+                THEN ROUND((COUNT(DISTINCT CASE WHEN p.status <![CDATA[ >= ]]> 1 THEN p.card_id END) * 100.0 / COUNT(DISTINCT p.card_id)), 1)
                 ELSE 0
             END AS learnedRate
         FROM biz_user_progress p
@@ -28,7 +28,7 @@
     <select id="selectDailyTrend" resultType="com.card.learn.vo.DailyLearnTrendVO">
         SELECT
             DATE_FORMAT(p.update_time, '%Y-%m-%d') AS date,
-            COUNT(*) AS count
+            COUNT(DISTINCT p.card_id) AS count
         FROM biz_user_progress p
         WHERE p.update_time <![CDATA[ >= ]]> #{startDate}
         <if test="userId != null">
@@ -44,9 +44,9 @@
             p.user_id AS userId,
             COALESCE(u.nickname, '未知用户') AS nickname,
             u.avatar AS avatar,
-            COUNT(*) AS totalCards,
-            SUM(CASE WHEN p.status = 2 THEN 1 ELSE 0 END) AS masteredCount,
-            SUM(CASE WHEN p.status = 1 THEN 1 ELSE 0 END) AS fuzzyCount
+            COUNT(DISTINCT p.card_id) AS totalCards,
+            COUNT(DISTINCT CASE WHEN p.status = 2 THEN p.card_id END) AS masteredCount,
+            COUNT(DISTINCT CASE WHEN p.status = 1 THEN p.card_id END) AS fuzzyCount
         FROM biz_user_progress p
         LEFT JOIN sys_user u ON p.user_id = u.user_id
         WHERE p.user_id IS NOT NULL AND p.status <![CDATA[ >= ]]> 1
@@ -62,9 +62,9 @@
             s.subject_name AS subjectName,
             m.major_name AS majorName,
             COUNT(DISTINCT c.card_id) AS totalCards,
-            SUM(CASE WHEN p.status IS NULL OR p.status = 0 THEN 1 ELSE 0 END) AS unlearnedCount,
-            SUM(CASE WHEN p.status = 1 THEN 1 ELSE 0 END) AS fuzzyCount,
-            SUM(CASE WHEN p.status = 2 THEN 1 ELSE 0 END) AS masteredCount
+            COUNT(DISTINCT CASE WHEN p.status IS NULL OR p.status = 0 THEN c.card_id END) AS unlearnedCount,
+            COUNT(DISTINCT CASE WHEN p.status = 1 THEN c.card_id END) AS fuzzyCount,
+            COUNT(DISTINCT CASE WHEN p.status = 2 THEN c.card_id END) AS masteredCount
         FROM biz_subject s
         LEFT JOIN biz_major m ON s.major_id = m.major_id
         LEFT JOIN biz_card c ON c.subject_id = s.subject_id AND c.del_flag = '0'
@@ -84,7 +84,7 @@
     </select>
 
     <select id="countByCondition" resultType="java.lang.Long">
-        SELECT COUNT(*) FROM biz_user_progress
+        SELECT COUNT(DISTINCT card_id) FROM biz_user_progress
         <where>
             <if test="userId != null">
                 AND user_id = #{userId}

@@ -74,7 +74,7 @@
         SELECT
             c.subject_id AS subjectId,
             p.status,
-            COUNT(*) AS count
+            COUNT(DISTINCT c.card_id) AS count
         FROM biz_card c
         INNER JOIN biz_user_progress p ON c.card_id = p.card_id
         WHERE c.del_flag = '0'

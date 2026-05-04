@@ -1,12 +1,13 @@
 # 408知识点学习卡片系统
 
-一个专注于408计算机考研知识点学习的小程序系统，采用卡片式学习方法，帮助用户高效掌握知识点。
+一个专注于408计算机考研知识点学习的多平台卡片系统，采用卡片式学习方法，结合SM-2间隔重复算法，帮助用户高效掌握知识点。
 
 ## 项目结构
 
 ```
 card_learn/
 ├── card-learn-boot/     # 后端项目 (Spring Boot)
+├── card-ios/            # iOS 客户端 (SwiftUI)
 ├── card-mini/           # 小程序项目 (Uni-app Vue3 + TS)
 ├── card-ui/             # 管理后台 (Vue 3 + Element Plus)
 ├── sql/                 # 数据库脚本
@@ -16,12 +17,19 @@ card_learn/
 ## 技术栈
 
 ### 后端 (card-learn-boot)
-- Spring Boot 2.7.x (JDK 8)
+- Spring Boot 2.7.x (JDK 8 / JDK 17)
 - MyBatis Plus 3.5.x
 - MySQL 8.0
 - Redis
 - Spring Security + JWT
 - Knife4j (API文档)
+- SM-2 间隔重复算法
+
+### iOS 客户端 (card-ios)
+- SwiftUI
+- iOS 16+
+- MVVM 架构
+- 翻转卡片交互
 
 ### 小程序 (card-mini)
 - Uni-app (Vue 3 + TypeScript)
@@ -85,6 +93,19 @@ npm run dev:mp-weixin
 - 知识点卡片管理 (支持Markdown/LaTeX)
 - 标签管理
 - 用户管理
+- 卡片审批（用户提交卡片需审批后上线）
+- 复习计划管理
+
+### iOS 客户端
+- 首页: 专业分类、科目列表、卡片学习
+- 学习: 翻转卡片、学习状态标记（不熟/模糊/掌握）
+- 复习计划: SM-2算法生成的复习计划、按日期分组展示
+- 学习统计: 连续学习天数、今日学习/掌握数量、科目进度
+- 今日学习/掌握: 点击查看当日学习的卡片详情
+- 学习历史: 每张卡片的学习记录追踪
+- 用户反馈: 可关联卡片提交反馈
+- 添加卡片: 用户自主创建知识点卡片
+- 我的卡片: 查看个人提交的卡片及审批状态
 
 ### 小程序
 - 首页: 专业分类、科目列表、推荐卡片
@@ -96,15 +117,19 @@ npm run dev:mp-weixin
 
 | 表名 | 说明 |
 |------|------|
-| sys_user | 后台管理员表 |
+| sys_user | 用户表（管理员+小程序用户） |
 | sys_role | 角色表 |
 | sys_menu | 菜单权限表 |
 | biz_major | 专业表 |
 | biz_subject | 科目表 |
 | biz_card | 知识点卡片表(核心) |
 | biz_tag | 标签表 |
-| sys_app_user | 小程序用户表 |
+| biz_card_tag | 卡片标签关联表 |
 | biz_user_progress | 用户学习进度表 |
+| biz_review_plan | 复习计划表 |
+| biz_study_history | 学习历史记录表 |
+| biz_feedback | 用户反馈表 |
+| biz_learning_streak | 学习连续记录表 |
 
 ## 开发计划
 
@@ -113,7 +138,12 @@ npm run dev:mp-weixin
 - [x] 管理后台完整页面
 - [x] 小程序完整功能
 - [x] LaTeX公式渲染支持
-- [ ] 艾宾浩斯复习提醒
+- [x] SM-2间隔重复算法
+- [x] 复习计划系统
+- [x] iOS客户端
+- [x] 学习统计与连续记录
+- [x] 卡片审批流程
+- [x] 用户反馈系统
 - [ ] AI辅助录入功能
 
 ## 部署脚本
