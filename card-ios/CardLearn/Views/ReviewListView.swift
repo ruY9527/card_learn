@@ -8,6 +8,10 @@ struct ReviewListView: View {
     @State private var errorMessage: String?
     @State private var selectedCard: ReviewPlanResponse?
     @State private var showStudy = false
+    @State private var showHistorySheet = false
+    @State private var historyCardId: Int?
+    @State private var studyHistory: [StudyHistoryRecordItem] = []
+    @State private var isLoadingHistory = false
 
     var body: some View {
         NavigationStack {
@@ -24,6 +28,11 @@ struct ReviewListView: View {
             .navigationBarTitleDisplayMode(.inline)
             .refreshable {
                 await loadReviewPlan()
+            }
+            .sheet(isPresented: $showHistorySheet) {
+                if let cardId = historyCardId {
+                    studyHistorySheet(cardId: cardId)
+                }
             }
         }
         .task {
@@ -62,10 +71,18 @@ struct ReviewListView: View {
                 ForEach(groupedPlans.keys.sorted(), id: \.self) { date in
                     Section(header: dateHeader(date)) {
                         ForEach(groupedPlans[date] ?? []) { plan in
-                            ReviewPlanCard(plan: plan) {
-                                selectedCard = plan
-                                showStudy = true
-                            }
+                            ReviewPlanCard(
+                                plan: plan,
+                                onTap: {
+                                    selectedCard = plan
+                                    showStudy = true
+                                },
+                                onHistoryTap: {
+                                    historyCardId = plan.cardId
+                                    showHistorySheet = true
+                                    Task { await loadStudyHistory(cardId: plan.cardId) }
+                                }
+                            )
                         }
                     }
                 }
@@ -170,6 +187,69 @@ struct ReviewListView: View {
         formatter.dateFormat = "yyyy-MM-dd"
         return formatter.string(from: date)
     }
+
+    // MARK: - 学习历史
+
+    private func loadStudyHistory(cardId: Int) async {
+        guard let userId = appState.userInfo?.userId else { return }
+        isLoadingHistory = true
+        studyHistory = []
+        defer { isLoadingHistory = false }
+
+        do {
+            let response = try await APIService.shared.getCardStudyHistory(cardId: cardId, userId: userId)
+            studyHistory = response.records ?? []
+        } catch {
+            studyHistory = []
+        }
+    }
+
+    private func studyHistorySheet(cardId: Int) -> some View {
+        NavigationStack {
+            VStack(spacing: 0) {
+                if isLoadingHistory {
+                    Spacer()
+                    ProgressView("加载中...")
+                    Spacer()
+                } else if studyHistory.isEmpty {
+                    Spacer()
+                    Text("暂无学习记录")
+                        .font(.system(size: 15))
+                        .foregroundColor(AppColor.textSecondary)
+                    Spacer()
+                } else {
+                    List {
+                        ForEach(studyHistory) { record in
+                            HStack(spacing: 12) {
+                                Circle()
+                                    .fill(Color(hex: record.statusColorHex))
+                                    .frame(width: 8, height: 8)
+
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(record.statusText)
+                                        .font(.system(size: 14))
+                                        .foregroundColor(AppColor.textPrimary)
+
+                                    if let time = record.createTime {
+                                        Text(time)
+                                            .font(.system(size: 12))
+                                            .foregroundColor(AppColor.textSecondary)
+                                    }
+                                }
+
+                                Spacer()
+                            }
+                            .padding(.vertical, 4)
+                        }
+                    }
+                    .listStyle(.plain)
+                }
+            }
+            .navigationTitle("学习记录")
+            .navigationBarTitleDisplayMode(.inline)
+        }
+        .presentationDetents([.medium, .large])
+    }
 }
 
 // MARK: - 复习计划卡片
@@ -177,6 +257,7 @@ struct ReviewListView: View {
 struct ReviewPlanCard: View {
     let plan: ReviewPlanResponse
     let onTap: () -> Void
+    let onHistoryTap: () -> Void
 
     private var difficultyColor: Color {
         switch plan.difficultyLevel {
@@ -211,6 +292,15 @@ struct ReviewPlanCard: View {
                                 .padding(.vertical, 2)
                                 .background(AppColor.infoLight)
                                 .cornerRadius(4)
+                        }
+
+                        if let count = plan.studyCount, count > 0 {
+                            Button(action: onHistoryTap) {
+                                Text("学习\(count)次")
+                                    .font(.system(size: 11))
+                                    .foregroundColor(AppColor.accentGreen)
+                                    .underline()
+                            }
                         }
                     }
                 }

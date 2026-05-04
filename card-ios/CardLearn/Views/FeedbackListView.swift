@@ -6,7 +6,9 @@ struct FeedbackListView: View {
     @State private var isLoading: Bool = false
     @State private var pageNum: Int = 1
     @State private var hasMore: Bool = true
-    
+    @State private var showError: Bool = false
+    @State private var errorMessage: String = ""
+
     private let apiService = APIService.shared
     private let typeMap: [String: String] = [
         "SUGGESTION": "建议",
@@ -15,10 +17,9 @@ struct FeedbackListView: View {
         "OTHER": "其他"
     ]
     private let statusMap: [String: String] = [
-        "PENDING": "待处理",
-        "PROCESSING": "处理中",
-        "RESOLVED": "已解决",
-        "CLOSED": "已关闭"
+        "0": "待处理",
+        "1": "已采纳",
+        "2": "已忽略"
     ]
     
     var body: some View {
@@ -98,6 +99,14 @@ struct FeedbackListView: View {
                 fetchFeedbackList()
             }
         }
+        .alert("加载失败", isPresented: $showError) {
+            Button("重试") {
+                fetchFeedbackList()
+            }
+            Button("确定", role: .cancel) { }
+        } message: {
+            Text(errorMessage)
+        }
     }
     
     private func fetchFeedbackList() {
@@ -124,6 +133,8 @@ struct FeedbackListView: View {
                 isLoading = false
             } catch {
                 isLoading = false
+                errorMessage = error.localizedDescription
+                showError = true
             }
         }
     }
@@ -149,7 +160,7 @@ struct FeedbackItem: View {
                 
                 Spacer()
                 
-                StatusTag(status: feedback.status ?? "PENDING", label: statusMap[feedback.status ?? "PENDING"] ?? "待处理")
+                StatusTag(status: feedback.status ?? "0", label: statusMap[feedback.status ?? "0"] ?? "待处理")
             }
             
             // 内容
@@ -241,19 +252,17 @@ struct TypeTag: View {
 struct StatusTag: View {
     let status: String
     let label: String
-    
+
     var body: some View {
         Text(label)
             .font(.system(size: 12))
-            .foregroundColor(status == "RESOLVED" ? AppColor.success :
-                             status == "PROCESSING" ? AppColor.info :
-                             status == "CLOSED" ? AppColor.textSecondary :
+            .foregroundColor(status == "1" ? AppColor.success :
+                             status == "2" ? AppColor.textSecondary :
                              AppColor.warning)
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
-            .background(status == "RESOLVED" ? AppColor.successLight :
-                        status == "PROCESSING" ? AppColor.blueLight :
-                        status == "CLOSED" ? AppColor.backgroundGray :
+            .background(status == "1" ? AppColor.successLight :
+                        status == "2" ? AppColor.backgroundGray :
                         AppColor.warningLight)
             .cornerRadius(4)
     }

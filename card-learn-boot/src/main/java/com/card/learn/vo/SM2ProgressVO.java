@@ -1,5 +1,6 @@
 package com.card.learn.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -26,5 +27,6 @@ public class SM2ProgressVO implements Serializable {
     private Integer interval;
 
     /** 下次复习时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime nextReviewTime;
 }

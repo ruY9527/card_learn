@@ -44,4 +44,7 @@ public class AdminReviewPlanVO implements Serializable {
 
     /** 状态(0待复习 1已完成) */
     private String status;
+
+    /** 学习次数 */
+    private Integer studyCount;
 }

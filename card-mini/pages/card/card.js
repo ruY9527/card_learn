@@ -1,5 +1,5 @@
 // pages/card/card.js
-const { getCardById, getCardPage, updateProgress, getCommentStats, submitComment } = require('../../utils/request')
+const { getCardById, getCardPage, updateProgress, getCommentStats, submitComment, submitReview } = require('../../utils/request')
 
 Page({
   data: {
@@ -204,13 +204,19 @@ Page({
     const card = this.data.currentCard
     if (!card) return
 
-    updateProgress({
-      cardId: card.cardId,
-      userId: this.data.appUserId,
-      status: status
-    }).then(() => {
+    // 有用户ID时使用SM-2复习接口，否则使用旧接口（游客模式）
+    const apiCall = this.data.appUserId
+      ? submitReview({ cardId: card.cardId, userId: this.data.appUserId, status: status })
+      : updateProgress({ cardId: card.cardId, userId: this.data.appUserId, status: status })
+
+    apiCall.then((res) => {
+      // 显示下次复习时间
+      let toastTitle = this.getStatusToast(status)
+      if (res && res.data && res.data.intervalDays) {
+        toastTitle = `${toastTitle}，${res.data.intervalDays}天后复习`
+      }
       wx.showToast({
-        title: this.getStatusToast(status),
+        title: toastTitle,
         icon: 'success',
         duration: 1000
       })

@@ -28,17 +28,6 @@
           <el-menu-item index="/card">卡片管理</el-menu-item>
           <el-menu-item index="/tag">标签管理</el-menu-item>
         </el-sub-menu>
-        <el-sub-menu index="system">
-          <template #title>
-            <el-icon><Setting /></el-icon>
-            <span>系统管理</span>
-          </template>
-          <el-menu-item index="/system/user">用户管理</el-menu-item>
-          <el-menu-item index="/system/role">角色管理</el-menu-item>
-          <el-menu-item index="/system/menu">菜单管理</el-menu-item>
-          <el-menu-item index="/system/log">日志管理</el-menu-item>
-          <el-menu-item index="/system/sprint">冲刺配置</el-menu-item>
-        </el-sub-menu>
         <el-sub-menu index="feedback">
           <template #title>
             <el-icon><ChatDotRound /></el-icon>
@@ -46,6 +35,7 @@
           </template>
           <el-menu-item index="/feedback">反馈管理</el-menu-item>
           <el-menu-item index="/card-audit">卡片审批</el-menu-item>
+          <el-menu-item index="/comment">评论管理</el-menu-item>
         </el-sub-menu>
         <el-sub-menu index="stats">
           <template #title>
@@ -60,6 +50,17 @@
           <el-icon><MagicStick /></el-icon>
           <template #title>AI转化</template>
         </el-menu-item>
+        <el-sub-menu index="system">
+          <template #title>
+            <el-icon><Setting /></el-icon>
+            <span>系统管理</span>
+          </template>
+          <el-menu-item index="/system/user">用户管理</el-menu-item>
+          <el-menu-item index="/system/role">角色管理</el-menu-item>
+          <el-menu-item index="/system/menu">菜单管理</el-menu-item>
+          <el-menu-item index="/system/log">日志管理</el-menu-item>
+          <el-menu-item index="/system/sprint">冲刺配置</el-menu-item>
+        </el-sub-menu>
       </el-menu>
     </el-aside>
     <el-container>

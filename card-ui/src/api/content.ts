@@ -267,6 +267,6 @@ export const getCardStudyHistory = (params: { cardId: number; userId?: number; p
 /**
  * 管理端-分页查询复习计划
  */
-export const getAdminReviewPlan = (params: { userId?: number; status?: string; scheduledDate?: string; pageNum: number; pageSize: number }) => {
+export const getAdminReviewPlan = (params: { userId?: number; status?: string; scheduledDateStart?: string; scheduledDateEnd?: string; pageNum: number; pageSize: number }) => {
   return request.get<any, PageResult<AdminReviewPlan>>('/learning/admin/review-plan', { params })
 }

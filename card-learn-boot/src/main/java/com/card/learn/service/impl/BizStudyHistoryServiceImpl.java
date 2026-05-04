@@ -56,4 +56,22 @@ public class BizStudyHistoryServiceImpl extends ServiceImpl<BizStudyHistoryMappe
         }
         return result;
     }
+
+    @Override
+    public Map<Long, Integer> batchGetStudyCount(Long userId, List<Long> cardIds) {
+        if (cardIds == null || cardIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        List<BizStudyHistory> records = lambdaQuery()
+                .in(BizStudyHistory::getCardId, cardIds)
+                .eq(userId != null, BizStudyHistory::getUserId, userId)
+                .select(BizStudyHistory::getCardId)
+                .list();
+
+        Map<Long, Integer> result = new HashMap<>();
+        for (BizStudyHistory record : records) {
+            result.merge(record.getCardId(), 1, Integer::sum);
+        }
+        return result;
+    }
 }

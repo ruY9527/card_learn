@@ -15,6 +15,13 @@ struct FeedbackView: View {
     @State private var images: [UIImage] = []
     @State private var isSubmitting: Bool = false
     @State private var showImagePicker: Bool = false
+    @State private var showError: Bool = false
+    @State private var errorMessage: String = ""
+    @State private var showSuccess: Bool = false
+
+    // 卡片选择
+    @State private var selectedCard: Card? = nil
+    @State private var showCardPicker: Bool = false
 
     // 专业和科目选择
     @State private var majorList: [Major] = []
@@ -39,11 +46,6 @@ struct FeedbackView: View {
                     // 反馈表单
                     if appState.isLoggedIn {
                         VStack(spacing: 20) {
-                            // 卡片纠错信息
-                            if let cardId = cardId {
-                                CardInfoSection(cardId: cardId, content: cardContent ?? "")
-                            }
-
                             // 专业选择
                             VStack(alignment: .leading, spacing: 12) {
                                 HStack(spacing: 4) {
@@ -147,6 +149,7 @@ struct FeedbackView: View {
                                         ForEach(subjectList) { subject in
                                             Button(action: {
                                                 selectedSubject = subject
+                                                selectedCard = nil // 科目变更，清空已选卡片
                                             }) {
                                                 HStack {
                                                     Text(subject.subjectName)
@@ -167,6 +170,75 @@ struct FeedbackView: View {
                                                 .foregroundColor(AppColor.textSecondary)
                                         }
                                         .padding(12)
+                                        .background(AppColor.backgroundLight)
+                                        .cornerRadius(8)
+                                    }
+                                }
+                            }
+
+                            // 关联卡片
+                            VStack(alignment: .leading, spacing: 12) {
+                                HStack(spacing: 4) {
+                                    Text("关联卡片")
+                                        .font(.system(size: 16, weight: .bold))
+                                        .foregroundColor(AppColor.textPrimary)
+                                    Text("*")
+                                        .font(.system(size: 14))
+                                        .foregroundColor(AppColor.error)
+                                }
+
+                                if cardId != nil {
+                                    // 从卡片详情进入时预选的卡片
+                                    CardInfoSection(cardId: cardId!, content: cardContent ?? "")
+                                } else if let card = selectedCard {
+                                    // 用户选择的卡片
+                                    HStack(spacing: 8) {
+                                        Text("#\(card.cardId)")
+                                            .font(.system(size: 12))
+                                            .foregroundColor(AppColor.primary)
+                                            .padding(.horizontal, 6)
+                                            .padding(.vertical, 2)
+                                            .background(AppColor.infoLight)
+                                            .cornerRadius(4)
+
+                                        Text(card.frontContent)
+                                            .font(.system(size: 14))
+                                            .foregroundColor(AppColor.textPrimary)
+                                            .lineLimit(1)
+
+                                        Spacer()
+
+                                        Button("更换") {
+                                            showCardPicker = true
+                                        }
+                                        .font(.system(size: 13))
+                                        .foregroundColor(AppColor.primary)
+                                    }
+                                    .padding(12)
+                                    .background(AppColor.backgroundLight)
+                                    .cornerRadius(8)
+                                } else if selectedSubject == nil {
+                                    // 未选科目
+                                    Text("请先选择科目")
+                                        .font(.system(size: 14))
+                                        .foregroundColor(AppColor.textSecondary)
+                                        .padding(12)
+                                        .frame(maxWidth: .infinity)
+                                        .background(AppColor.backgroundLight)
+                                        .cornerRadius(8)
+                                } else {
+                                    // 未选卡片 - 点击打开选择器
+                                    Button(action: { showCardPicker = true }) {
+                                        HStack {
+                                            Text("点击选择关联卡片")
+                                                .font(.system(size: 14))
+                                                .foregroundColor(AppColor.textSecondary)
+                                            Spacer()
+                                            Text("🔍")
+                                                .font(.system(size: 16))
+                                        }
+                                        .padding(12)
+                                        .frame(maxWidth: .infinity)
                                         .background(AppColor.backgroundLight)
                                         .cornerRadius(8)
                                     }
@@ -305,9 +377,21 @@ struct FeedbackView: View {
                     }
                 }
                 .padding(.horizontal, 16)
+                .padding(.bottom, 40)
             }
-            .navigationTitle(cardId != nil ? "卡片纠错" : "提交反馈")
+            .navigationTitle((cardId != nil || selectedCard != nil) ? "卡片纠错" : "提交反馈")
             .navigationBarTitleDisplayMode(.inline)
+            .sheet(isPresented: $showCardPicker) {
+                CardPickerSheet(
+                    subjectId: selectedSubject?.subjectId,
+                    subjectName: selectedSubject?.subjectName,
+                    userId: appState.userInfo?.userId,
+                    onSelect: { card in
+                        selectedCard = card
+                        showCardPicker = false
+                    }
+                )
+            }
             .sheet(isPresented: $showImagePicker) {
                 ImagePicker(images: images, maxCount: 3 - images.count) { selectedImages in
                     images.append(contentsOf: selectedImages)
@@ -320,13 +404,26 @@ struct FeedbackView: View {
             }
             loadMajors()
         }
+        .alert("提交失败", isPresented: $showError) {
+            Button("确定", role: .cancel) {}
+        } message: {
+            Text(errorMessage)
+        }
+        .alert("提交成功", isPresented: $showSuccess) {
+            Button("确定") {
+                dismiss()
+            }
+        } message: {
+            Text("感谢您的反馈！")
+        }
     }
 
     // 是否可以提交
     private var canSubmit: Bool {
         !content.trimmingCharacters(in: .whitespaces).isEmpty &&
         selectedMajor != nil &&
-        selectedSubject != nil
+        selectedSubject != nil &&
+        (cardId != nil || selectedCard != nil)
     }
 
     // 加载专业列表
@@ -356,6 +453,7 @@ struct FeedbackView: View {
     private func loadSubjects(for majorId: Int) {
         isLoadingSubjects = true
         selectedSubject = nil // 清空已选科目
+        selectedCard = nil // 清空已选卡片
         Task {
             do {
                 let subjects = try await apiService.getSubjectList(majorId: majorId)
@@ -380,13 +478,14 @@ struct FeedbackView: View {
               let majorId = selectedMajor?.majorId,
               let subjectId = selectedSubject?.subjectId else { return }
 
+        let finalCardId = cardId ?? selectedCard?.cardId
         isSubmitting = true
 
         Task {
             do {
-                let _ = try await apiService.submitFeedback(
+                try await apiService.submitFeedback(
                     appUserId: userId,
-                    cardId: cardId,
+                    cardId: finalCardId,
                     majorId: majorId,
                     subjectId: subjectId,
                     type: feedbackType.rawValue,
@@ -397,14 +496,16 @@ struct FeedbackView: View {
                     token: appState.token
                 )
 
-                isSubmitting = false
-
-                // 返回上一页
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    dismiss()
+                await MainActor.run {
+                    isSubmitting = false
+                    showSuccess = true
                 }
             } catch {
-                isSubmitting = false
+                await MainActor.run {
+                    isSubmitting = false
+                    errorMessage = error.localizedDescription
+                    showError = true
+                }
             }
         }
     }
@@ -587,6 +688,181 @@ struct ImagePicker: UIViewControllerRepresentable {
             group.notify(queue: .main) {
                 picker.dismiss(animated: true)
                 self.onSelect(images)
+            }
+        }
+    }
+}
+
+// 卡片选择器
+struct CardPickerSheet: View {
+    let subjectId: Int?
+    let subjectName: String?
+    let userId: Int?
+    let onSelect: (Card) -> Void
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var keyword: String = ""
+    @State private var results: [Card] = []
+    @State private var isLoading: Bool = false
+    @State private var hasSearched: Bool = false
+
+    private let apiService = APIService.shared
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 0) {
+                // 搜索栏
+                HStack(spacing: 12) {
+                    TextField("搜索卡片内容...", text: $keyword)
+                        .font(.system(size: 14))
+                        .padding(10)
+                        .background(AppColor.backgroundLight)
+                        .cornerRadius(8)
+                        .onSubmit { search() }
+
+                    Button(action: search) {
+                        Text("搜索")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 10)
+                            .background(AppColor.primary)
+                            .cornerRadius(8)
+                    }
+                    .disabled(isLoading)
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+
+                // 科目过滤提示
+                if let name = subjectName {
+                    HStack {
+                        Text("当前科目：\(name)")
+                            .font(.system(size: 12))
+                            .foregroundColor(AppColor.textSecondary)
+                        Spacer()
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 8)
+                }
+
+                Divider()
+
+                // 搜索结果
+                if isLoading {
+                    VStack {
+                        Spacer()
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: AppColor.primary))
+                        Text("搜索中...")
+                            .font(.system(size: 14))
+                            .foregroundColor(AppColor.textSecondary)
+                            .padding(.top, 8)
+                        Spacer()
+                    }
+                } else if hasSearched && results.isEmpty {
+                    VStack {
+                        Spacer()
+                        Text("🔍")
+                            .font(.system(size: 48))
+                        Text("未找到匹配的卡片")
+                            .font(.system(size: 15))
+                            .foregroundColor(AppColor.textMedium)
+                            .padding(.top, 8)
+                        Text(subjectName != nil ? "当前科目下无匹配结果，请尝试其他关键词" : "请尝试其他关键词")
+                            .font(.system(size: 13))
+                            .foregroundColor(AppColor.textSecondary)
+                            .padding(.top, 4)
+                        Spacer()
+                    }
+                } else {
+                    ScrollView {
+                        LazyVStack(spacing: 0) {
+                            ForEach(results) { card in
+                                Button(action: { onSelect(card) }) {
+                                    HStack(spacing: 12) {
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text(card.frontContent)
+                                                .font(.system(size: 14))
+                                                .foregroundColor(AppColor.textPrimary)
+                                                .lineLimit(2)
+                                                .multilineTextAlignment(.leading)
+
+                                            HStack(spacing: 8) {
+                                                Text("#\(card.cardId)")
+                                                    .font(.system(size: 11))
+                                                    .foregroundColor(AppColor.primary)
+                                                    .padding(.horizontal, 4)
+                                                    .padding(.vertical, 1)
+                                                    .background(AppColor.infoLight)
+                                                    .cornerRadius(3)
+
+                                                if let subjectName = card.subjectName {
+                                                    Text(subjectName)
+                                                        .font(.system(size: 11))
+                                                        .foregroundColor(AppColor.textSecondary)
+                                                }
+                                            }
+                                        }
+
+                                        Spacer()
+
+                                        Image(systemName: "chevron.right")
+                                            .font(.system(size: 12))
+                                            .foregroundColor(AppColor.textSecondary)
+                                    }
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 12)
+                                    .background(Color.white)
+                                }
+
+                                Divider()
+                                    .padding(.leading, 16)
+                            }
+                        }
+                    }
+                }
+            }
+            .navigationTitle("选择关联卡片")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("取消") { dismiss() }
+                        .foregroundColor(AppColor.primary)
+                }
+            }
+        }
+        .onAppear {
+            search()
+        }
+    }
+
+    private func search() {
+        let trimmed = keyword.trimmingCharacters(in: .whitespaces)
+        let searchKeyword: String? = trimmed.isEmpty ? nil : trimmed
+
+        isLoading = true
+        hasSearched = true
+
+        Task {
+            do {
+                let pageData = try await apiService.getCardPage(
+                    subjectId: subjectId,
+                    frontContent: searchKeyword,
+                    appUserId: userId,
+                    status: nil,
+                    pageNum: 1,
+                    pageSize: 20
+                )
+                await MainActor.run {
+                    results = pageData.records
+                    isLoading = false
+                }
+            } catch {
+                await MainActor.run {
+                    results = []
+                    isLoading = false
+                }
             }
         }
     }

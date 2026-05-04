@@ -31,7 +31,8 @@ public interface BizReviewPlanMapper extends BaseMapper<BizReviewPlan> {
     Page<AdminReviewPlanVO> selectAdminReviewPlan(Page<AdminReviewPlanVO> page,
                                                     @Param("userId") Long userId,
                                                     @Param("status") String status,
-                                                    @Param("scheduledDate") String scheduledDate);
+                                                    @Param("scheduledDateStart") String scheduledDateStart,
+                                                    @Param("scheduledDateEnd") String scheduledDateEnd);
 
     /**
      * 各科目卡片总数

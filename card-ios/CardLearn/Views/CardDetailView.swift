@@ -15,7 +15,9 @@ struct CardDetailView: View {
     @State private var dragOffset: CGFloat = 0
     @State private var isDragging: Bool = false
     @State private var showFeedback: Bool = false
-    
+    @State private var showError: Bool = false
+    @State private var errorMessage: String = ""
+
     private let apiService = APIService.shared
     
     private var currentCard: Card? {
@@ -228,6 +230,11 @@ struct CardDetailView: View {
             currentCardIndex = currentIndex
             updateProgress()
         }
+        .alert("提交失败", isPresented: $showError) {
+            Button("确定", role: .cancel) {}
+        } message: {
+            Text(errorMessage)
+        }
     }
     
     private func goToPrev() {
@@ -260,77 +267,27 @@ struct CardDetailView: View {
             do {
                 let userId = appState.userInfo?.userId
 
-                // 同时调用两个接口：更新进度 + 提交SM-2复习（创建复习计划）
-                async let progressResult = apiService.updateProgress(
+                // 使用服务端SM-2计算（一个接口完成所有逻辑）
+                let result = try await apiService.submitSimpleReview(
                     cardId: card.cardId,
-                    appUserId: userId,
-                    status: status,
-                    token: appState.token
+                    userId: userId,
+                    status: status
                 )
-
-                // 映射status到SM-2 quality: 0->0(忘记), 1->3(困难), 2->5(完美)
-                let quality: Int
-                switch status {
-                case 1: quality = 3
-                case 2: quality = 5
-                default: quality = 0
-                }
-
-                // 获取当前SM-2状态，计算下次复习参数
-                let sm2State: SM2Result
-                do {
-                    let progress = try await apiService.getSM2Progress(
-                        cardId: card.cardId,
-                        appUserId: userId
-                    )
-                    sm2State = SM2Result(
-                        interval: progress.interval ?? 1,
-                        easeFactor: progress.easeFactor ?? 2.5,
-                        repetitions: progress.repetitions ?? 0,
-                        nextReviewDate: Date()
-                    )
-                } catch {
-                    sm2State = .initial
-                }
-
-                let reviewResult = SM2Algorithm.shared.calculate(
-                    quality: ReviewQuality(rawValue: quality) ?? .blackout,
-                    previous: sm2State
-                )
-
-                let isoFormatter = ISO8601DateFormatter()
-                isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-                let nextReviewTime = isoFormatter.string(from: reviewResult.nextReviewDate)
-
-                let request = ReviewSubmitRequest(
-                    cardId: card.cardId,
-                    userId: userId ?? 0,
-                    quality: quality,
-                    easeFactor: reviewResult.easeFactor,
-                    repetitions: reviewResult.repetitions,
-                    interval: reviewResult.interval,
-                    nextReviewTime: nextReviewTime
-                )
-
-                async let reviewSubmit = apiService.submitSM2Review(
-                    request: request,
-                    token: appState.token
-                )
-
-                let _ = try await progressResult
-                let _ = try await reviewSubmit
 
                 // 更新本地统计
                 updateLocalStats(status)
+
+                // 可选：显示下次复习间隔
+                print("下次复习: \(result.intervalDays)天后")
 
                 // 自动跳转到下一张
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                     goToNext()
                 }
             } catch {
-                updateLocalStats(status)
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                    goToNext()
+                await MainActor.run {
+                    errorMessage = error.localizedDescription
+                    showError = true
                 }
             }
         }

@@ -163,13 +163,11 @@ struct MyCardsView: View {
 
         Task {
             do {
-                let success = try await apiService.deleteMyCard(draftId: card.draftId, token: token)
-                if success {
-                    cardList.removeAll { $0.draftId == card.draftId }
-                    fetchStats()
-                }
+                try await apiService.deleteMyCard(draftId: card.draftId, token: token)
+                cardList.removeAll { $0.draftId == card.draftId }
+                fetchStats()
             } catch {
-                // 显示错误
+                // 删除失败，保留卡片在列表中
             }
             cardToDelete = nil
         }

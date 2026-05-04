@@ -12,6 +12,7 @@ struct AddCardView: View {
     @State private var backContent: String = ""
     @State private var difficultyLevel: Int = 2
     @State private var isSubmitting: Bool = false
+    @State private var isLoadingSubjects: Bool = false
     @State private var showError: Bool = false
     @State private var errorMessage: String = ""
     @State private var showSuccess: Bool = false
@@ -40,6 +41,7 @@ struct AddCardView: View {
                     SubjectSelectSection(
                         subjectList: subjectList,
                         selectedSubjectId: selectedSubjectId,
+                        isLoading: isLoadingSubjects,
                         onSelect: { subjectId in
                             selectedSubjectId = subjectId
                         }
@@ -110,21 +112,44 @@ struct AddCardView: View {
     private func fetchMajors() {
         Task {
             do {
-                majorList = try await apiService.getMajorList()
+                let majors = try await apiService.getMajorList()
+                await MainActor.run {
+                    majorList = majors
+                    // 默认选择第一个专业
+                    if let firstMajor = majors.first {
+                        selectedMajorId = firstMajor.majorId
+                        fetchSubjects(majorId: firstMajor.majorId)
+                    }
+                }
             } catch {
-                errorMessage = "获取专业列表失败"
-                showError = true
+                await MainActor.run {
+                    errorMessage = "获取专业列表失败"
+                    showError = true
+                }
             }
         }
     }
 
     private func fetchSubjects(majorId: Int) {
+        isLoadingSubjects = true
+        selectedSubjectId = nil
         Task {
             do {
-                subjectList = try await apiService.getSubjectList(majorId: majorId)
+                let subjects = try await apiService.getSubjectList(majorId: majorId)
+                await MainActor.run {
+                    subjectList = subjects
+                    isLoadingSubjects = false
+                    // 默认选择第一个科目
+                    if let firstSubject = subjects.first {
+                        selectedSubjectId = firstSubject.subjectId
+                    }
+                }
             } catch {
-                errorMessage = "获取科目列表失败"
-                showError = true
+                await MainActor.run {
+                    isLoadingSubjects = false
+                    errorMessage = "获取科目列表失败"
+                    showError = true
+                }
             }
         }
     }
@@ -205,7 +230,7 @@ struct MajorSelectSection: View {
                     .font(.system(size: 14))
                     .foregroundColor(AppColor.textSecondary)
             } else {
-                ScrollView {
+                ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 12) {
                         ForEach(majorList) { major in
                             AddCardMajorItem(
@@ -252,6 +277,7 @@ fileprivate struct AddCardMajorItem: View {
 struct SubjectSelectSection: View {
     let subjectList: [Subject]
     let selectedSubjectId: Int?
+    let isLoading: Bool
     let onSelect: (Int) -> Void
 
     var body: some View {
@@ -260,12 +286,20 @@ struct SubjectSelectSection: View {
                 .font(.system(size: 15, weight: .medium))
                 .foregroundColor(AppColor.textPrimary)
 
-            if subjectList.isEmpty {
+            if isLoading {
+                HStack {
+                    Spacer()
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle())
+                    Spacer()
+                }
+                .padding(12)
+            } else if subjectList.isEmpty {
                 Text("请先选择专业")
                     .font(.system(size: 14))
                     .foregroundColor(AppColor.textSecondary)
             } else {
-                ScrollView {
+                ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 12) {
                         ForEach(subjectList) { subject in
                             AddCardSubjectItem(

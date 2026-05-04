@@ -15,15 +15,15 @@ public class PageResultVO<T> implements Serializable {
 
     private List<T> records;
     private Long total;
-    private Long pageNum;
-    private Long pageSize;
+    private Long current;
+    private Long size;
 
     public PageResultVO() {}
 
-    public PageResultVO(List<T> records, Long total, Long pageNum, Long pageSize) {
+    public PageResultVO(List<T> records, Long total, Long current, Long size) {
         this.records = records;
         this.total = total;
-        this.pageNum = pageNum;
-        this.pageSize = pageSize;
+        this.current = current;
+        this.size = size;
     }
 }

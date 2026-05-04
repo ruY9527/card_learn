@@ -55,8 +55,8 @@ struct PageResponse<T: Codable>: Codable {
     enum CodingKeys: String, CodingKey {
         case records
         case total
-        case size = "pageSize"
-        case current = "pageNum"
+        case size
+        case current
         case pages
     }
 }
@@ -106,7 +106,7 @@ enum FeedbackType: String, Codable, CaseIterable {
 // 反馈模型
 struct Feedback: Codable, Identifiable {
     let id: Int
-    let appUserId: Int?
+    let userId: Int?
     let cardId: Int?
     let majorId: Int?
     let subjectId: Int?
@@ -217,7 +217,7 @@ struct StudyHistory: Codable, Identifiable {
 struct Comment: Codable, Identifiable {
     let commentId: Int
     let cardId: Int
-    let appUserId: Int
+    let userId: Int
     let userNickname: String?
     let content: String
     let rating: Int?
@@ -273,8 +273,45 @@ struct ReviewPlanResponse: Codable, Identifiable {
     let backContent: String?
     let subjectName: String?
     let difficultyLevel: Int?
+    let studyCount: Int?
 
     var id: Int { cardId }
+}
+
+// 卡片学习历史响应
+struct CardStudyHistoryResponse: Codable {
+    let cardId: Int
+    let frontContent: String?
+    let records: [StudyHistoryRecordItem]?
+    let total: Int?
+}
+
+// 学习历史记录项
+struct StudyHistoryRecordItem: Codable, Identifiable {
+    let id: Int
+    let userId: Int?
+    let nickname: String?
+    let cardId: Int?
+    let status: Int?
+    let createTime: String?
+
+    var statusText: String {
+        switch status {
+        case 0: return "未学"
+        case 1: return "模糊"
+        case 2: return "掌握"
+        default: return "未知"
+        }
+    }
+
+    var statusColorHex: String {
+        switch status {
+        case 0: return "9E9E9E"
+        case 1: return "FF9800"
+        case 2: return "4CAF50"
+        default: return "9E9E9E"
+        }
+    }
 }
 
 // 科目进度
@@ -309,4 +346,21 @@ struct ReviewSubmitRequest: Codable {
     let repetitions: Int
     let interval: Int
     let nextReviewTime: String
+}
+
+// 简化复习请求（服务端计算SM-2）
+struct SimpleReviewRequest: Codable {
+    let cardId: Int
+    let userId: Int
+    let status: Int
+}
+
+// 简化复习结果
+struct ReviewResultVO: Codable {
+    let cardId: Int
+    let status: Int
+    let easeFactor: Double
+    let repetitions: Int
+    let intervalDays: Int
+    let nextReviewTime: String?
 }

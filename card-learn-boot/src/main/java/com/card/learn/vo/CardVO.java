@@ -1,5 +1,6 @@
 package com.card.learn.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -42,8 +43,10 @@ public class CardVO implements Serializable {
     /** 创建用户昵称 */
     private String createUserNickname;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updateTime;
 
 }

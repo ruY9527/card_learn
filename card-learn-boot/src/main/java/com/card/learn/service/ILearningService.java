@@ -3,6 +3,7 @@ package com.card.learn.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.card.learn.dto.AdminReviewPlanQueryDTO;
 import com.card.learn.dto.DeviceRegisterDTO;
+import com.card.learn.dto.SimpleReviewDTO;
 import com.card.learn.dto.SM2ReviewDTO;
 import com.card.learn.vo.*;
 
@@ -19,9 +20,14 @@ public interface ILearningService {
     SM2ProgressVO getSM2Progress(Long userId, Long cardId);
 
     /**
-     * 提交复习结果
+     * 提交复习结果（客户端计算SM-2）
      */
     void submitReview(SM2ReviewDTO dto);
+
+    /**
+     * 简化复习提交（服务端计算SM-2，status自动映射quality）
+     */
+    ReviewResultVO submitSimpleReview(SimpleReviewDTO dto);
 
     /**
      * 获取复习计划

@@ -29,4 +29,7 @@ public class ReviewPlanVO implements Serializable {
 
     /** 难度等级 */
     private Integer difficultyLevel;
+
+    /** 学习次数 */
+    private Integer studyCount;
 }

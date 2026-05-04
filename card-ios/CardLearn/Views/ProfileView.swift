@@ -6,8 +6,6 @@ struct ProfileView: View {
     @State private var sprintConfig: SprintConfig?
     @State private var showFeedback: Bool = false
     @State private var showFeedbackList: Bool = false
-    @State private var showProgressCards: Bool = false
-    @State private var progressType: String = ""
     @State private var showAddCard: Bool = false
     @State private var showMyCards: Bool = false
 
@@ -32,28 +30,6 @@ struct ProfileView: View {
                         }
                     }
                     .padding(.horizontal, 16)
-
-                    // 学习统计
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("学习统计")
-                            .font(.system(size: 18, weight: .bold))
-                            .foregroundColor(AppColor.textPrimary)
-                            .padding(.horizontal, 16)
-
-                        StatsGrid(
-                            learned: appState.stats.learned,
-                            mastered: appState.stats.mastered,
-                            review: appState.stats.review
-                        ) { type in
-                            if appState.isLoggedIn {
-                                progressType = type
-                                showProgressCards = true
-                            } else {
-                                showLoginModal = true
-                            }
-                        }
-                        .padding(.horizontal, 16)
-                    }
 
                     // 设置
                     VStack(alignment: .leading, spacing: 12) {
@@ -121,9 +97,6 @@ struct ProfileView: View {
             }
             .navigationDestination(isPresented: $showFeedbackList) {
                 FeedbackListView()
-            }
-            .navigationDestination(isPresented: $showProgressCards) {
-                ProgressCardsView(type: progressType)
             }
             .navigationDestination(isPresented: $showAddCard) {
                 AddCardView()

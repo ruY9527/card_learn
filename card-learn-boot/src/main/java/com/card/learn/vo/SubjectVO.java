@@ -1,5 +1,6 @@
 package com.card.learn.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -28,6 +29,7 @@ public class SubjectVO implements Serializable {
     /** 排序 */
     private Integer orderNum;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
 
 }

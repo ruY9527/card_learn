@@ -15,6 +15,12 @@ spring:
     password: 123
     database: 0
     timeout: 10000ms
+  # Jackson 日期格式配置
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+    serialization:
+      write-dates-as-timestamps: false
   # 解决Swagger/Knife4j与Spring Boot 2.6+兼容性问题
   mvc:
     pathmatch:

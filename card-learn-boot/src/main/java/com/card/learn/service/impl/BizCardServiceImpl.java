@@ -143,36 +143,36 @@ public class BizCardServiceImpl extends ServiceImpl<BizCardMapper, BizCard> impl
     public Page<MyCardVO> pageMyCards(Long createUserId, Integer pageNum, Integer pageSize) {
         Page<MyCardVO> page = new Page<>(pageNum, pageSize);
         Page<MyCardVO> result = cardMapper.selectMyCards(page, createUserId);
-        
+
         // 获取标签信息
         if (!CollectionUtils.isEmpty(result.getRecords())) {
             List<Long> cardIds = result.getRecords().stream()
-                    .map(MyCardVO::getCardId)
+                    .map(MyCardVO::getDraftId)
                     .collect(Collectors.toList());
-            
+
             // 获取卡片标签关联
             List<BizCardTag> cardTags = cardTagService.lambdaQuery()
                     .in(BizCardTag::getCardId, cardIds)
                     .list();
-            
+
             if (!CollectionUtils.isEmpty(cardTags)) {
                 List<Long> tagIds = cardTags.stream()
                         .map(BizCardTag::getTagId)
                         .distinct()
                         .collect(Collectors.toList());
-                
+
                 List<BizTag> tags = tagService.listByIds(tagIds);
                 Map<Long, String> tagNameMap = tags.stream()
                         .collect(Collectors.toMap(BizTag::getTagId, BizTag::getTagName));
-                
+
                 Map<Long, List<String>> cardTagsMap = cardTags.stream()
                         .collect(Collectors.groupingBy(
                                 BizCardTag::getCardId,
                                 Collectors.mapping(ct -> tagNameMap.get(ct.getTagId()), Collectors.toList())
                         ));
-                
+
                 result.getRecords().forEach(vo -> {
-                    vo.setTags(cardTagsMap.get(vo.getCardId()));
+                    vo.setTags(cardTagsMap.get(vo.getDraftId()));
                 });
             }
         }

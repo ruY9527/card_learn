@@ -27,11 +27,14 @@
         </el-form-item>
         <el-form-item label="计划日期">
           <el-date-picker
-            v-model="filterForm.scheduledDate"
-            type="date"
-            placeholder="选择日期"
-            value-format="YYYY-MM-DD"
-            style="width: 160px"
+            v-model="filterForm.dateRange"
+            type="datetimerange"
+            range-separator="至"
+            start-placeholder="开始时间"
+            end-placeholder="结束时间"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            :default-time="[new Date(2000, 1, 1, 0, 0, 0), new Date(2000, 1, 1, 23, 59, 59)]"
+            style="width: 380px"
           />
         </el-form-item>
         <el-form-item>
@@ -96,6 +99,14 @@
             </el-tag>
           </template>
         </el-table-column>
+        <el-table-column prop="studyCount" label="学习次数" width="100" align="center">
+          <template #default="{ row }">
+            <el-link v-if="row.studyCount > 0" type="primary" @click="openHistory(row)">
+              {{ row.studyCount }}次
+            </el-link>
+            <span v-else class="text-muted">0次</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="status" label="状态" width="100" align="center">
           <template #default="{ row }">
             <el-tag :type="row.status === '0' ? 'warning' : 'success'" size="small">
@@ -118,23 +129,48 @@
         />
       </div>
     </el-card>
+
+    <!-- 学习历史抽屉 -->
+    <el-drawer v-model="historyDrawerVisible" title="学习记录" size="400px">
+      <div v-loading="historyLoading">
+        <el-empty v-if="!historyLoading && historyRecords.length === 0" description="暂无学习记录" />
+        <el-timeline v-else>
+          <el-timeline-item
+            v-for="record in historyRecords"
+            :key="record.id"
+            :timestamp="record.createTime"
+            placement="top"
+            :type="record.status === 2 ? 'success' : record.status === 1 ? 'warning' : 'info'"
+          >
+            <el-tag :type="record.status === 2 ? 'success' : record.status === 1 ? 'warning' : 'info'" size="small">
+              {{ statusText(record.status) }}
+            </el-tag>
+          </el-timeline-item>
+        </el-timeline>
+      </div>
+    </el-drawer>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed } from 'vue'
-import { getAdminReviewPlan, getUserList } from '@/api/content'
-import type { AdminReviewPlan, SysUser } from '@/api/types'
+import { getAdminReviewPlan, getUserList, getCardStudyHistory } from '@/api/content'
+import type { AdminReviewPlan, SysUser, StudyHistoryRecord } from '@/api/types'
 
 const loading = ref(false)
 const tableData = ref<AdminReviewPlan[]>([])
 const userList = ref<SysUser[]>([])
 const totalRecords = ref(0)
 
+// 学习历史抽屉
+const historyDrawerVisible = ref(false)
+const historyLoading = ref(false)
+const historyRecords = ref<StudyHistoryRecord[]>([])
+
 const filterForm = reactive({
   userId: undefined as number | undefined,
   status: '' as string,
-  scheduledDate: '' as string
+  dateRange: null as [string, string] | null
 })
 
 const pagination = reactive({
@@ -165,7 +201,8 @@ async function handleSearch() {
     const res = await getAdminReviewPlan({
       userId: filterForm.userId,
       status: filterForm.status || undefined,
-      scheduledDate: filterForm.scheduledDate || undefined,
+      scheduledDateStart: filterForm.dateRange?.[0] || undefined,
+      scheduledDateEnd: filterForm.dateRange?.[1] || undefined,
       pageNum: pagination.pageNum,
       pageSize: pagination.pageSize
     })
@@ -182,7 +219,7 @@ async function handleSearch() {
 function handleReset() {
   filterForm.userId = undefined
   filterForm.status = ''
-  filterForm.scheduledDate = ''
+  filterForm.dateRange = null
   pagination.pageNum = 1
   handleSearch()
 }
@@ -194,6 +231,27 @@ async function loadUsers() {
   } catch (e) {
     console.error(e)
   }
+}
+
+// 打开学习历史
+async function openHistory(row: AdminReviewPlan) {
+  historyDrawerVisible.value = true
+  historyLoading.value = true
+  historyRecords.value = []
+  try {
+    const res = await getCardStudyHistory({ cardId: row.cardId, userId: row.userId })
+    historyRecords.value = res.data.records || []
+  } catch (e) {
+    console.error(e)
+  } finally {
+    historyLoading.value = false
+  }
+}
+
+// 状态文本
+function statusText(status: number) {
+  const map: Record<number, string> = { 0: '未学', 1: '模糊', 2: '掌握' }
+  return map[status] || '未知'
 }
 
 onMounted(() => {
@@ -247,6 +305,11 @@ onMounted(() => {
     display: flex;
     justify-content: flex-end;
     margin-top: 16px;
+  }
+
+  .text-muted {
+    color: #909399;
+    font-size: 13px;
   }
 }
 </style>

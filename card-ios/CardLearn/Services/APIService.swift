@@ -108,7 +108,7 @@ class APIService {
     }
 
     // 更新学习进度
-    func updateProgress(cardId: Int, appUserId: Int?, status: Int, token: String?) async throws -> Bool {
+    func updateProgress(cardId: Int, appUserId: Int?, status: Int, token: String?) async throws {
         let url = URL(string: config.getApiUrl(path: "/api/miniprogram/progress"))!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -122,7 +122,9 @@ class APIService {
 
         let (data, _) = try await session.data(for: request)
         let response = try JSONDecoder().decode(APIResponse<String>.self, from: data)
-        return response.code == 200
+        if response.code != 200 {
+            throw APIError.serverError(response.message ?? "更新进度失败")
+        }
     }
 
     // 获取科目统计
@@ -234,7 +236,7 @@ class APIService {
     // MARK: - 反馈相关 API
     
     // 提交反馈
-    func submitFeedback(appUserId: Int, cardId: Int?, majorId: Int?, subjectId: Int?, type: String, rating: Int?, content: String, contact: String?, images: [String]?, token: String) async throws -> Bool {
+    func submitFeedback(appUserId: Int, cardId: Int?, majorId: Int?, subjectId: Int?, type: String, rating: Int?, content: String, contact: String?, images: [String]?, token: String) async throws {
         let url = URL(string: config.getApiUrl(path: "/api/miniprogram/feedback"))!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -242,7 +244,7 @@ class APIService {
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
 
         var body: [String: Any] = [
-            "appUserId": appUserId,
+            "userId": appUserId,
             "type": type,
             "content": content
         ]
@@ -255,9 +257,16 @@ class APIService {
 
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
 
-        let (data, _) = try await session.data(for: request)
+        let (data, urlResponse) = try await session.data(for: request)
+        if let httpResponse = urlResponse as? HTTPURLResponse {
+            if httpResponse.statusCode == 401 || httpResponse.statusCode == 403 {
+                throw APIError.serverError("登录已过期，请重新登录")
+            }
+        }
         let response = try JSONDecoder().decode(APIResponse<String>.self, from: data)
-        return response.code == 200
+        if response.code != 200 {
+            throw APIError.serverError(response.message ?? "提交反馈失败")
+        }
     }
 
     // 获取用户反馈列表
@@ -272,7 +281,12 @@ class APIService {
         var request = URLRequest(url: urlComponents.url!)
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
 
-        let (data, _) = try await session.data(for: request)
+        let (data, urlResponse) = try await session.data(for: request)
+        if let httpResponse = urlResponse as? HTTPURLResponse {
+            if httpResponse.statusCode == 401 || httpResponse.statusCode == 403 {
+                throw APIError.serverError("登录已过期，请重新登录")
+            }
+        }
         let response = try JSONDecoder().decode(APIResponse<PageResponse<Feedback>>.self, from: data)
         if response.code == 200, let pageData = response.data {
             return pageData
@@ -368,7 +382,7 @@ class APIService {
     }
 
     // 删除我的卡片
-    func deleteMyCard(draftId: Int, token: String) async throws -> Bool {
+    func deleteMyCard(draftId: Int, token: String) async throws {
         let url = URL(string: config.getApiUrl(path: "/api/miniprogram/card/my/\(draftId)"))!
         var request = URLRequest(url: url)
         request.httpMethod = "DELETE"
@@ -376,7 +390,9 @@ class APIService {
 
         let (data, _) = try await session.data(for: request)
         let response = try JSONDecoder().decode(APIResponse<String>.self, from: data)
-        return response.code == 200
+        if response.code != 200 {
+            throw APIError.serverError(response.message ?? "删除卡片失败")
+        }
     }
 
     // MARK: - 评论 API
@@ -390,7 +406,7 @@ class APIService {
 
         let body: [String: Any] = [
             "cardId": cardId,
-            "appUserId": appUserId,
+            "userId": appUserId,
             "content": content,
             "rating": rating,
             "commentType": commentType
@@ -451,7 +467,7 @@ class APIService {
     }
 
     // 提交复习结果（SM-2）
-    func submitSM2Review(request: ReviewSubmitRequest, token: String?) async throws -> Bool {
+    func submitSM2Review(request: ReviewSubmitRequest, token: String?) async throws {
         let url = URL(string: config.getApiUrl(path: "/api/learning/review"))!
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = "POST"
@@ -463,7 +479,27 @@ class APIService {
 
         let (data, _) = try await session.data(for: urlRequest)
         let response = try JSONDecoder().decode(APIResponse<String>.self, from: data)
-        return response.code == 200
+        if response.code != 200 {
+            throw APIError.serverError(response.message ?? "提交复习失败")
+        }
+    }
+
+    // 简化复习提交（服务端自动计算SM-2）
+    func submitSimpleReview(cardId: Int, userId: Int?, status: Int) async throws -> ReviewResultVO {
+        let url = URL(string: config.getApiUrl(path: "/api/learning/review/simple"))!
+        var urlRequest = URLRequest(url: url)
+        urlRequest.httpMethod = "POST"
+        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        let requestBody = SimpleReviewRequest(cardId: cardId, userId: userId ?? 0, status: status)
+        urlRequest.httpBody = try JSONEncoder().encode(requestBody)
+
+        let (data, _) = try await session.data(for: urlRequest)
+        let response = try JSONDecoder().decode(APIResponse<ReviewResultVO>.self, from: data)
+        if response.code == 200, let result = response.data {
+            return result
+        }
+        throw APIError.serverError(response.message ?? "提交复习失败")
     }
 
     // 获取复习计划
@@ -478,6 +514,18 @@ class APIService {
             return plans
         }
         throw APIError.serverError(response.message ?? "获取复习计划失败")
+    }
+
+    // 获取卡片学习历史
+    func getCardStudyHistory(cardId: Int, userId: Int) async throws -> CardStudyHistoryResponse {
+        var urlComponents = URLComponents(string: config.getApiUrl(path: "/api/miniprogram/study-history/card/\(cardId)"))!
+        urlComponents.queryItems = [URLQueryItem(name: "userId", value: String(userId))]
+        let (data, _) = try await session.data(from: urlComponents.url!)
+        let response = try JSONDecoder().decode(APIResponse<CardStudyHistoryResponse>.self, from: data)
+        if response.code == 200, let history = response.data {
+            return history
+        }
+        throw APIError.serverError(response.message ?? "获取学习历史失败")
     }
 
     // 获取科目进度
@@ -509,7 +557,7 @@ class APIService {
     }
 
     // 注册设备（推送）
-    func registerDevice(userId: Int, deviceToken: String, deviceType: String) async throws -> Bool {
+    func registerDevice(userId: Int, deviceToken: String, deviceType: String) async throws {
         let url = URL(string: config.getApiUrl(path: "/api/learning/device/register"))!
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = "POST"
@@ -522,7 +570,9 @@ class APIService {
         urlRequest.httpBody = try JSONSerialization.data(withJSONObject: body)
         let (data, _) = try await session.data(for: urlRequest)
         let response = try JSONDecoder().decode(APIResponse<String>.self, from: data)
-        return response.code == 200
+        if response.code != 200 {
+            throw APIError.serverError(response.message ?? "注册设备失败")
+        }
     }
 }
 

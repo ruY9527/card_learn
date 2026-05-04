@@ -336,4 +336,5 @@ export interface AdminReviewPlan {
   subjectName: string
   difficultyLevel: number
   status: string
+  studyCount: number
 }

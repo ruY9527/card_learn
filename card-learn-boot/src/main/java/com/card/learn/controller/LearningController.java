@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.card.learn.common.Result;
 import com.card.learn.dto.AdminReviewPlanQueryDTO;
 import com.card.learn.dto.DeviceRegisterDTO;
+import com.card.learn.dto.SimpleReviewDTO;
 import com.card.learn.dto.SM2ReviewDTO;
 import com.card.learn.service.ILearningService;
 import com.card.learn.vo.*;
@@ -37,6 +38,12 @@ public class LearningController {
     public Result<Void> submitReview(@Validated @RequestBody SM2ReviewDTO dto) {
         learningService.submitReview(dto);
         return Result.success();
+    }
+
+    @PostMapping("/review/simple")
+    @ApiOperation("简化复习提交（服务端自动计算SM-2）")
+    public Result<ReviewResultVO> submitSimpleReview(@Validated @RequestBody SimpleReviewDTO dto) {
+        return Result.success(learningService.submitSimpleReview(dto));
     }
 
     @GetMapping("/plan")

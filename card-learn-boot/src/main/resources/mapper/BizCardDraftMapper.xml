@@ -21,7 +21,7 @@
     </resultMap>
 
     <resultMap id="MyCardVOResultMap" type="com.card.learn.vo.MyCardVO">
-        <id property="cardId" column="draft_id"/>
+        <id property="draftId" column="draft_id"/>
         <result property="subjectId" column="subject_id"/>
         <result property="subjectName" column="subject_name"/>
         <result property="frontContent" column="front_content"/>

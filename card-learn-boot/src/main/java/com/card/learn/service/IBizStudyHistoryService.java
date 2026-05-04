@@ -26,4 +26,9 @@ public interface IBizStudyHistoryService extends IService<BizStudyHistory> {
      * 批量查询卡片的最近学习时间，返回 key=cardId, value=最近学习时间
      */
     Map<Long, LocalDateTime> batchGetLastStudyTime(Long userId, List<Long> cardIds);
+
+    /**
+     * 批量查询卡片的学习次数，返回 key=cardId, value=学习次数
+     */
+    Map<Long, Integer> batchGetStudyCount(Long userId, List<Long> cardIds);
 }

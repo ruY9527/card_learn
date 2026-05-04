@@ -1,5 +1,6 @@
 package com.card.learn.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -22,7 +23,9 @@ public class MiniCardDTO implements Serializable {
     private Integer difficultyLevel;
     private List<String> tags;
     private Integer status; // 学习状态：0未学/1模糊/2掌握
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updateTime; // 学习/更新时间
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime lastStudyTime; // 上次设置当前状态的时间
 
 }

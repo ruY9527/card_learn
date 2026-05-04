@@ -3,9 +3,12 @@ package com.card.learn.service.impl;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.card.learn.dto.AdminReviewPlanQueryDTO;
 import com.card.learn.dto.DeviceRegisterDTO;
+import com.card.learn.dto.SimpleReviewDTO;
 import com.card.learn.dto.SM2ReviewDTO;
+import com.card.learn.util.SM2Algorithm;
 import com.card.learn.entity.*;
 import com.card.learn.mapper.*;
+import com.card.learn.service.IBizStudyHistoryService;
 import com.card.learn.service.ILearningService;
 import com.card.learn.vo.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +43,9 @@ public class LearningServiceImpl implements ILearningService {
     @Autowired
     private BizStudyHistoryMapper studyHistoryMapper;
 
+    @Autowired
+    private IBizStudyHistoryService studyHistoryService;
+
     @Override
     public SM2ProgressVO getSM2Progress(Long userId, Long cardId) {
         BizUserProgress progress = progressMapper.selectByUserIdAndCardId(userId, cardId);
@@ -47,18 +53,16 @@ public class LearningServiceImpl implements ILearningService {
         SM2ProgressVO vo = new SM2ProgressVO();
         vo.setCardId(cardId);
 
-        if (progress != null && progress.getNextReviewTime() != null) {
-            // 从复习计划中获取SM-2参数
-            BizReviewPlan plan = reviewPlanMapper.selectLatestPendingByUserAndCard(userId, cardId);
-            if (plan != null) {
-                vo.setNextReviewTime(progress.getNextReviewTime());
-            }
+        if (progress != null) {
+            vo.setEaseFactor(progress.getEaseFactor() != null ? progress.getEaseFactor() : 2.5);
+            vo.setRepetitions(progress.getRepetitions() != null ? progress.getRepetitions() : 0);
+            vo.setInterval(progress.getIntervalDays() != null ? progress.getIntervalDays() : 1);
+            vo.setNextReviewTime(progress.getNextReviewTime());
+        } else {
+            vo.setEaseFactor(2.5);
+            vo.setRepetitions(0);
+            vo.setInterval(1);
         }
-
-        // 默认值
-        if (vo.getEaseFactor() == null) vo.setEaseFactor(2.5);
-        if (vo.getRepetitions() == null) vo.setRepetitions(0);
-        if (vo.getInterval() == null) vo.setInterval(1);
 
         return vo;
     }
@@ -72,8 +76,18 @@ public class LearningServiceImpl implements ILearningService {
         // 根据quality映射status: >=3为掌握(2), 1-2为模糊(1), 0为未学(0)
         int status = dto.getQuality() >= 3 ? 2 : (dto.getQuality() >= 1 ? 1 : 0);
 
-        LocalDateTime nextReviewTime = ZonedDateTime.parse(dto.getNextReviewTime(),
-            DateTimeFormatter.ISO_ZONED_DATE_TIME).toLocalDateTime();
+        // 支持多种时间格式：yyyy-MM-dd HH:mm:ss、ISO 8601（带T和时区）
+        LocalDateTime nextReviewTime;
+        String timeStr = dto.getNextReviewTime();
+        try {
+            nextReviewTime = LocalDateTime.parse(timeStr, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        } catch (Exception e) {
+            try {
+                nextReviewTime = LocalDateTime.parse(timeStr, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
+            } catch (Exception e2) {
+                nextReviewTime = ZonedDateTime.parse(timeStr, DateTimeFormatter.ISO_ZONED_DATE_TIME).toLocalDateTime();
+            }
+        }
 
         if (progress == null) {
             progress = new BizUserProgress();
@@ -81,10 +95,16 @@ public class LearningServiceImpl implements ILearningService {
             progress.setCardId(dto.getCardId());
             progress.setStatus(status);
             progress.setNextReviewTime(nextReviewTime);
+            progress.setEaseFactor(dto.getEaseFactor());
+            progress.setRepetitions(dto.getRepetitions());
+            progress.setIntervalDays(dto.getInterval());
             progressMapper.insert(progress);
         } else {
             progress.setStatus(status);
             progress.setNextReviewTime(nextReviewTime);
+            progress.setEaseFactor(dto.getEaseFactor());
+            progress.setRepetitions(dto.getRepetitions());
+            progress.setIntervalDays(dto.getInterval());
             progressMapper.updateById(progress);
         }
 
@@ -119,8 +139,126 @@ public class LearningServiceImpl implements ILearningService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
+    public ReviewResultVO submitSimpleReview(SimpleReviewDTO dto) {
+        // 1. 映射 status -> SM-2 quality: 0->0, 1->3, 2->5
+        int quality;
+        switch (dto.getStatus()) {
+            case 0:
+                quality = 0;
+                break;
+            case 1:
+                quality = 3;
+                break;
+            case 2:
+                quality = 5;
+                break;
+            default:
+                quality = 3;
+        }
+
+        // 2. 加载当前 SM-2 状态
+        BizUserProgress progress = progressMapper.selectByUserIdAndCardId(dto.getUserId(), dto.getCardId());
+
+        double currentEF = 2.5;
+        int currentReps = 0;
+        int currentInterval = 1;
+
+        if (progress != null) {
+            if (progress.getEaseFactor() != null) {
+                currentEF = progress.getEaseFactor();
+            }
+            if (progress.getRepetitions() != null) {
+                currentReps = progress.getRepetitions();
+            }
+            if (progress.getIntervalDays() != null) {
+                currentInterval = progress.getIntervalDays();
+            }
+        }
+
+        // 3. 计算 SM-2
+        SM2Algorithm.SM2Result sm2Result = SM2Algorithm.calculate(quality, currentEF, currentReps, currentInterval);
+
+        // 4. 更新用户进度
+        LocalDateTime nextReviewTime = LocalDateTime.now().plusDays(sm2Result.getInterval());
+
+        if (progress == null) {
+            progress = new BizUserProgress();
+            progress.setUserId(dto.getUserId());
+            progress.setCardId(dto.getCardId());
+            progress.setStatus(dto.getStatus());
+            progress.setNextReviewTime(nextReviewTime);
+            progress.setEaseFactor(sm2Result.getEaseFactor());
+            progress.setRepetitions(sm2Result.getRepetitions());
+            progress.setIntervalDays(sm2Result.getInterval());
+            progressMapper.insert(progress);
+        } else {
+            progress.setStatus(dto.getStatus());
+            progress.setNextReviewTime(nextReviewTime);
+            progress.setEaseFactor(sm2Result.getEaseFactor());
+            progress.setRepetitions(sm2Result.getRepetitions());
+            progress.setIntervalDays(sm2Result.getInterval());
+            progressMapper.updateById(progress);
+        }
+
+        // 5. 创建/更新复习计划
+        BizReviewPlan plan = reviewPlanMapper.selectPendingByUserAndCard(dto.getUserId(), dto.getCardId());
+        if (plan != null) {
+            plan.setStatus("1");
+            plan.setActualReviewDate(LocalDateTime.now());
+            plan.setSm2Quality(quality);
+            reviewPlanMapper.updateById(plan);
+        }
+
+        BizReviewPlan newPlan = new BizReviewPlan();
+        newPlan.setUserId(dto.getUserId());
+        newPlan.setCardId(dto.getCardId());
+        newPlan.setScheduledDate(nextReviewTime.toLocalDate());
+        newPlan.setStatus("0");
+        reviewPlanMapper.insert(newPlan);
+
+        // 6. 记录学习历史
+        BizStudyHistory history = new BizStudyHistory();
+        history.setUserId(dto.getUserId());
+        history.setCardId(dto.getCardId());
+        history.setStatus(dto.getStatus());
+        history.setCreateTime(LocalDateTime.now());
+        studyHistoryMapper.insert(history);
+
+        // 7. 更新学习连续记录
+        updateLearningStreak(dto.getUserId());
+
+        // 8. 构建返回结果
+        ReviewResultVO result = new ReviewResultVO();
+        result.setCardId(dto.getCardId());
+        result.setStatus(dto.getStatus());
+        result.setEaseFactor(sm2Result.getEaseFactor());
+        result.setRepetitions(sm2Result.getRepetitions());
+        result.setIntervalDays(sm2Result.getInterval());
+        result.setNextReviewTime(nextReviewTime);
+
+        return result;
+    }
+
+    @Override
     public List<ReviewPlanVO> getReviewPlan(Long userId) {
-        return reviewPlanMapper.selectReviewPlan(userId, LocalDate.now());
+        List<ReviewPlanVO> plans = reviewPlanMapper.selectReviewPlan(userId, LocalDate.now());
+
+        // 按 cardId 去重，保留 scheduledDate 最早的
+        Map<Long, ReviewPlanVO> dedupMap = new LinkedHashMap<>();
+        for (ReviewPlanVO plan : plans) {
+            dedupMap.putIfAbsent(plan.getCardId(), plan);
+        }
+        List<ReviewPlanVO> deduped = new ArrayList<>(dedupMap.values());
+
+        // 批量查询学习次数
+        List<Long> cardIds = deduped.stream().map(ReviewPlanVO::getCardId).collect(Collectors.toList());
+        Map<Long, Integer> countMap = studyHistoryService.batchGetStudyCount(userId, cardIds);
+        for (ReviewPlanVO plan : deduped) {
+            plan.setStudyCount(countMap.getOrDefault(plan.getCardId(), 0));
+        }
+
+        return deduped;
     }
 
     @Override
@@ -221,7 +359,34 @@ public class LearningServiceImpl implements ILearningService {
     @Override
     public Page<AdminReviewPlanVO> getAdminReviewPlan(AdminReviewPlanQueryDTO queryDTO) {
         Page<AdminReviewPlanVO> page = new Page<>(queryDTO.getPageNum(), queryDTO.getPageSize());
-        return reviewPlanMapper.selectAdminReviewPlan(page, queryDTO.getUserId(), queryDTO.getStatus(), queryDTO.getScheduledDate());
+        Page<AdminReviewPlanVO> result = reviewPlanMapper.selectAdminReviewPlan(page, queryDTO.getUserId(), queryDTO.getStatus(), queryDTO.getScheduledDateStart(), queryDTO.getScheduledDateEnd());
+
+        // 按 userId+cardId 去重，保留 scheduledDate 最新的
+        Map<String, AdminReviewPlanVO> dedupMap = new LinkedHashMap<>();
+        for (AdminReviewPlanVO vo : result.getRecords()) {
+            String key = vo.getUserId() + "_" + vo.getCardId();
+            // 因为 SQL 按 scheduledDate DESC 排序，第一个就是最新的
+            dedupMap.putIfAbsent(key, vo);
+        }
+        List<AdminReviewPlanVO> deduped = new ArrayList<>(dedupMap.values());
+
+        // 批量查询学习次数（按用户分组）
+        Map<Long, List<Long>> userCardMap = new HashMap<>();
+        for (AdminReviewPlanVO vo : deduped) {
+            userCardMap.computeIfAbsent(vo.getUserId(), k -> new ArrayList<>()).add(vo.getCardId());
+        }
+        for (Map.Entry<Long, List<Long>> entry : userCardMap.entrySet()) {
+            Map<Long, Integer> countMap = studyHistoryService.batchGetStudyCount(entry.getKey(), entry.getValue());
+            for (AdminReviewPlanVO vo : deduped) {
+                if (vo.getUserId().equals(entry.getKey())) {
+                    vo.setStudyCount(countMap.getOrDefault(vo.getCardId(), 0));
+                }
+            }
+        }
+
+        result.setRecords(deduped);
+        result.setTotal(deduped.size());
+        return result;
     }
 
     private void updateLearningStreak(Long userId) {

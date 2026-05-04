@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 
 import java.io.Serializable;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
 
 /**
@@ -27,10 +28,21 @@ public class BizUserProgress implements Serializable {
     /** 掌握状态(0未学 1模糊 2掌握) */
     private Integer status;
 
+    /** SM-2容易系数 */
+    private Double easeFactor;
+
+    /** SM-2连续正确次数 */
+    private Integer repetitions;
+
+    /** SM-2复习间隔天数 */
+    private Integer intervalDays;
+
     /** 建议下次复习时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime nextReviewTime;
 
     @TableField(fill = FieldFill.INSERT_UPDATE)
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updateTime;
 
 }

@@ -17,6 +17,8 @@ struct StudyView: View {
     @State private var isLoading: Bool = false
     @State private var searchKeyword: String = ""
     @FocusState private var isSearchFocused: Bool
+    @State private var showError: Bool = false
+    @State private var errorMessage: String = ""
 
     @State private var navigateToCardDetail: Bool = false
     @State private var selectedCard: Card?
@@ -148,6 +150,15 @@ struct StudyView: View {
             fetchCards()
             fetchStats()
         }
+        .alert("加载失败", isPresented: $showError) {
+            Button("重试") {
+                fetchCards()
+                fetchStats()
+            }
+            Button("确定", role: .cancel) {}
+        } message: {
+            Text(errorMessage)
+        }
     }
     
     private func fetchCards() {
@@ -182,8 +193,10 @@ struct StudyView: View {
                 if pageNum == 1 {
                     cardList = []
                 }
+                errorMessage = error.localizedDescription
+                showError = true
             }
-            
+
             isLoading = false
         }
     }
@@ -199,7 +212,7 @@ struct StudyView: View {
                 reviewCount = stats.review ?? 0
                 totalCount = stats.total ?? 0
             } catch {
-                // 使用默认值
+                // 统计加载失败不影响卡片显示，静默处理
             }
         }
     }

@@ -1,0 +1,10 @@
+{
+  "hooks": {
+    "post_tool_use": [
+      {
+        "matcher": "Edit",
+        "command": "FILE=$(echo '$TOOL_INPUT' | grep -oP '\"file_path\"\\s*:\\s*\"\\K[^\"]+' | head -1); if echo \"$FILE\" | grep -q '\\.java$'; then cd /Users/baobaoyang/Documents/coding/github_self/card_learn/card-learn-boot && mvn compile -DskipTests -q 2>&1 | tail -5; elif echo \"$FILE\" | grep -q '\\.swift$'; then xcodebuild -project /Users/baobaoyang/Documents/coding/github_self/card_learn/card-ios/CardLearn.xcodeproj -scheme CardLearn -destination 'platform=iOS Simulator,name=iPhone 16' build 2>&1 | tail -5; fi"
+      }
+    ]
+  }
+}

@@ -59,8 +59,11 @@
             <if test="status != null and status != ''">
                 AND rp.status = #{status}
             </if>
-            <if test="scheduledDate != null and scheduledDate != ''">
-                AND rp.scheduled_date = #{scheduledDate}
+            <if test="scheduledDateStart != null and scheduledDateStart != ''">
+                AND rp.scheduled_date <![CDATA[ >= ]]> #{scheduledDateStart}
+            </if>
+            <if test="scheduledDateEnd != null and scheduledDateEnd != ''">
+                AND rp.scheduled_date <![CDATA[ <= ]]> #{scheduledDateEnd}
             </if>
         </where>
         ORDER BY rp.scheduled_date DESC, rp.user_id ASC, rp.card_id ASC

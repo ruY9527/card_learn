@@ -1,5 +1,6 @@
 package com.card.learn.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -14,7 +15,7 @@ public class MyCardVO implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private Long cardId;
+    private Long draftId;
 
     /** 所属科目ID */
     private Long subjectId;
@@ -44,9 +45,11 @@ public class MyCardVO implements Serializable {
     private String auditRemark;
 
     /** 创建时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
 
     /** 审批时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime auditTime;
 
 }

@@ -388,6 +388,16 @@ const getCardComments = (cardId, pageNum = 1, pageSize = 10) =>
 const getCommentStats = (cardId) =>
   request({ url: `/api/miniprogram/comment/stats/${cardId}` })
 
+/**
+ * 简化复习提交（服务端自动计算SM-2）
+ * @param {Object} data
+ * @param {number} data.cardId - 卡片ID
+ * @param {number} data.userId - 用户ID
+ * @param {number} data.status - 状态 0未学/1模糊/2掌握
+ */
+const submitReview = (data) =>
+  request({ url: '/api/learning/review/simple', method: 'POST', data })
+
 // 导出API方法
 module.exports = {
   request,
@@ -415,5 +425,6 @@ module.exports = {
   deleteMyCard,
   submitComment,
   getCardComments,
-  getCommentStats
+  getCommentStats,
+  submitReview
 }
