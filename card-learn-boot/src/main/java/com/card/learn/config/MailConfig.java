@@ -1,5 +1,6 @@
 package com.card.learn.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -9,18 +10,29 @@ import java.util.Properties;
 
 /**
  * 邮件发送配置
- * 直接配置SMTP参数，避免因conf/application.yml覆盖主配置导致属性无法读取
  */
 @Configuration
 public class MailConfig {
 
+    @Value("${spring.mail.host:smtp.example.com}")
+    private String host;
+
+    @Value("${spring.mail.port:587}")
+    private Integer port;
+
+    @Value("${spring.mail.username:noreply@example.com}")
+    private String username;
+
+    @Value("${spring.mail.password:}")
+    private String password;
+
     @Bean
     public JavaMailSender javaMailSender() {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-        mailSender.setHost("smtp.exmail.qq.com");
-        mailSender.setPort(587);
-        mailSender.setUsername("yundee@yundeeiot.com");
-        mailSender.setPassword("WW7hMw3xuXntznd2");
+        mailSender.setHost(host);
+        mailSender.setPort(port);
+        mailSender.setUsername(username);
+        mailSender.setPassword(password);
         mailSender.setDefaultEncoding("UTF-8");
 
         Properties props = mailSender.getJavaMailProperties();
