@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.card.learn.mapper.BizGoalRecordMapper">
+
+    <!-- 查询某日目标完成情况 -->
+    <select id="selectByUserAndDate" resultType="com.card.learn.entity.BizGoalRecord">
+        SELECT
+            id,
+            user_id         AS userId,
+            goal_date       AS goalDate,
+            goal_type       AS goalType,
+            target_count    AS targetCount,
+            actual_count    AS actualCount,
+            completed,
+            create_time     AS createTime,
+            update_time     AS updateTime
+        FROM biz_goal_record
+        WHERE user_id = #{userId} AND goal_date = #{goalDate}
+    </select>
+
+    <!-- 查询本周目标完成情况 -->
+    <select id="selectWeekRecords" resultType="com.card.learn.vo.GoalProgressVO">
+        SELECT
+            DATE_FORMAT(goal_date, '%Y-%m-%d') AS date,
+            MAX(CASE WHEN goal_type = 'daily_learn' THEN actual_count ELSE 0 END) AS learnProgress,
+            MAX(CASE WHEN goal_type = 'daily_learn' THEN target_count ELSE 0 END) AS learnTarget,
+            MAX(CASE WHEN goal_type = 'daily_learn' THEN completed ELSE 0 END) = 1 AS learnCompleted,
+            MAX(CASE WHEN goal_type = 'daily_master' THEN actual_count ELSE 0 END) AS masterProgress,
+            MAX(CASE WHEN goal_type = 'daily_master' THEN target_count ELSE 0 END) AS masterTarget,
+            MAX(CASE WHEN goal_type = 'daily_master' THEN completed ELSE 0 END) = 1 AS masterCompleted
+        FROM biz_goal_record
+        WHERE user_id = #{userId}
+          AND goal_date BETWEEN #{startDate} AND #{endDate}
+        GROUP BY goal_date
+        ORDER BY goal_date ASC
+    </select>
+
+</mapper>

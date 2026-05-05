@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.card.learn.mapper.BizUserDailyCountMapper">
+
+    <!-- 查询用户某日学习计数 -->
+    <select id="selectByUserAndDate" resultType="com.card.learn.entity.BizUserDailyCount">
+        SELECT
+            id,
+            user_id         AS userId,
+            count_date      AS countDate,
+            learn_count     AS learnCount,
+            master_count    AS masterCount,
+            review_count    AS reviewCount,
+            update_time     AS updateTime,
+            create_time     AS createTime
+        FROM biz_user_daily_count
+        WHERE user_id = #{userId} AND count_date = #{countDate}
+    </select>
+
+</mapper>

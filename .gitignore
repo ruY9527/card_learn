@@ -56,3 +56,6 @@ logs/
 # Xcode user-specific files
 xcuserdata/
 *.xcuserstate
+
+# Spring Boot build output
+BOOT-INF/

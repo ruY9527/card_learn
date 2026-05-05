@@ -8,8 +8,11 @@ import com.card.learn.dto.SM2ReviewDTO;
 import com.card.learn.util.SM2Algorithm;
 import com.card.learn.entity.*;
 import com.card.learn.mapper.*;
+import com.card.learn.dto.AchievementCheckDTO;
 import com.card.learn.service.IBizStudyHistoryService;
+import com.card.learn.service.IIncentiveService;
 import com.card.learn.service.ILearningService;
+import com.card.learn.service.IWeakPointService;
 import com.card.learn.vo.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -45,6 +48,12 @@ public class LearningServiceImpl implements ILearningService {
 
     @Autowired
     private IBizStudyHistoryService studyHistoryService;
+
+    @Autowired
+    private IIncentiveService incentiveService;
+
+    @Autowired
+    private IWeakPointService weakPointService;
 
     @Override
     public SM2ProgressVO getSM2Progress(Long userId, Long cardId) {
@@ -228,7 +237,31 @@ public class LearningServiceImpl implements ILearningService {
         // 7. 更新学习连续记录
         updateLearningStreak(dto.getUserId());
 
-        // 8. 构建返回结果
+        // 8. 记录薄弱点
+        weakPointService.recordWeakPoint(dto.getUserId(), dto.getCardId(), dto.getStatus());
+
+        // 9. 激励系统：发放经验值 + 检查成就
+        String cardIdStr = String.valueOf(dto.getCardId());
+        incentiveService.awardExp(dto.getUserId(), 1, "STUDY", cardIdStr, "学习卡片");
+        if (dto.getStatus() == 2) {
+            incentiveService.awardExp(dto.getUserId(), 5, "MASTER", cardIdStr, "掌握卡片");
+        }
+
+        AchievementCheckDTO checkDTO = new AchievementCheckDTO();
+        checkDTO.setUserId(dto.getUserId());
+        checkDTO.setActionType("learn");
+        checkDTO.setSourceId(cardIdStr);
+        incentiveService.checkAndUnlockAchievement(checkDTO);
+
+        if (dto.getStatus() == 2) {
+            AchievementCheckDTO masterCheckDTO = new AchievementCheckDTO();
+            masterCheckDTO.setUserId(dto.getUserId());
+            masterCheckDTO.setActionType("master");
+            masterCheckDTO.setSourceId(cardIdStr);
+            incentiveService.checkAndUnlockAchievement(masterCheckDTO);
+        }
+
+        // 9. 构建返回结果
         ReviewResultVO result = new ReviewResultVO();
         result.setCardId(dto.getCardId());
         result.setStatus(dto.getStatus());

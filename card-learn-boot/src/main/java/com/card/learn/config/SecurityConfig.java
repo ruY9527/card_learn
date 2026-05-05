@@ -97,7 +97,9 @@ public class SecurityConfig {
             ).permitAll()
             // 放行接口 - 学习服务API
             .antMatchers(
-                "/api/learning/**"
+                "/api/learning/**",
+                "/api/incentive/**",
+                "/api/dashboard/**"
             ).permitAll()
             // 其他请求需要认证
             .anyRequest().authenticated()

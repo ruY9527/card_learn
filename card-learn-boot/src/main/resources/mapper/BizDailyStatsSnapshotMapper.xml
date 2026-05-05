@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.card.learn.mapper.BizDailyStatsSnapshotMapper">
+
+    <!-- 查询用户日期范围内的统计快照 -->
+    <select id="selectByUserAndDateRange" resultType="com.card.learn.entity.BizDailyStatsSnapshot">
+        SELECT *
+        FROM biz_daily_stats_snapshot
+        WHERE user_id = #{userId}
+          AND stats_date <![CDATA[ >= ]]> #{startDate}
+          AND stats_date <![CDATA[ <= ]]> #{endDate}
+        ORDER BY stats_date ASC
+    </select>
+
+</mapper>

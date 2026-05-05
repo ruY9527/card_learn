@@ -9,6 +9,9 @@ struct StatsView: View {
     @State private var isLoading = false
     @State private var navigateToTodayLearned = false
     @State private var navigateToTodayMastered = false
+    @State private var navigateToCurrentStreak = false
+    @State private var navigateToLongestStreak = false
+    @State private var navigateToTotalDays = false
 
     var body: some View {
         NavigationStack {
@@ -22,6 +25,9 @@ struct StatsView: View {
 
                         // 今日学习
                         todayCard
+
+                        // 学习报告入口
+                        reportEntry
 
                         // 科目进度
                         subjectProgressSection
@@ -40,6 +46,15 @@ struct StatsView: View {
             }
             .navigationDestination(isPresented: $navigateToTodayMastered) {
                 TodayCardsView(type: "todayMastered", date: todayDateString)
+            }
+            .navigationDestination(isPresented: $navigateToCurrentStreak) {
+                StreakDetailView(streakType: .current, streakValue: stats?.currentStreak ?? 0)
+            }
+            .navigationDestination(isPresented: $navigateToLongestStreak) {
+                StreakDetailView(streakType: .longest, streakValue: stats?.longestStreak ?? 0)
+            }
+            .navigationDestination(isPresented: $navigateToTotalDays) {
+                StreakDetailView(streakType: .total, streakValue: stats?.totalStudyDays ?? 0)
             }
         }
         .task {
@@ -65,6 +80,7 @@ struct StatsView: View {
                     icon: "flame.fill",
                     color: .white
                 )
+                .onTapGesture { navigateToCurrentStreak = true }
 
                 Divider()
                     .frame(height: 40)
@@ -76,6 +92,7 @@ struct StatsView: View {
                     icon: "trophy.fill",
                     color: .white
                 )
+                .onTapGesture { navigateToLongestStreak = true }
 
                 Divider()
                     .frame(height: 40)
@@ -87,6 +104,7 @@ struct StatsView: View {
                     icon: "calendar",
                     color: .white
                 )
+                .onTapGesture { navigateToTotalDays = true }
             }
         }
         .padding(20)
@@ -158,6 +176,38 @@ struct StatsView: View {
         .background(Color.white)
         .cornerRadius(12)
         .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+    }
+
+    // MARK: - 学习报告入口
+
+    private var reportEntry: some View {
+        NavigationLink(destination: ReportView()) {
+            HStack(spacing: 12) {
+                Image(systemName: "doc.text.fill")
+                    .font(.system(size: 20))
+                    .foregroundColor(Color(hex: "667eea"))
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("学习报告")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(AppColor.textPrimary)
+                    Text("查看周报和月报，了解学习趋势")
+                        .font(.system(size: 12))
+                        .foregroundColor(AppColor.textSecondary)
+                }
+
+                Spacer()
+
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 14))
+                    .foregroundColor(.secondary)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(16)
+            .background(Color.white)
+            .cornerRadius(12)
+            .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+        }
     }
 
     // MARK: - 科目进度

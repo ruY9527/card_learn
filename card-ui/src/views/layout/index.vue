@@ -46,6 +46,16 @@
           <el-menu-item index="/stats/learning">学习数据统计</el-menu-item>
           <el-menu-item index="/stats/study-history">学习记录</el-menu-item>
           <el-menu-item index="/stats/review-plan">复习计划</el-menu-item>
+          <el-menu-item index="/stats/report">学习报告</el-menu-item>
+        </el-sub-menu>
+        <el-sub-menu index="incentive">
+          <template #title>
+            <el-icon><Trophy /></el-icon>
+            <span>激励管理</span>
+          </template>
+          <el-menu-item index="/incentive/dashboard">激励仪表盘</el-menu-item>
+          <el-menu-item index="/incentive/achievement">成就管理</el-menu-item>
+          <el-menu-item index="/incentive/rank">排行榜</el-menu-item>
         </el-sub-menu>
         <el-menu-item index="/ai">
           <el-icon><MagicStick /></el-icon>
@@ -104,7 +114,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Sunny, Moon, Fold, Expand } from '@element-plus/icons-vue'
+import { Sunny, Moon, Fold, Expand, Trophy } from '@element-plus/icons-vue'
 import { useUserStore } from '@/store/user'
 import { useTheme } from '@/composables/useTheme'
 

@@ -23,7 +23,7 @@ import java.util.List;
  * Dashboard数据统计控制器
  */
 @RestController
-@RequestMapping("/dashboard")
+@RequestMapping("/api/dashboard")
 @Api(tags = "数据看板")
 public class DashboardController {
 

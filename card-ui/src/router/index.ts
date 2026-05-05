@@ -121,6 +121,30 @@ const routes: RouteRecordRaw[] = [
         name: 'ReviewPlan',
         component: () => import('@/views/stats/review-plan/index.vue'),
         meta: { title: '复习计划' }
+      },
+      {
+        path: 'stats/report',
+        name: 'LearningReport',
+        component: () => import('@/views/stats/report/index.vue'),
+        meta: { title: '学习报告' }
+      },
+      {
+        path: 'incentive/dashboard',
+        name: 'IncentiveDashboard',
+        component: () => import('@/views/incentive/dashboard/index.vue'),
+        meta: { title: '激励仪表盘' }
+      },
+      {
+        path: 'incentive/achievement',
+        name: 'IncentiveAchievement',
+        component: () => import('@/views/incentive/achievement/index.vue'),
+        meta: { title: '成就管理' }
+      },
+      {
+        path: 'incentive/rank',
+        name: 'IncentiveRank',
+        component: () => import('@/views/incentive/rank/index.vue'),
+        meta: { title: '排行榜' }
       }
     ]
   }

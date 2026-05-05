@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.card.learn.mapper.BizLearningReportMapper">
+
+    <!-- 查询用户报告列表 -->
+    <select id="selectReportList" resultType="com.card.learn.vo.ReportListVO">
+        SELECT
+            id AS reportId,
+            report_type AS reportType,
+            period_start AS periodStart,
+            period_end AS periodEnd
+        FROM biz_learning_report
+        WHERE user_id = #{userId}
+        <if test="reportType != null">
+            AND report_type = #{reportType}
+        </if>
+        ORDER BY period_start DESC
+        LIMIT #{offset}, #{size}
+    </select>
+
+    <!-- 查询用户报告总数 -->
+    <select id="selectReportCount" resultType="int">
+        SELECT COUNT(*)
+        FROM biz_learning_report
+        WHERE user_id = #{userId}
+        <if test="reportType != null">
+            AND report_type = #{reportType}
+        </if>
+    </select>
+
+</mapper>

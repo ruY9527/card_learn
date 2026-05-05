@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.card.learn.mapper.BizAchievementMapper">
+
+    <!-- 查询成就列表（含用户解锁状态） -->
+    <select id="selectAchievementList" resultType="com.card.learn.vo.AchievementVO">
+        SELECT
+            a.achievement_id    AS achievementId,
+            a.achievement_code  AS code,
+            a.name              AS name,
+            a.description       AS description,
+            a.icon              AS icon,
+            a.tier              AS tier,
+            a.category          AS category,
+            a.condition_value   AS conditionValue,
+            a.exp_reward        AS expReward,
+            CASE WHEN ua.id IS NOT NULL THEN TRUE ELSE FALSE END AS unlocked,
+            ua.achieved_at      AS achievedAt
+        FROM biz_achievement a
+        LEFT JOIN biz_user_achievement ua
+            ON a.achievement_code = ua.achievement_code
+            AND ua.user_id = #{userId}
+        WHERE a.enabled = 1
+        <if test="category != null and category != ''">
+            AND a.category = #{category}
+        </if>
+        ORDER BY a.sort_order ASC
+    </select>
+
+</mapper>

@@ -1,5 +1,6 @@
 package com.card.learn.service.impl;
 
+import com.card.learn.mapper.BizStudyHistoryMapper;
 import com.card.learn.mapper.BizUserProgressMapper;
 import com.card.learn.service.ILearningStatsService;
 import com.card.learn.vo.DailyLearnTrendVO;
@@ -21,6 +22,9 @@ public class LearningStatsServiceImpl implements ILearningStatsService {
 
     @Autowired
     private BizUserProgressMapper progressMapper;
+
+    @Autowired
+    private BizStudyHistoryMapper studyHistoryMapper;
 
     @Override
     public LearningStatsVO getOverallStats(Long userId) {
@@ -44,7 +48,7 @@ public class LearningStatsServiceImpl implements ILearningStatsService {
             days = 30;
         }
         String startDate = LocalDate.now().minusDays(days).format(DateTimeFormatter.ISO_LOCAL_DATE);
-        return progressMapper.selectDailyTrend(startDate, userId);
+        return studyHistoryMapper.selectDailyTrend(startDate, userId);
     }
 
     @Override

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.card.learn.mapper.BizExpLogMapper">
+
+    <!-- 分页查询用户经验值日志 -->
+    <select id="selectExpLogPage" resultType="com.card.learn.vo.ExpLogVO">
+        SELECT
+            id,
+            exp_change      AS expChange,
+            source_type     AS sourceType,
+            source_id       AS sourceId,
+            description,
+            create_time     AS createTime
+        FROM biz_exp_log
+        WHERE user_id = #{userId}
+        <if test="sourceType != null and sourceType != ''">
+            AND source_type = #{sourceType}
+        </if>
+        ORDER BY create_time DESC
+    </select>
+
+</mapper>

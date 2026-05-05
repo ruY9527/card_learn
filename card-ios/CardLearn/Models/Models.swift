@@ -369,6 +369,14 @@ struct SubjectProgressResponse: Codable, Identifiable {
     var id: Int { subjectId }
 }
 
+// 每日学习趋势
+struct DailyLearnTrend: Codable, Identifiable {
+    let date: String
+    let count: Int
+
+    var id: String { date }
+}
+
 // 学习统计
 struct LearningStatsResponse: Codable {
     let currentStreak: Int
@@ -404,4 +412,293 @@ struct ReviewResultVO: Codable {
     let repetitions: Int
     let intervalDays: Int
     let nextReviewTime: String?
+}
+
+// MARK: - 激励系统模型
+
+// 成就
+struct Achievement: Codable, Identifiable {
+    let achievementId: Int
+    let code: String
+    let name: String
+    let description: String?
+    let icon: String?
+    let tier: Int
+    let category: String
+    let conditionValue: Int?
+    let expReward: Int?
+    let unlocked: Bool?
+    let achievedAt: String?
+
+    var id: Int { achievementId }
+
+    var tierName: String {
+        switch tier {
+        case 1: return "铜牌"
+        case 2: return "银牌"
+        case 3: return "金牌"
+        case 4: return "钻石"
+        default: return "普通"
+        }
+    }
+
+    var tierColor: String {
+        switch tier {
+        case 1: return "CD7F32"
+        case 2: return "C0C0C0"
+        case 3: return "FFD700"
+        case 4: return "B9F2FF"
+        default: return "9E9E9E"
+        }
+    }
+}
+
+// 成就列表响应
+struct AchievementListResponse: Codable {
+    let unlockedCount: Int
+    let totalCount: Int
+    let achievements: [Achievement]
+}
+
+// 成就检查响应
+struct AchievementCheckResponse: Codable {
+    let newAchievements: [Achievement]
+    let totalExp: Int
+    let level: Int
+    let leveledUp: Bool
+}
+
+// 用户等级
+struct UserLevel: Codable {
+    let level: Int
+    let levelName: String
+    let currentExp: Int
+    let totalExp: Int
+    let nextLevelExp: Int
+    let progressPercent: Double
+    let expToNextLevel: Int
+}
+
+// 经验值日志
+struct ExpLog: Codable, Identifiable {
+    let id: Int
+    let expChange: Int
+    let sourceType: String
+    let sourceId: String?
+    let description: String?
+    let createTime: String
+
+    var sourceIcon: String {
+        switch sourceType {
+        case "STUDY": return "book.fill"
+        case "MASTER": return "star.fill"
+        case "REVIEW": return "arrow.clockwise"
+        case "GOAL": return "target"
+        case "ACHIEVEMENT": return "trophy.fill"
+        case "COMMENT": return "bubble.left.fill"
+        case "CONTRIBUTE": return "square.and.pencil"
+        default: return "plus.circle.fill"
+        }
+    }
+}
+
+// 学习目标
+struct LearningGoal: Codable {
+    let dailyLearnTarget: Int
+    let dailyMasterTarget: Int
+    let enabled: Bool
+}
+
+// 目标进度
+struct GoalProgress: Codable {
+    let date: String
+    let learnProgress: Int
+    let learnTarget: Int
+    let learnCompleted: Bool
+    let learnPercent: Double
+    let masterProgress: Int
+    let masterTarget: Int
+    let masterCompleted: Bool
+    let masterPercent: Double
+}
+
+// 周目标记录
+struct WeekGoalRecord: Codable, Identifiable {
+    let date: String
+    let learnProgress: Int?
+    let learnTarget: Int?
+    let learnCompleted: Bool?
+    let masterProgress: Int?
+    let masterTarget: Int?
+    let masterCompleted: Bool?
+
+    var id: String { date }
+}
+
+// 目标设置请求
+struct GoalSetRequest: Codable {
+    var dailyLearnTarget: Int?
+    var dailyMasterTarget: Int?
+    var enabled: Bool?
+}
+
+// 排行榜项
+struct RankItem: Codable, Identifiable {
+    let rank: Int
+    let userId: Int
+    let nickname: String
+    let avatar: String?
+    let level: Int
+    let levelName: String?
+    let totalExp: Int?
+    let weekLearnCount: Int?
+    let currentStreak: Int?
+
+    var id: Int { userId }
+}
+
+// 用户排名
+struct RankPosition: Codable {
+    let userId: Int
+    let rank: Int?
+    let totalExp: Int?
+    let weekRank: Int?
+    let weekLearnCount: Int?
+    let streakRank: Int?
+    let currentStreak: Int?
+}
+
+// 成就分类枚举
+enum AchievementCategory: String, CaseIterable {
+    case all = ""
+    case streak = "streak"
+    case count = "count"
+    case subject = "subject"
+    case social = "social"
+
+    var label: String {
+        switch self {
+        case .all: return "全部"
+        case .streak: return "连续"
+        case .count: return "数量"
+        case .subject: return "科目"
+        case .social: return "社交"
+        }
+    }
+}
+
+// MARK: - 学习报告模型
+
+// 报告详情
+struct ReportDetail: Codable {
+    let reportId: Int?
+    let reportType: String
+    let periodStart: String
+    let periodEnd: String
+    let overview: ReportOverview
+    let masteryTrend: MasteryTrend?
+    let subjectAnalysis: [SubjectAnalysis]?
+    let learningHabits: LearningHabits?
+    let weakPoints: [WeakPoint]?
+    let suggestions: [Suggestion]?
+}
+
+// 报告概览
+struct ReportOverview: Codable {
+    let totalCards: Int
+    let newMastered: Int
+    let forgotten: Int
+    let streakDays: Int
+    let studyDuration: Int?
+    let comparison: Comparison?
+}
+
+// 与上期对比
+struct Comparison: Codable {
+    let totalCardsChange: String?
+    let newMasteredChange: String?
+    let forgottenChange: String?
+}
+
+// 掌握率趋势
+struct MasteryTrend: Codable {
+    let startRate: Int
+    let endRate: Int
+    let changeRate: Int
+    let trendData: [TrendPoint]?
+}
+
+// 趋势数据点
+struct TrendPoint: Codable, Identifiable {
+    let date: String
+    let rate: Int
+
+    var id: String { date }
+}
+
+// 科目分析
+struct SubjectAnalysis: Codable, Identifiable {
+    let subjectId: Int
+    let subjectName: String
+    let totalCards: Int
+    let mastered: Int
+    let weakPoints: Int
+    let masteryRate: Int
+
+    var id: Int { subjectId }
+}
+
+// 学习习惯
+struct LearningHabits: Codable {
+    let morning: Int
+    let afternoon: Int
+    let evening: Int
+    let peakHour: String
+    let mostActiveDay: String
+    let avgDailyDuration: Int
+    let studyFrequency: Int
+}
+
+// 薄弱点
+struct WeakPoint: Codable, Identifiable {
+    let cardId: Int
+    let subjectName: String?
+    let frontContent: String?
+    let errorCount: Int
+    let lastErrorTime: String?
+
+    var id: Int { cardId }
+}
+
+// 改进建议
+struct Suggestion: Codable, Identifiable {
+    let type: String
+    let priority: String
+    let content: String
+
+    var id: String { content }
+}
+
+// 历史报告列表项
+struct ReportListItem: Codable, Identifiable {
+    let reportId: Int
+    let reportType: String
+    let periodStart: String
+    let periodEnd: String
+    let overview: ReportOverview?
+
+    var id: Int { reportId }
+}
+
+// 历史报告响应
+struct ReportHistoryResponse: Codable {
+    let records: [ReportListItem]
+    let total: Int
+    let pages: Int
+}
+
+// 薄弱点响应
+struct WeakPointResponse: Codable {
+    let records: [WeakPoint]
+    let total: Int
 }

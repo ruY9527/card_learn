@@ -338,3 +338,54 @@ export interface AdminReviewPlan {
   status: string
   studyCount: number
 }
+
+// ========== 激励系统类型 ==========
+
+// 成就
+export interface Achievement {
+  achievementId: number
+  code: string
+  name: string
+  description: string
+  icon: string
+  tier: number
+  category: string
+  conditionValue: number
+  expReward: number
+  unlocked: boolean
+  achievedAt: string
+}
+
+// 用户等级
+export interface UserLevel {
+  level: number
+  levelName: string
+  currentExp: number
+  totalExp: number
+  nextLevelExp: number
+  progressPercent: number
+  expToNextLevel: number
+}
+
+// 经验值日志
+export interface ExpLog {
+  id: number
+  expChange: number
+  sourceType: string
+  sourceId: string
+  description: string
+  createTime: string
+}
+
+// 排行榜项
+export interface RankItem {
+  rank: number
+  userId: number
+  nickname: string
+  avatar: string
+  level: number
+  levelName: string
+  totalExp: number
+  weekLearnCount: number
+  currentStreak: number
+}

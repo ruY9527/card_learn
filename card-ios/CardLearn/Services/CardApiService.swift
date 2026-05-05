@@ -130,6 +130,22 @@ final class CardApiService: BaseApiService {
         throw APIError.serverError(response.message ?? "获取学习统计失败")
     }
 
+    // MARK: - 学习趋势
+
+    func getLearnTrend(userId: Int?, days: Int = 30) async throws -> [DailyLearnTrend] {
+        var urlComponents = URLComponents(string: config.getApiUrl(path: "/api/dashboard/learn-trend"))!
+        var queryItems = [URLQueryItem(name: "days", value: String(days))]
+        if let userId = userId {
+            queryItems.append(URLQueryItem(name: "userId", value: String(userId)))
+        }
+        urlComponents.queryItems = queryItems
+        let response: APIResponse<[DailyLearnTrend]> = try await get(url: urlComponents.url!)
+        if response.code == 200, let data = response.data {
+            return data
+        }
+        throw APIError.serverError(response.message ?? "获取学习趋势失败")
+    }
+
     // MARK: - 冲刺配置
 
     func getSprintConfig() async throws -> SprintConfig {

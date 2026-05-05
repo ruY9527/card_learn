@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.card.learn.mapper.BizStudyHistoryMapper">
+
+    <!-- 每日学习趋势（基于学习历史事件表，每次学习都会记录，数据最准确） -->
+    <select id="selectDailyTrend" resultType="com.card.learn.vo.DailyLearnTrendVO">
+        SELECT
+            DATE_FORMAT(h.create_time, '%Y-%m-%d') AS date,
+            COUNT(*) AS count
+        FROM biz_study_history h
+        WHERE h.create_time <![CDATA[ >= ]]> #{startDate}
+        <if test="userId != null">
+            AND h.user_id = #{userId}
+        </if>
+        GROUP BY DATE_FORMAT(h.create_time, '%Y-%m-%d')
+        ORDER BY date ASC
+    </select>
+
+    <!-- 查询用户日期范围内的学习历史 -->
+    <select id="selectByUserAndDateRange" resultType="com.card.learn.entity.BizStudyHistory">
+        SELECT *
+        FROM biz_study_history
+        WHERE user_id = #{userId}
+          AND create_time <![CDATA[ >= ]]> #{startTime}
+          AND create_time <![CDATA[ <= ]]> #{endTime}
+        ORDER BY create_time ASC
+    </select>
+
+</mapper>

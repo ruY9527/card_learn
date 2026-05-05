@@ -9,6 +9,7 @@ struct ProfileView: View {
     @State private var showAddCard: Bool = false
     @State private var showMyCards: Bool = false
     @State private var showMyNotes: Bool = false
+    @State private var showIncentiveCenter: Bool = false
 
     private let apiService = CardApiService.shared
 
@@ -77,6 +78,37 @@ struct ProfileView: View {
                         .padding(.horizontal, 16)
                     }
 
+                    // 激励中心入口
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("学习激励")
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundColor(AppColor.textPrimary)
+                            .padding(.horizontal, 16)
+
+                        Button(action: {
+                            if appState.isLoggedIn {
+                                showIncentiveCenter = true
+                            } else {
+                                showLoginModal = true
+                            }
+                        }) {
+                            HStack {
+                                Image(systemName: "trophy.fill")
+                                    .foregroundColor(Color(hex: "FFD700"))
+                                    .frame(width: 24)
+                                Text("激励中心")
+                                    .foregroundColor(AppColor.textPrimary)
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .foregroundColor(AppColor.disabledText)
+                            }
+                            .padding()
+                            .background(Color(.systemBackground))
+                            .cornerRadius(12)
+                        }
+                        .padding(.horizontal, 16)
+                    }
+
                     // 反馈入口
                     VStack(alignment: .leading, spacing: 12) {
                         Text("帮助与反馈")
@@ -114,6 +146,9 @@ struct ProfileView: View {
             }
             .navigationDestination(isPresented: $showMyNotes) {
                 NoteListView()
+            }
+            .navigationDestination(isPresented: $showIncentiveCenter) {
+                IncentiveCenterView()
             }
             .sheet(isPresented: $showLoginModal) {
                 LoginModal(onSuccess: {

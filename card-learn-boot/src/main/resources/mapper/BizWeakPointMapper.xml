@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.card.learn.mapper.BizWeakPointMapper">
+
+    <!-- 查询用户薄弱点列表(含卡片信息) -->
+    <select id="selectWeakPointList" resultType="com.card.learn.vo.WeakPointVO">
+        SELECT
+            wp.card_id AS cardId,
+            s.subject_name AS subjectName,
+            SUBSTRING(c.front_content, 1, 50) AS frontContent,
+            wp.error_count AS errorCount,
+            DATE_FORMAT(wp.last_error_time, '%Y-%m-%d %H:%i:%s') AS lastErrorTime
+        FROM biz_weak_point wp
+        LEFT JOIN biz_card c ON wp.card_id = c.card_id
+        LEFT JOIN biz_subject s ON c.subject_id = s.subject_id
+        WHERE wp.user_id = #{userId}
+          AND wp.status = 'active'
+        ORDER BY wp.error_count DESC, wp.last_error_time DESC
+        LIMIT #{offset}, #{size}
+    </select>
+
+    <!-- 查询用户薄弱点总数 -->
+    <select id="selectWeakPointCount" resultType="int">
+        SELECT COUNT(*)
+        FROM biz_weak_point
+        WHERE user_id = #{userId}
+          AND status = 'active'
+    </select>
+
+    <!-- 按用户和卡片查找薄弱点 -->
+    <select id="selectByUserAndCard" resultType="com.card.learn.entity.BizWeakPoint">
+        SELECT *
+        FROM biz_weak_point
+        WHERE user_id = #{userId}
+          AND card_id = #{cardId}
+    </select>
+
+    <!-- 删除用户卡片的薄弱点 -->
+    <delete id="deleteByUserAndCard">
+        DELETE FROM biz_weak_point
+        WHERE user_id = #{userId}
+          AND card_id = #{cardId}
+    </delete>
+
+</mapper>

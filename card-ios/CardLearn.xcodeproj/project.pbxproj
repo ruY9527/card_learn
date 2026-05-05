@@ -42,6 +42,16 @@
 		A0000027 /* NoteApiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000027; };
 		A0000028 /* LearningApiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000028; };
 		A0000029 /* UserCardApiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000029; };
+		A000002A /* IncentiveApiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000002A; };
+		A000002B /* IncentiveCenterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000002B; };
+		A000002C /* AchievementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000002C; };
+		A000002D /* RankListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000002D; };
+		A000002E /* GoalSettingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000002E; };
+		A000002F /* ExpLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000002F; };
+		A0000030 /* StreakDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000030; };
+		A0000031 /* ReportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000031; };
+		A0000032 /* ReportApiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000032; };
+		A0000033 /* WeakPointListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000033; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -81,6 +91,16 @@
 		B0000027 /* NoteApiService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteApiService.swift; sourceTree = "<group>"; };
 		B0000028 /* LearningApiService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LearningApiService.swift; sourceTree = "<group>"; };
 		B0000029 /* UserCardApiService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserCardApiService.swift; sourceTree = "<group>"; };
+		B000002A /* IncentiveApiService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncentiveApiService.swift; sourceTree = "<group>"; };
+		B000002B /* IncentiveCenterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncentiveCenterView.swift; sourceTree = "<group>"; };
+		B000002C /* AchievementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchievementView.swift; sourceTree = "<group>"; };
+		B000002D /* RankListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RankListView.swift; sourceTree = "<group>"; };
+		B000002E /* GoalSettingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalSettingView.swift; sourceTree = "<group>"; };
+		B000002F /* ExpLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpLogView.swift; sourceTree = "<group>"; };
+		B0000030 /* StreakDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreakDetailView.swift; sourceTree = "<group>"; };
+		B0000031 /* ReportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportView.swift; sourceTree = "<group>"; };
+		B0000032 /* ReportApiService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportApiService.swift; sourceTree = "<group>"; };
+		B0000033 /* WeakPointListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeakPointListView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -145,6 +165,8 @@
 				B0000027 /* NoteApiService.swift */,
 				B0000028 /* LearningApiService.swift */,
 				B0000029 /* UserCardApiService.swift */,
+				B000002A /* IncentiveApiService.swift */,
+				B0000032 /* ReportApiService.swift */,
 				B000001E /* NotificationService.swift */,
 			);
 			path = Services;
@@ -171,6 +193,14 @@
 				B000001F /* TodayCardsView.swift */,
 				B0000020 /* CommentSheetView.swift */,
 				B0000021 /* NoteListView.swift */,
+				B000002B /* IncentiveCenterView.swift */,
+				B000002C /* AchievementView.swift */,
+				B000002D /* RankListView.swift */,
+				B000002E /* GoalSettingView.swift */,
+				B000002F /* ExpLogView.swift */,
+				B0000030 /* StreakDetailView.swift */,
+				B0000031 /* ReportView.swift */,
+				B0000033 /* WeakPointListView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -295,6 +325,16 @@
 				A0000027 /* NoteApiService.swift in Sources */,
 				A0000028 /* LearningApiService.swift in Sources */,
 				A0000029 /* UserCardApiService.swift in Sources */,
+				A000002A /* IncentiveApiService.swift in Sources */,
+				A000002B /* IncentiveCenterView.swift in Sources */,
+				A000002C /* AchievementView.swift in Sources */,
+				A000002D /* RankListView.swift in Sources */,
+				A000002E /* GoalSettingView.swift in Sources */,
+				A000002F /* ExpLogView.swift in Sources */,
+				A0000030 /* StreakDetailView.swift in Sources */,
+				A0000031 /* ReportView.swift in Sources */,
+				A0000032 /* ReportApiService.swift in Sources */,
+				A0000033 /* WeakPointListView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

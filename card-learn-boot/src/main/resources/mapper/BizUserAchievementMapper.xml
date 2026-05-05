@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.card.learn.mapper.BizUserAchievementMapper">
+
+    <!-- 统计用户已解锁成就数 -->
+    <select id="countByUserId" resultType="int">
+        SELECT COUNT(*) FROM biz_user_achievement
+        WHERE user_id = #{userId}
+    </select>
+
+    <!-- 检查用户是否已解锁某成就 -->
+    <select id="countByUserAndCode" resultType="int">
+        SELECT COUNT(*) FROM biz_user_achievement
+        WHERE user_id = #{userId} AND achievement_code = #{achievementCode}
+    </select>
+
+</mapper>

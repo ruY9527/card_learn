@@ -41,6 +41,7 @@ import java.util.stream.Collectors;
 /**
  * 小程序公开接口控制器
  */
+@SuppressWarnings("unchecked")
 @RestController
 @RequestMapping("/api/miniprogram")
 @Api(tags = "小程序公开接口")
