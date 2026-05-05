@@ -71,6 +71,7 @@
           <el-menu-item index="/system/menu">菜单管理</el-menu-item>
           <el-menu-item index="/system/log">日志管理</el-menu-item>
           <el-menu-item index="/system/sprint">冲刺配置</el-menu-item>
+          <el-menu-item index="/system/email-config">邮箱配置</el-menu-item>
         </el-sub-menu>
       </el-menu>
     </el-aside>

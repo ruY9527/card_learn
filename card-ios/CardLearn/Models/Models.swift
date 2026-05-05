@@ -132,6 +132,23 @@ struct LoginResponse: Codable {
     let user: UserInfo
 }
 
+// 邮箱验证码响应
+struct EmailCodeResponse: Codable {
+    let codeKey: String
+}
+
+// 邮箱注册响应（可能是username或LoginVO）
+struct EmailRegisterResponse: Codable {
+    let username: String?
+    let token: String?
+    let user: UserInfo?
+
+    // 是否为直接登录响应（无需激活）
+    var isAutoLogin: Bool {
+        return token != nil && user != nil
+    }
+}
+
 // 进度更新请求
 struct ProgressUpdate: Codable {
     let cardId: Int

@@ -129,6 +129,7 @@ struct UserInfo: Codable {
     let nickname: String
     let avatar: String?
     let username: String?
+    let email: String?
 }
 
 // 学习统计模型

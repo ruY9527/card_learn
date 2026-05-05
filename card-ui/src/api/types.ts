@@ -31,9 +31,37 @@ export interface CaptchaResult {
 // 登录表单
 export interface LoginForm {
   username: string
+  email?: string
   password: string
   captcha: string
   captchaKey: string
+}
+
+// 发送邮箱验证码
+export interface SendEmailCodeForm {
+  email: string
+  type: 'register' | 'reset'
+}
+
+// 邮箱注册
+export interface EmailRegisterForm {
+  email: string
+  code: string
+  codeKey: string
+  password: string
+}
+
+// 重置密码
+export interface ResetPasswordForm {
+  email: string
+  code: string
+  codeKey: string
+  newPassword: string
+}
+
+// 邮箱验证码结果
+export interface EmailCodeResult {
+  codeKey: string
 }
 
 // 登录结果
@@ -51,6 +79,7 @@ export interface UserInfo {
   userId: number
   username: string
   nickname: string
+  email?: string
   avatar: string
   status: string
 }

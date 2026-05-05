@@ -65,6 +65,11 @@ public class SecurityConfig {
             .antMatchers(
                 "/auth/login",
                 "/auth/register",
+                "/auth/email-code/send",
+                "/auth/email/register",
+                "/auth/activate",
+                "/auth/password/reset-code/send",
+                "/auth/password/reset",
                 "/captcha/**"
             ).permitAll()
             // 放行接口 - API文档

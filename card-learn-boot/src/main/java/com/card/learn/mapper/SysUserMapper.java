@@ -14,6 +14,12 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
 
     SysUser selectByUsername(@Param("username") String username);
 
+    SysUser selectByEmail(@Param("email") String email);
+
+    boolean existsByEmail(@Param("email") String email);
+
+    boolean existsByUsername(@Param("username") String username);
+
     Page<SysUser> selectPageByCondition(Page<SysUser> page, @Param("username") String username, @Param("status") String status);
 
 }

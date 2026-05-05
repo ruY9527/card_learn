@@ -52,6 +52,8 @@
 		A0000031 /* ReportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000031; };
 		A0000032 /* ReportApiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000032; };
 		A0000033 /* WeakPointListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000033; };
+		A0000034 /* EmailAuthApiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000034; };
+		A0000035 /* ForgotPasswordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000035; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -101,6 +103,8 @@
 		B0000031 /* ReportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportView.swift; sourceTree = "<group>"; };
 		B0000032 /* ReportApiService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportApiService.swift; sourceTree = "<group>"; };
 		B0000033 /* WeakPointListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeakPointListView.swift; sourceTree = "<group>"; };
+		B0000034 /* EmailAuthApiService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmailAuthApiService.swift; sourceTree = "<group>"; };
+		B0000035 /* ForgotPasswordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgotPasswordView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -167,6 +171,7 @@
 				B0000029 /* UserCardApiService.swift */,
 				B000002A /* IncentiveApiService.swift */,
 				B0000032 /* ReportApiService.swift */,
+				B0000034 /* EmailAuthApiService.swift */,
 				B000001E /* NotificationService.swift */,
 			);
 			path = Services;
@@ -201,6 +206,7 @@
 				B0000030 /* StreakDetailView.swift */,
 				B0000031 /* ReportView.swift */,
 				B0000033 /* WeakPointListView.swift */,
+				B0000035 /* ForgotPasswordView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -335,6 +341,8 @@
 				A0000031 /* ReportView.swift in Sources */,
 				A0000032 /* ReportApiService.swift in Sources */,
 				A0000033 /* WeakPointListView.swift in Sources */,
+				A0000034 /* EmailAuthApiService.swift in Sources */,
+				A0000035 /* ForgotPasswordView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -6,6 +6,27 @@
         SELECT * FROM sys_user WHERE username = #{username}
     </select>
 
+    <select id="selectByEmail" resultType="com.card.learn.entity.SysUser">
+        SELECT *
+        FROM sys_user
+        WHERE email = #{email}
+          AND del_flag = '0'
+    </select>
+
+    <select id="existsByEmail" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM sys_user
+        WHERE email = #{email}
+          AND del_flag = '0'
+    </select>
+
+    <select id="existsByUsername" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM sys_user
+        WHERE username = #{username}
+          AND del_flag = '0'
+    </select>
+
     <select id="selectPageByCondition" resultType="com.card.learn.entity.SysUser">
         SELECT * FROM sys_user
         <where>

@@ -25,6 +25,8 @@ public class SysUser implements Serializable {
 
     private String nickname;
 
+    private String email;
+
     private String avatar;
 
     /** 帐号状态（0正常 1停用） */

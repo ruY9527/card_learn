@@ -6,7 +6,7 @@ export const getCaptcha = () => {
   return request.get<any, CaptchaResult>('/captcha/generate')
 }
 
-// 登录
+// 登录（支持用户名或邮箱）
 export const login = (data: LoginForm) => {
   return request.post<any, LoginResult>('/auth/login', data)
 }

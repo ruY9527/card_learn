@@ -31,6 +31,7 @@ out/
 .env
 .env.local
 *.local
+application-local.yml
 
 # Logs
 logs/

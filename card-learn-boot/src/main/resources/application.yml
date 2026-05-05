@@ -2,6 +2,8 @@ server:
   port: 8080
 
 spring:
+  profiles:
+    active: local  # 本地开发激活local profile（含SMTP真实配置），部署时改为prod或去掉
   application:
     name: card-learn-boot
   datasource:
@@ -21,6 +23,18 @@ spring:
     time-zone: Asia/Shanghai
     serialization:
       write-dates-as-timestamps: false
+  # 邮件配置（请替换为实际SMTP信息）
+  mail:
+    host: smtp.example.com
+    port: 587
+    username: noreply@example.com
+    password: xxxxxx
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
   # 解决Swagger/Knife4j与Spring Boot 2.6+兼容性问题
   mvc:
     pathmatch:
@@ -45,6 +59,15 @@ jwt:
   expiration: 86400000
   header: Authorization
   prefix: Bearer
+
+# 邮箱认证配置
+email:
+  from: noreply@example.com
+  verify-code-ttl: 300
+  activate-code-ttl: 86400
+  send-limit-per-day: 10
+  send-interval-seconds: 60
+  activate-base-url: http://localhost:5173/auth/activate
 
 # Knife4j配置
 knife4j:

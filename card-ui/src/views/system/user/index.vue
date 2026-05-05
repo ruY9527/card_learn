@@ -273,9 +273,8 @@ const handleCommand = async (command: string, row: SysUser) => {
 
 const handleAssignRoles = async () => {
   try {
-    await request.put('/system/user/assignRoles', null, {
-      params: { userId: currentUserId.value },
-      data: selectedRoles.value
+    await request.put('/system/user/assignRoles', selectedRoles.value, {
+      params: { userId: currentUserId.value }
     })
     ElMessage.success('角色分配成功')
     roleDialogVisible.value = false

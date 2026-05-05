@@ -9,6 +9,18 @@ const routes: RouteRecordRaw[] = [
     meta: { title: '登录' }
   },
   {
+    path: '/forgot-password',
+    name: 'ForgotPassword',
+    component: () => import('@/views/forgot-password/index.vue'),
+    meta: { title: '忘记密码' }
+  },
+  {
+    path: '/auth/activate',
+    name: 'Activate',
+    component: () => import('@/views/activate/index.vue'),
+    meta: { title: '账号激活' }
+  },
+  {
     path: '/',
     name: 'Layout',
     component: () => import('@/views/layout/index.vue'),
@@ -79,6 +91,12 @@ const routes: RouteRecordRaw[] = [
         name: 'Sprint',
         component: () => import('@/views/system/sprint/index.vue'),
         meta: { title: '冲刺配置' }
+      },
+      {
+        path: 'system/email-config',
+        name: 'EmailConfig',
+        component: () => import('@/views/system/email-config/index.vue'),
+        meta: { title: '邮箱配置' }
       },
       {
         path: 'feedback',
@@ -159,7 +177,8 @@ const router = createRouter({
 router.beforeEach((to, _from, next) => {
   document.title = `${to.meta.title || '首页'} - 考研知识点学习卡片管理系统`
   const token = localStorage.getItem('token')
-  if (!token && to.path !== '/login') {
+  const publicPaths = ['/login', '/forgot-password', '/auth/activate']
+  if (!token && !publicPaths.includes(to.path)) {
     next('/login')
   } else {
     next()

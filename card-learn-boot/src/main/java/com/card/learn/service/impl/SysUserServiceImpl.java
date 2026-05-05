@@ -36,6 +36,21 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     }
 
     @Override
+    public SysUser getByEmail(String email) {
+        return userMapper.selectByEmail(email);
+    }
+
+    @Override
+    public boolean existsByEmail(String email) {
+        return userMapper.existsByEmail(email);
+    }
+
+    @Override
+    public boolean existsByUsername(String username) {
+        return userMapper.existsByUsername(username);
+    }
+
+    @Override
     public Page<SysUser> pageUsers(UserQueryDTO queryDTO) {
         Page<SysUser> page = new Page<>(queryDTO.getPageNum(), queryDTO.getPageSize());
         return userMapper.selectPageByCondition(page, queryDTO.getUsername(), queryDTO.getStatus());

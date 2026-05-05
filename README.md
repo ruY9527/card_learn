@@ -137,6 +137,7 @@ npm run dev:mp-weixin
 | biz_card_reply | 评论回复表 |
 | biz_comment_like | 评论点赞/踩记录表 |
 | biz_card_draft | 用户投稿卡片草稿表 |
+| sys_config | 系统配置表 |
 
 ## 开发计划
 
@@ -153,9 +154,25 @@ npm run dev:mp-weixin
 - [x] 用户反馈系统
 - [x] 评论回复与点赞/踩系统
 - [x] 笔记管理功能
+- [x] 邮箱注册/登录与忘记密码
+- [x] 邮箱激活可配置化
 - [ ] AI辅助录入功能
 
 ## 版本历史
+
+### v1.3 (2026-05-06)
+
+**新功能：**
+- 邮箱注册/登录：支持邮箱验证码注册、邮箱+密码登录，三端同步实现（后端、Web、iOS）
+- 邮箱激活可配置化：管理员可在「系统管理 > 邮箱配置」中开关激活流程，关闭后注册即自动激活
+- 激活链接地址配置：激活邮件中的链接域名可在管理后台配置，适配不同部署环境
+- 忘记密码：通过邮箱验证码重置密码，三端同步实现
+- 登录页面全新UI：左右分栏布局、Tab切换登录/注册、渐变按钮、响应式适配
+
+**优化：**
+- 修复用户管理分配角色时Content-Type不正确的问题
+- 修复iOS端EmailAuthApiService和ForgotPasswordView未加入Xcode项目的编译错误
+- sys_config表新增email_activation_required和email_activate_url配置项
 
 ### v1.2 (2026-05-05)
 

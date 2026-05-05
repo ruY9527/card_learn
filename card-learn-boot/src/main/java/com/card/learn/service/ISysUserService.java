@@ -18,6 +18,21 @@ public interface ISysUserService extends IService<SysUser> {
     SysUser getByUsername(String username);
 
     /**
+     * 根据邮箱查询用户
+     */
+    SysUser getByEmail(String email);
+
+    /**
+     * 邮箱是否已存在
+     */
+    boolean existsByEmail(String email);
+
+    /**
+     * 用户名是否已存在
+     */
+    boolean existsByUsername(String username);
+
+    /**
      * 分页查询用户
      */
     Page<SysUser> pageUsers(UserQueryDTO queryDTO);
