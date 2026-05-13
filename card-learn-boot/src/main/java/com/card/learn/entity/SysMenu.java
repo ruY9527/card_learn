@@ -40,6 +40,12 @@ public class SysMenu implements Serializable {
     /** 菜单类型（M目录 C菜单 F按钮） */
     private String menuType;
 
+    /** 菜单图标 */
+    private String icon;
+
+    /** 是否隐藏（0否 1是） */
+    private String hidden;
+
     @TableField(fill = FieldFill.INSERT)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;

@@ -66,7 +66,10 @@ const errorMsg = ref('')
 const countdown = ref(3)
 
 const goLogin = () => router.push('/login')
-const goHome = () => router.push('/')
+const goHome = () => {
+  const roles = userStore.userInfo?.roles || []
+  router.push(roles.includes('admin') ? '/admin/dashboard' : '/learn')
+}
 
 onMounted(async () => {
   const code = route.query.code as string
@@ -84,12 +87,15 @@ onMounted(async () => {
     loading.value = false
     userStore.setToken(res.data.token)
     userStore.setUserInfo(res.data.user)
+    if (res.data.user?.menus) {
+      userStore.setMenus(res.data.user.menus)
+    }
     // 倒计时跳转
     const timer = setInterval(() => {
       countdown.value--
       if (countdown.value <= 0) {
         clearInterval(timer)
-        router.push('/')
+        goHome()
       }
     }, 1000)
   } catch (error: any) {

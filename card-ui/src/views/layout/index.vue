@@ -14,65 +14,51 @@
         active-text-color="var(--sidebar-active-text)"
         router
       >
-        <el-menu-item index="/dashboard">
-          <el-icon><HomeFilled /></el-icon>
-          <template #title>首页</template>
-        </el-menu-item>
-        <el-sub-menu index="content">
-          <template #title>
-            <el-icon><Folder /></el-icon>
-            <span>内容管理</span>
-          </template>
-          <el-menu-item index="/major">专业管理</el-menu-item>
-          <el-menu-item index="/subject">科目管理</el-menu-item>
-          <el-menu-item index="/card">卡片管理</el-menu-item>
-          <el-menu-item index="/tag">标签管理</el-menu-item>
-        </el-sub-menu>
-        <el-sub-menu index="feedback">
-          <template #title>
-            <el-icon><ChatDotRound /></el-icon>
-            <span>用户反馈</span>
-          </template>
-          <el-menu-item index="/feedback">反馈管理</el-menu-item>
-          <el-menu-item index="/card-audit">卡片审批</el-menu-item>
-          <el-menu-item index="/comment">评论管理</el-menu-item>
-          <el-menu-item index="/note">笔记管理</el-menu-item>
-        </el-sub-menu>
-        <el-sub-menu index="stats">
-          <template #title>
-            <el-icon><DataAnalysis /></el-icon>
-            <span>数据统计</span>
-          </template>
-          <el-menu-item index="/stats/learning">学习数据统计</el-menu-item>
-          <el-menu-item index="/stats/study-history">学习记录</el-menu-item>
-          <el-menu-item index="/stats/review-plan">复习计划</el-menu-item>
-          <el-menu-item index="/stats/report">学习报告</el-menu-item>
-        </el-sub-menu>
-        <el-sub-menu index="incentive">
-          <template #title>
-            <el-icon><Trophy /></el-icon>
-            <span>激励管理</span>
-          </template>
-          <el-menu-item index="/incentive/dashboard">激励仪表盘</el-menu-item>
-          <el-menu-item index="/incentive/achievement">成就管理</el-menu-item>
-          <el-menu-item index="/incentive/rank">排行榜</el-menu-item>
-        </el-sub-menu>
-        <el-menu-item index="/ai">
-          <el-icon><MagicStick /></el-icon>
-          <template #title>AI转化</template>
-        </el-menu-item>
-        <el-sub-menu index="system">
-          <template #title>
-            <el-icon><Setting /></el-icon>
-            <span>系统管理</span>
-          </template>
-          <el-menu-item index="/system/user">用户管理</el-menu-item>
-          <el-menu-item index="/system/role">角色管理</el-menu-item>
-          <el-menu-item index="/system/menu">菜单管理</el-menu-item>
-          <el-menu-item index="/system/log">日志管理</el-menu-item>
-          <el-menu-item index="/system/sprint">冲刺配置</el-menu-item>
-          <el-menu-item index="/system/email-config">邮箱配置</el-menu-item>
-        </el-sub-menu>
+        <template v-for="menu in visibleMenus" :key="menu.menuId">
+          <!-- 有子菜单的目录 -->
+          <el-sub-menu v-if="menu.children?.length" :index="`menu-${menu.menuId}`">
+            <template #title>
+              <el-icon v-if="menu.icon && iconMap[menu.icon]">
+                <component :is="iconMap[menu.icon]" />
+              </el-icon>
+              <span>{{ menu.menuName }}</span>
+            </template>
+            <template v-for="child in menu.children" :key="child.menuId">
+              <el-sub-menu v-if="child.children?.length" :index="`menu-${child.menuId}`">
+                <template #title>
+                  <el-icon v-if="child.icon && iconMap[child.icon]">
+                    <component :is="iconMap[child.icon]" />
+                  </el-icon>
+                  <span>{{ child.menuName }}</span>
+                </template>
+                <el-menu-item
+                  v-for="grandchild in child.children"
+                  :key="grandchild.menuId"
+                  v-show="grandchild.hidden !== '1'"
+                  :index="getNavPath(grandchild)"
+                >
+                  <el-icon v-if="grandchild.icon && iconMap[grandchild.icon]">
+                    <component :is="iconMap[grandchild.icon]" />
+                  </el-icon>
+                  <template #title>{{ grandchild.menuName }}</template>
+                </el-menu-item>
+              </el-sub-menu>
+              <el-menu-item v-else-if="child.hidden !== '1'" :index="getNavPath(child)">
+                <el-icon v-if="child.icon && iconMap[child.icon]">
+                  <component :is="iconMap[child.icon]" />
+                </el-icon>
+                <template #title>{{ child.menuName }}</template>
+              </el-menu-item>
+            </template>
+          </el-sub-menu>
+          <!-- 无子菜单的独立菜单项 -->
+          <el-menu-item v-else-if="menu.hidden !== '1'" :index="getNavPath(menu)">
+            <el-icon v-if="menu.icon && iconMap[menu.icon]">
+              <component :is="iconMap[menu.icon]" />
+            </el-icon>
+            <template #title>{{ menu.menuName }}</template>
+          </el-menu-item>
+        </template>
       </el-menu>
     </el-aside>
     <el-container>
@@ -115,9 +101,18 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Sunny, Moon, Fold, Expand, Trophy } from '@element-plus/icons-vue'
+import {
+  Sunny, Moon, Fold, Expand, Trophy, UserFilled,
+  HomeFilled, Folder, FolderOpened, Document, Tickets, PriceTag,
+  ChatDotRound, ChatLineSquare, CircleCheck, Comment, Notebook,
+  DataAnalysis, TrendCharts, List, Calendar,
+  Odometer, Medal, Histogram,
+  MagicStick, Setting, User, UserFilled as UserFilledIcon,
+  Menu, DocumentCopy, Message, Operation
+} from '@element-plus/icons-vue'
 import { useUserStore } from '@/store/user'
 import { useTheme } from '@/composables/useTheme'
+import { getNavPath } from '@/router/dynamicRoutes'
 
 const route = useRoute()
 const router = useRouter()
@@ -127,8 +122,48 @@ const { isDark, toggleTheme } = useTheme()
 const isCollapse = ref(false)
 const activeMenu = computed(() => route.path)
 
+// 图标映射：后端存储的图标名 → Element Plus 图标组件
+const iconMap: Record<string, any> = {
+  HomeFilled,
+  Folder,
+  FolderOpened,
+  Document,
+  Tickets,
+  PriceTag,
+  ChatDotRound,
+  ChatLineSquare,
+  CircleCheck,
+  Comment,
+  Notebook,
+  DataAnalysis,
+  TrendCharts,
+  List,
+  Calendar,
+  Trophy,
+  Odometer,
+  Medal,
+  Histogram,
+  MagicStick,
+  Setting,
+  User,
+  UserFilled: UserFilledIcon,
+  Menu,
+  DocumentCopy,
+  Message,
+  Sprint: Operation
+}
+
+// 过滤隐藏菜单
+const visibleMenus = computed(() => {
+  return (userStore.menus || []).filter(m => m.hidden !== '1')
+})
+
 const handleCommand = (command: string) => {
   if (command === 'logout') {
+    // 清理动态路由
+    for (const name of userStore.dynamicRouteNames) {
+      router.removeRoute(name)
+    }
     userStore.logout()
     router.push('/login')
   }
@@ -169,7 +204,6 @@ const handleCommand = (command: string) => {
       border-right: none;
       height: calc(100% - 50px);
 
-      // 确保菜单颜色与侧边栏一致，避免折叠时闪黑
       :deep(.el-menu-item),
       :deep(.el-sub-menu__title) {
         color: var(--sidebar-text);
@@ -185,7 +219,6 @@ const handleCommand = (command: string) => {
         background-color: rgba(64, 158, 255, 0.15);
       }
 
-      // 折叠时弹出的子菜单样式
       :deep(.el-menu--popup) {
         background-color: var(--sidebar-bg);
 

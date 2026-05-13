@@ -28,20 +28,11 @@
           </template>
         </el-table-column>
         <el-table-column prop="createTime" label="创建时间" width="180" />
-        <el-table-column label="操作" width="150" fixed="right">
+        <el-table-column label="操作" width="200" fixed="right">
           <template #default="{ row }">
             <el-button type="primary" link size="small" @click="handleEdit(row)">编辑</el-button>
+            <el-button type="success" link size="small" @click="handleCommand('assignMenu', row)">分配权限</el-button>
             <el-button type="danger" link size="small" @click="handleDelete(row)">删除</el-button>
-            <el-dropdown trigger="click" @command="(command: string) => handleCommand(command, row)">
-              <el-button type="warning" link size="small">
-                更多<el-icon class="el-icon--right"><arrow-down /></el-icon>
-              </el-button>
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item command="assignMenu">分配权限</el-dropdown-item>
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
           </template>
         </el-table-column>
       </el-table>
@@ -179,33 +170,11 @@ const resetQuery = () => {
 const fetchMenuList = async () => {
   try {
     const res = await request.get('/system/menu/list')
-    menuList.value = buildMenuTree(res.data)
+    // 后端已返回树形结构，直接使用
+    menuList.value = res.data
   } catch (error) {
     console.error(error)
   }
-}
-
-const buildMenuTree = (menus: SysMenu[]): SysMenu[] => {
-  const result: SysMenu[] = []
-  const map = new Map<number, SysMenu>()
-
-  menus.forEach(menu => {
-    map.set(menu.menuId, menu)
-    menu.children = []
-  })
-
-  menus.forEach(menu => {
-    if (menu.parentId === 0) {
-      result.push(menu)
-    } else {
-      const parent = map.get(menu.parentId)
-      if (parent) {
-        parent.children!.push(menu)
-      }
-    }
-  })
-
-  return result
 }
 
 const handleAdd = () => {
@@ -237,11 +206,19 @@ const handleDelete = async (row: SysRole) => {
   }
 }
 
-const handleCommand = (command: string, row: SysRole) => {
+const handleCommand = async (command: string, row: SysRole) => {
   if (command === 'assignMenu') {
     currentRoleId.value = row.roleId!
     menuDialogVisible.value = true
-    fetchMenuList()
+    await fetchMenuList()
+    // 加载该角色已分配的菜单并勾选
+    try {
+      const res = await request.get(`/system/menu/roleMenus/${row.roleId}`)
+      const checkedKeys: number[] = res.data || []
+      menuTreeRef.value?.setCheckedKeys(checkedKeys)
+    } catch (error) {
+      console.error('加载角色菜单失败:', error)
+    }
   }
 }
 

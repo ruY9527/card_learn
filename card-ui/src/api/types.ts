@@ -82,6 +82,8 @@ export interface UserInfo {
   email?: string
   avatar: string
   status: string
+  roles?: string[]
+  menus?: SysMenu[]
 }
 
 // 专业
@@ -156,6 +158,8 @@ export interface SysMenu {
   component: string
   perms: string
   menuType: string
+  icon?: string
+  hidden?: string
   createTime?: string
   children?: SysMenu[]
 }

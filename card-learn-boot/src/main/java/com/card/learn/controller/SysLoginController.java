@@ -5,8 +5,12 @@ import com.card.learn.dto.EmailRegisterDTO;
 import com.card.learn.dto.LoginDTO;
 import com.card.learn.dto.ResetPasswordDTO;
 import com.card.learn.dto.SendEmailCodeDTO;
+import com.card.learn.entity.SysMenu;
+import com.card.learn.entity.SysRole;
 import com.card.learn.entity.SysUser;
 import com.card.learn.service.IEmailAuthService;
+import com.card.learn.service.ISysMenuService;
+import com.card.learn.service.ISysRoleService;
 import com.card.learn.service.ISysUserService;
 import com.card.learn.util.JwtUtil;
 import io.swagger.annotations.Api;
@@ -20,8 +24,11 @@ import com.card.learn.vo.LoginUserInfoVO;
 import com.card.learn.vo.LoginVO;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 登录控制器
@@ -48,6 +55,12 @@ public class SysLoginController {
 
     @Autowired
     private IEmailAuthService emailAuthService;
+
+    @Autowired
+    private ISysRoleService roleService;
+
+    @Autowired
+    private ISysMenuService menuService;
 
     @PostMapping("/login")
     @ApiOperation("用户登录（支持用户名或邮箱）")
@@ -81,12 +94,7 @@ public class SysLoginController {
         String token = jwtUtil.generateToken(user.getUsername());
 
         // 构建用户信息（不返回敏感字段）
-        LoginUserInfoVO userInfo = new LoginUserInfoVO();
-        userInfo.setUserId(user.getUserId());
-        userInfo.setUsername(user.getUsername());
-        userInfo.setNickname(user.getNickname());
-        userInfo.setEmail(user.getEmail());
-        userInfo.setAvatar(user.getAvatar());
+        LoginUserInfoVO userInfo = buildUserInfo(user);
 
         LoginVO loginVO = new LoginVO();
         loginVO.setToken(token);
@@ -186,6 +194,32 @@ public class SysLoginController {
             return userService.getByUsername(username);
         }
         return null;
+    }
+
+    /**
+     * 构建登录用户信息（含角色）
+     */
+    private LoginUserInfoVO buildUserInfo(SysUser user) {
+        LoginUserInfoVO userInfo = new LoginUserInfoVO();
+        userInfo.setUserId(user.getUserId());
+        userInfo.setUsername(user.getUsername());
+        userInfo.setNickname(user.getNickname());
+        userInfo.setEmail(user.getEmail());
+        userInfo.setAvatar(user.getAvatar());
+
+        // 查询用户角色
+        List<SysRole> roles = roleService.selectRolesByUserId(user.getUserId());
+        if (roles != null && !roles.isEmpty()) {
+            userInfo.setRoles(roles.stream().map(SysRole::getRoleKey).collect(Collectors.toList()));
+        } else {
+            userInfo.setRoles(new ArrayList<>());
+        }
+
+        // 查询用户菜单权限
+        List<SysMenu> menus = menuService.selectMenusByUserId(user.getUserId());
+        userInfo.setMenus(menuService.buildMenuTree(menus));
+
+        return userInfo;
     }
 
 }

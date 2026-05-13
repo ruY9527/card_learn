@@ -193,7 +193,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { User, Lock, Key, Message } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules } from 'element-plus'
@@ -201,10 +201,11 @@ import { login, getCaptcha } from '@/api/auth'
 import { sendEmailCode, emailRegister } from '@/api/email-auth'
 import { useUserStore } from '@/store/user'
 
+const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
 
-const activeTab = ref('login')
+const activeTab = ref((route.query.tab as string) === 'register' ? 'register' : 'login')
 
 // ========== 登录 ==========
 const loginFormRef = ref<FormInstance>()
@@ -244,8 +245,13 @@ const handleLogin = async () => {
     const res = await login(loginForm)
     userStore.setToken(res.data.token)
     userStore.setUserInfo(res.data.user)
+    // 保存菜单数据，路由守卫会自动注册动态路由
+    if (res.data.user?.menus) {
+      userStore.setMenus(res.data.user.menus)
+    }
     ElMessage.success('登录成功')
-    router.push('/')
+    const roles = res.data.user?.roles || []
+    router.push(roles.includes('admin') ? '/admin/dashboard' : '/learn')
   } catch {
     refreshCaptcha()
   } finally {
@@ -327,8 +333,12 @@ const handleRegister = async () => {
       // 不需要激活，直接登录
       userStore.setToken(res.data.token)
       userStore.setUserInfo(res.data.user)
+      if (res.data.user?.menus) {
+        userStore.setMenus(res.data.user.menus)
+      }
       ElMessage.success('注册成功，已自动登录')
-      router.push('/')
+      const roles = res.data.user?.roles || []
+      router.push(roles.includes('admin') ? '/admin/dashboard' : '/learn')
     } else {
       // 需要激活
       ElMessage.success('注册成功，请查收激活邮件并在24小时内完成激活')

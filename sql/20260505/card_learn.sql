@@ -43,9 +43,15 @@ CREATE TABLE `sys_role` (
   PRIMARY KEY (`role_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='角色信息表';
 
--- 初始化角色
-INSERT INTO `sys_role` (`role_name`, `role_key`) VALUES ('超级管理员', 'admin');
-INSERT INTO `sys_role` (`role_name`, `role_key`) VALUES ('普通管理员', 'manager');
+-- 初始化角色（8个角色：2大类人员体系）
+INSERT INTO `sys_role` (`role_id`, `role_name`, `role_key`, `status`) VALUES
+(1, '超级管理员', 'admin', '0'),
+(3, '内容编辑员', 'content_editor', '0'),
+(4, '审核员', 'reviewer', '0'),
+(5, '数据分析师', 'data_analyst', '0'),
+(6, '系统管理员', 'system_admin', '0'),
+(7, '普通学习者', 'learner', '0'),
+(8, '高级学习者', 'premium_learner', '0');
 
 -- ----------------------------
 -- 3. 菜单权限表
@@ -60,18 +66,42 @@ CREATE TABLE `sys_menu` (
   `component` varchar(255) DEFAULT NULL COMMENT '组件路径',
   `perms` varchar(100) DEFAULT NULL COMMENT '权限标识',
   `menu_type` char(1) DEFAULT '' COMMENT '菜单类型（M目录 C菜单 F按钮）',
+  `icon` varchar(100) DEFAULT NULL COMMENT '菜单图标',
+  `hidden` char(1) DEFAULT '0' COMMENT '是否隐藏（0否 1是）',
   `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (`menu_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='菜单权限表';
 
 -- 初始化菜单
-INSERT INTO `sys_menu` (`menu_name`, `parent_id`, `order_num`, `path`, `component`, `menu_type`) VALUES ('系统管理', 0, 1, 'system', NULL, 'M');
-INSERT INTO `sys_menu` (`menu_name`, `parent_id`, `order_num`, `path`, `component`, `menu_type`) VALUES ('用户管理', 1, 1, 'user', 'system/user/index', 'C');
-INSERT INTO `sys_menu` (`menu_name`, `parent_id`, `order_num`, `path`, `component`, `menu_type`) VALUES ('内容管理', 0, 2, 'content', NULL, 'M');
-INSERT INTO `sys_menu` (`menu_name`, `parent_id`, `order_num`, `path`, `component`, `menu_type`) VALUES ('专业管理', 3, 1, 'major', 'content/major/index', 'C');
-INSERT INTO `sys_menu` (`menu_name`, `parent_id`, `order_num`, `path`, `component`, `menu_type`) VALUES ('科目管理', 3, 2, 'subject', 'content/subject/index', 'C');
-INSERT INTO `sys_menu` (`menu_name`, `parent_id`, `order_num`, `path`, `component`, `menu_type`) VALUES ('卡片管理', 3, 3, 'card', 'content/card/index', 'C');
-INSERT INTO `sys_menu` (`menu_name`, `parent_id`, `order_num`, `path`, `component`, `menu_type`) VALUES ('标签管理', 3, 4, 'tag', 'content/tag/index', 'C');
+INSERT INTO `sys_menu` (`menu_id`, `menu_name`, `parent_id`, `order_num`, `path`, `component`, `menu_type`, `icon`) VALUES
+(1, '系统管理', 0, 7, 'system', NULL, 'M', 'Setting'),
+(2, '用户管理', 1, 1, 'system/user', 'views/system/user/index.vue', 'C', 'User'),
+(3, '内容管理', 0, 2, 'content', NULL, 'M', 'Folder'),
+(4, '专业管理', 3, 1, 'major', 'views/content/major/index.vue', 'C', 'FolderOpened'),
+(5, '科目管理', 3, 2, 'subject', 'views/content/subject/index.vue', 'C', 'Document'),
+(6, '卡片管理', 3, 3, 'card', 'views/content/card/index.vue', 'C', 'Tickets'),
+(7, '标签管理', 3, 4, 'tag', 'views/content/tag/index.vue', 'C', 'PriceTag'),
+(8, '首页', 0, 0, 'dashboard', 'views/dashboard/index.vue', 'C', 'HomeFilled'),
+(9, '用户反馈', 0, 3, 'feedback', NULL, 'M', 'ChatDotRound'),
+(10, '反馈管理', 9, 1, 'feedback', 'views/feedback/index.vue', 'C', 'ChatLineSquare'),
+(11, '卡片审批', 9, 2, 'card-audit', 'views/feedback/card-audit/index.vue', 'C', 'CircleCheck'),
+(12, '评论管理', 9, 3, 'comment', 'views/comment/index.vue', 'C', 'Comment'),
+(13, '笔记管理', 9, 4, 'note', 'views/note/index.vue', 'C', 'Notebook'),
+(14, '数据统计', 0, 4, 'stats', NULL, 'M', 'DataAnalysis'),
+(15, '学习数据统计', 14, 1, 'stats/learning', 'views/stats/learning/index.vue', 'C', 'TrendCharts'),
+(16, '学习记录', 14, 2, 'stats/study-history', 'views/stats/study-history/index.vue', 'C', 'List'),
+(17, '复习计划', 14, 3, 'stats/review-plan', 'views/stats/review-plan/index.vue', 'C', 'Calendar'),
+(18, '学习报告', 14, 4, 'stats/report', 'views/stats/report/index.vue', 'C', 'Document'),
+(19, '激励管理', 0, 5, 'incentive', NULL, 'M', 'Trophy'),
+(20, '激励仪表盘', 19, 1, 'incentive/dashboard', 'views/incentive/dashboard/index.vue', 'C', 'Odometer'),
+(21, '成就管理', 19, 2, 'incentive/achievement', 'views/incentive/achievement/index.vue', 'C', 'Medal'),
+(22, '排行榜', 19, 3, 'incentive/rank', 'views/incentive/rank/index.vue', 'C', 'Histogram'),
+(23, 'AI转化', 0, 6, 'ai', 'views/ai/index.vue', 'C', 'MagicStick'),
+(24, '角色管理', 1, 2, 'system/role', 'views/system/role/index.vue', 'C', 'UserFilled'),
+(25, '菜单管理', 1, 3, 'system/menu', 'views/system/menu/index.vue', 'C', 'Menu'),
+(26, '日志管理', 1, 4, 'system/log', 'views/system/log/index.vue', 'C', 'DocumentCopy'),
+(27, '冲刺配置', 1, 5, 'system/sprint', 'views/system/sprint/index.vue', 'C', 'Sprint'),
+(28, '邮箱配置', 1, 6, 'system/email-config', 'views/system/email-config/index.vue', 'C', 'Message');
 
 -- ----------------------------
 -- 4. 用户和角色关联表
@@ -97,7 +127,40 @@ CREATE TABLE `sys_role_menu` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='角色和菜单关联表';
 
 -- 初始化角色菜单关联
-INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES (1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7);
+-- 超级管理员(role_id=1): 全部菜单
+INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES
+(1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7),
+(1, 8), (1, 9), (1, 10), (1, 11), (1, 12), (1, 13),
+(1, 14), (1, 15), (1, 16), (1, 17), (1, 18),
+(1, 19), (1, 20), (1, 21), (1, 22),
+(1, 23),
+(1, 24), (1, 25), (1, 26), (1, 27), (1, 28);
+
+-- 内容编辑员(role_id=3): 首页 + 内容管理
+INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES
+(3, 8), (3, 3), (3, 4), (3, 5), (3, 6), (3, 7);
+
+-- 审核员(role_id=4): 首页 + 用户反馈
+INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES
+(4, 8), (4, 9), (4, 10), (4, 11), (4, 12), (4, 13);
+
+-- 数据分析师(role_id=5): 首页 + 数据统计
+INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES
+(5, 8), (5, 14), (5, 15), (5, 16), (5, 17), (5, 18);
+
+-- 系统管理员(role_id=6): 首页 + 系统管理
+INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES
+(6, 8), (6, 1), (6, 2), (6, 24), (6, 25), (6, 26), (6, 27), (6, 28);
+
+-- 普通学习者(role_id=7): 首页 + AI + 统计 + 激励
+INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES
+(7, 8), (7, 23), (7, 14), (7, 15), (7, 16), (7, 17), (7, 18),
+(7, 19), (7, 20), (7, 21), (7, 22);
+
+-- 高级学习者(role_id=8): 普通学习者 + 反馈管理 + 笔记管理
+INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES
+(8, 8), (8, 23), (8, 14), (8, 15), (8, 16), (8, 17), (8, 18),
+(8, 19), (8, 20), (8, 21), (8, 22), (8, 9), (8, 10), (8, 13);
 
 -- ----------------------------
 -- 6. 专业表

@@ -2,7 +2,7 @@
   <div class="dashboard">
     <el-row :gutter="20">
       <el-col :span="6">
-        <el-card shadow="hover">
+        <el-card shadow="hover" class="stat-card-clickable" @click="router.push('/admin/major')">
           <div class="stat-card">
             <el-icon :size="40" color="#409eff"><Folder /></el-icon>
             <div class="stat-info">
@@ -13,7 +13,7 @@
         </el-card>
       </el-col>
       <el-col :span="6">
-        <el-card shadow="hover">
+        <el-card shadow="hover" class="stat-card-clickable" @click="router.push('/admin/subject')">
           <div class="stat-card">
             <el-icon :size="40" color="#67c23a"><Document /></el-icon>
             <div class="stat-info">
@@ -24,7 +24,7 @@
         </el-card>
       </el-col>
       <el-col :span="6">
-        <el-card shadow="hover">
+        <el-card shadow="hover" class="stat-card-clickable" @click="router.push('/admin/card')">
           <div class="stat-card">
             <el-icon :size="40" color="#e6a23c"><Tickets /></el-icon>
             <div class="stat-info">
@@ -35,7 +35,7 @@
         </el-card>
       </el-col>
       <el-col :span="6">
-        <el-card shadow="hover">
+        <el-card shadow="hover" class="stat-card-clickable" @click="router.push('/admin/tag')">
           <div class="stat-card">
             <el-icon :size="40" color="#f56c6c"><PriceTag /></el-icon>
             <div class="stat-info">
@@ -61,8 +61,11 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import request from '@/api/request'
 import { ElMessage } from 'element-plus'
+
+const router = useRouter()
 
 const stats = ref({
   majorCount: 0,
@@ -90,6 +93,15 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .dashboard {
+  .stat-card-clickable {
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+
+    &:hover {
+      transform: translateY(-4px);
+    }
+  }
+
   .stat-card {
     display: flex;
     align-items: center;
