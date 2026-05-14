@@ -8,6 +8,7 @@ import com.card.learn.mapper.BizAchievementMapper;
 import com.card.learn.mapper.BizUserLevelMapper;
 import com.card.learn.service.IIncentiveService;
 import com.card.learn.vo.AchievementVO;
+import com.card.learn.vo.LearningGoalVO;
 import com.card.learn.vo.RankVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -51,6 +52,14 @@ public class AdminIncentiveController {
         long total = achievementMapper.selectCount(null);
         stats.put("totalAchievements", total);
         return Result.success(stats);
+    }
+
+    // ==================== 目标管理 ====================
+
+    @GetMapping("/goal/user")
+    @ApiOperation("获取用户学习目标及提醒设置")
+    public Result<LearningGoalVO> getUserGoal(@RequestParam Long userId) {
+        return Result.success(incentiveService.getCurrentGoal(userId));
     }
 
     // ==================== 排行榜 ====================

@@ -200,6 +200,7 @@ import type { FormInstance, FormRules } from 'element-plus'
 import { login, getCaptcha } from '@/api/auth'
 import { sendEmailCode, emailRegister } from '@/api/email-auth'
 import { useUserStore } from '@/store/user'
+import { registerDynamicRoutes } from '@/router/dynamicRouteHelper'
 
 const route = useRoute()
 const router = useRouter()
@@ -245,13 +246,18 @@ const handleLogin = async () => {
     const res = await login(loginForm)
     userStore.setToken(res.data.token)
     userStore.setUserInfo(res.data.user)
-    // 保存菜单数据，路由守卫会自动注册动态路由
+    // 保存菜单数据
     if (res.data.user?.menus) {
       userStore.setMenus(res.data.user.menus)
     }
     ElMessage.success('登录成功')
     const roles = res.data.user?.roles || []
-    router.push(roles.includes('admin') ? '/admin/dashboard' : '/learn')
+    const isAdmin = roles.includes('admin')
+    // 管理员需要先注册动态路由再跳转
+    if (isAdmin) {
+      await registerDynamicRoutes(userStore)
+    }
+    router.push(isAdmin ? '/admin/dashboard' : '/learn')
   } catch {
     refreshCaptcha()
   } finally {
@@ -338,7 +344,12 @@ const handleRegister = async () => {
       }
       ElMessage.success('注册成功，已自动登录')
       const roles = res.data.user?.roles || []
-      router.push(roles.includes('admin') ? '/admin/dashboard' : '/learn')
+      const isAdmin = roles.includes('admin')
+      // 管理员需要先注册动态路由再跳转
+      if (isAdmin) {
+        await registerDynamicRoutes(userStore)
+      }
+      router.push(isAdmin ? '/admin/dashboard' : '/learn')
     } else {
       // 需要激活
       ElMessage.success('注册成功，请查收激活邮件并在24小时内完成激活')

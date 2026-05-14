@@ -23,4 +23,10 @@ public class GoalSetDTO implements Serializable {
 
     @ApiModelProperty(value = "是否启用")
     private Boolean enabled;
+
+    @ApiModelProperty(value = "提醒小时(0-23)")
+    private Integer reminderHour;
+
+    @ApiModelProperty(value = "提醒分钟(0-59)")
+    private Integer reminderMinute;
 }

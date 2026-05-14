@@ -44,6 +44,21 @@ spring:
     serialization:
       write-dates-as-timestamps: false
   
+  # 邮件配置
+  mail:
+    host: smtp.exmail.qq.com
+    port: 587
+    protocol: smtp
+    default-encoding: UTF-8
+    username: yundee@yundeeiot.com
+    password: WW7hMw3xuXntznd2
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
   # MVC 配置
   mvc:
     pathmatch:
@@ -70,6 +85,15 @@ jwt:
   expiration: 86400000  # 24小时
   header: Authorization
   prefix: Bearer
+
+# 邮箱认证配置
+email:
+  from: yundee@yundeeiot.com
+  verify-code-ttl: 300
+  activate-code-ttl: 86400
+  send-limit-per-day: 10
+  send-interval-seconds: 60
+  activate-base-url: http://localhost:5173/auth/activate
 
 # Knife4j 配置（生产环境可关闭）
 knife4j:

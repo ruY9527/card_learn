@@ -63,6 +63,7 @@
                 <el-dropdown-menu>
                   <el-dropdown-item command="resetPwd">重置密码</el-dropdown-item>
                   <el-dropdown-item command="assignRole">分配角色</el-dropdown-item>
+                  <el-dropdown-item command="viewReminder">学习提醒</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -111,6 +112,34 @@
       </template>
     </el-dialog>
 
+    <!-- 学习提醒详情对话框 -->
+    <el-dialog v-model="reminderDialogVisible" title="学习提醒设置" width="400px">
+      <div v-loading="reminderLoading">
+        <el-descriptions :column="1" border>
+          <el-descriptions-item label="提醒状态">
+            <el-tag :type="reminderGoal?.enabled ? 'success' : 'info'">
+              {{ reminderGoal?.enabled ? '已启用' : '未启用' }}
+            </el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="提醒时间">
+            <span v-if="reminderGoal?.reminderHour != null">
+              {{ String(reminderGoal.reminderHour).padStart(2, '0') }}:{{ String(reminderGoal.reminderMinute).padStart(2, '0') }}
+            </span>
+            <span v-else class="no-reminder">未设置</span>
+          </el-descriptions-item>
+          <el-descriptions-item label="每日学习目标">
+            {{ reminderGoal?.dailyLearnTarget ?? '-' }} 张
+          </el-descriptions-item>
+          <el-descriptions-item label="每日掌握目标">
+            {{ reminderGoal?.dailyMasterTarget ?? '-' }} 张
+          </el-descriptions-item>
+        </el-descriptions>
+      </div>
+      <template #footer>
+        <el-button @click="reminderDialogVisible = false">关闭</el-button>
+      </template>
+    </el-dialog>
+
     <!-- 分配角色对话框 -->
     <el-dialog v-model="roleDialogVisible" title="分配角色" width="400px">
       <el-form label-width="80px">
@@ -138,6 +167,8 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import request from '@/api/request'
+import { getUserGoal } from '@/api/incentive'
+import type { LearningGoal } from '@/api/types'
 
 interface SysUser {
   userId?: number
@@ -190,6 +221,10 @@ const roleList = ref<SysRole[]>([])
 const selectedRoles = ref<number[]>([])
 const currentUserId = ref<number>(0)
 const submitLoading = ref(false)
+
+const reminderDialogVisible = ref(false)
+const reminderLoading = ref(false)
+const reminderGoal = ref<LearningGoal | null>(null)
 
 const fetchData = async () => {
   loading.value = true
@@ -268,6 +303,18 @@ const handleCommand = async (command: string, row: SysUser) => {
     selectedRoles.value = []
     roleDialogVisible.value = true
     fetchRoleList()
+  } else if (command === 'viewReminder') {
+    reminderLoading.value = true
+    reminderDialogVisible.value = true
+    reminderGoal.value = null
+    try {
+      const res = await getUserGoal({ userId: row.userId! })
+      reminderGoal.value = res.data
+    } catch (error) {
+      console.error(error)
+    } finally {
+      reminderLoading.value = false
+    }
   }
 }
 

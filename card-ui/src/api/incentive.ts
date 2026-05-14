@@ -1,5 +1,5 @@
 import request from './request'
-import type { Achievement, RankItem, PageResult } from './types'
+import type { Achievement, RankItem, PageResult, LearningGoal } from './types'
 
 // ========== 成就相关API ==========
 
@@ -23,4 +23,10 @@ export const getWeekRank = (params: { pageNum: number; pageSize: number }) => {
 
 export const getStreakRank = (params: { pageNum: number; pageSize: number }) => {
   return request.get<any, PageResult<RankItem>>('/admin/incentive/rank/streak', { params })
+}
+
+// ========== 目标管理API ==========
+
+export const getUserGoal = (params: { userId: number }) => {
+  return request.get<any, { data: LearningGoal }>('/admin/incentive/goal/user', { params })
 }

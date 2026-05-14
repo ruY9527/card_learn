@@ -20,4 +20,10 @@ public class LearningGoalVO implements Serializable {
 
     /** 是否启用 */
     private Boolean enabled;
+
+    /** 提醒小时(0-23) */
+    private Integer reminderHour;
+
+    /** 提醒分钟(0-59) */
+    private Integer reminderMinute;
 }

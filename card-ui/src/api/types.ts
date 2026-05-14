@@ -116,6 +116,8 @@ export interface Card {
   frontContent: string
   backContent: string
   difficultyLevel?: number
+  status?: number        // 0=未学, 1=模糊, 2=掌握
+  lastStudyTime?: string
   createTime?: string
   updateTime?: string
 }
@@ -421,4 +423,13 @@ export interface RankItem {
   totalExp: number
   weekLearnCount: number
   currentStreak: number
+}
+
+// 学习目标
+export interface LearningGoal {
+  dailyLearnTarget: number
+  dailyMasterTarget: number
+  enabled: boolean
+  reminderHour: number | null
+  reminderMinute: number | null
 }

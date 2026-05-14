@@ -31,6 +31,12 @@ public class BizLearningGoal implements Serializable {
     /** 是否启用(0禁用1启用) */
     private Integer enabled;
 
+    /** 提醒小时(0-23) */
+    private Integer reminderHour;
+
+    /** 提醒分钟(0-59) */
+    private Integer reminderMinute;
+
     @TableField(fill = FieldFill.INSERT_UPDATE)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updateTime;
