@@ -54,6 +54,12 @@ const routes: RouteRecordRaw[] = [
         name: 'LearnStudySubject',
         component: () => import('@/views/learn/study/index.vue'),
         meta: { title: '刷知识卡片' }
+      },
+      {
+        path: 'heatmap',
+        name: 'LearnHeatmap',
+        component: () => import('@/views/learn/heatmap/index.vue'),
+        meta: { title: '学习天数' }
       }
     ]
   },
@@ -74,29 +80,10 @@ const router = createRouter({
 })
 
 // 标记是否已加载过菜单（避免重复加载）
-let menuLoaded = false
+export let menuLoaded = false
 
-/**
- * 注册动态路由：将后端菜单转换为路由，作为 AdminLayout 的子路由添加
- */
-async function registerDynamicRoutes(userStore: ReturnType<typeof useUserStore>) {
-  // 如果已有菜单数据（登录时返回的），直接使用
-  let menuData = userStore.menus
-  if (!menuData || menuData.length === 0) {
-    // 否则从后端获取
-    menuData = await userStore.fetchMenus()
-  }
-  const dynamicRoutes = generateRoutesFromMenus(menuData)
-  const addedNames: string[] = []
-  for (const route of dynamicRoutes) {
-    // 作为 AdminLayout 的子路由注册，确保页面被 Layout 包裹
-    router.addRoute('AdminLayout', route)
-    if (route.name) {
-      addedNames.push(route.name as string)
-    }
-  }
-  userStore.addDynamicRouteNames(addedNames)
-  menuLoaded = true
+export function setMenuLoaded(value: boolean) {
+  menuLoaded = value
 }
 
 // 路由守卫
@@ -138,7 +125,20 @@ router.beforeEach(async (to, _from, next) => {
   if (!menuLoaded) {
     try {
       const userStore = useUserStore()
-      await registerDynamicRoutes(userStore)
+      let menuData = userStore.menus
+      if (!menuData || menuData.length === 0) {
+        menuData = await userStore.fetchMenus()
+      }
+      const dynamicRoutes = generateRoutesFromMenus(menuData)
+      const addedNames: string[] = []
+      for (const route of dynamicRoutes) {
+        router.addRoute('AdminLayout', route)
+        if (route.name) {
+          addedNames.push(route.name as string)
+        }
+      }
+      userStore.addDynamicRouteNames(addedNames)
+      menuLoaded = true
       // 使用 next({ ...to }) 确保新添加的路由被匹配
       next({ ...to, replace: true })
       return

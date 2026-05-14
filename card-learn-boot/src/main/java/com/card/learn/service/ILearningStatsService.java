@@ -1,6 +1,7 @@
 package com.card.learn.service;
 
 import com.card.learn.vo.DailyLearnTrendVO;
+import com.card.learn.vo.DayLearnDetailVO;
 import com.card.learn.vo.LearningStatsVO;
 import com.card.learn.vo.SubjectLearnStatsVO;
 import com.card.learn.vo.UserLearnRankVO;
@@ -34,4 +35,11 @@ public interface ILearningStatsService {
      * @param userId 用户ID，null表示全局统计
      */
     List<SubjectLearnStatsVO> getSubjectStats(Long userId);
+
+    /**
+     * 某日学习详情
+     * @param userId 用户ID
+     * @param date 日期 (yyyy-MM-dd)
+     */
+    DayLearnDetailVO getDayDetail(Long userId, String date);
 }

@@ -7,6 +7,7 @@ import com.card.learn.service.IBizCardService;
 import com.card.learn.service.IBizTagService;
 import com.card.learn.service.ILearningStatsService;
 import com.card.learn.vo.DailyLearnTrendVO;
+import com.card.learn.vo.DayLearnDetailVO;
 import com.card.learn.vo.LearningStatsVO;
 import com.card.learn.vo.SubjectLearnStatsVO;
 import com.card.learn.vo.UserLearnRankVO;
@@ -80,6 +81,14 @@ public class DashboardController {
     public Result<List<SubjectLearnStatsVO>> getSubjectStats(
             @RequestParam(required = false) Long userId) {
         return Result.success(learningStatsService.getSubjectStats(userId));
+    }
+
+    @GetMapping("/day-detail")
+    @ApiOperation("某日学习详情")
+    public Result<DayLearnDetailVO> getDayDetail(
+            @RequestParam Long userId,
+            @RequestParam String date) {
+        return Result.success(learningStatsService.getDayDetail(userId, date));
     }
 
 }
