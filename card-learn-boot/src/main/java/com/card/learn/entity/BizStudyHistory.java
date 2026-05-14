@@ -28,6 +28,9 @@ public class BizStudyHistory implements Serializable {
     /** 状态(0未学 1模糊 2掌握) */
     private Integer status;
 
+    /** 学习来源: web/ios/mini */
+    private String source;
+
     /** 学习时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;

@@ -15,5 +15,6 @@ public class MiniProgressDTO implements Serializable {
     private Long cardId;
     private Long userId;
     private Integer status;  // 0未学, 1模糊, 2掌握
+    private String source;   // 学习来源: web/ios/mini
 
 }

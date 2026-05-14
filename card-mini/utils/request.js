@@ -481,6 +481,7 @@ const exportNotes = (params) =>
  * @param {number} data.cardId - 卡片ID
  * @param {number} data.userId - 用户ID
  * @param {number} data.status - 状态 0未学/1模糊/2掌握
+ * @param {string} [data.source] - 学习来源: web/ios/mini
  */
 const submitReview = (data) =>
   request({ url: '/api/learning/review/simple', method: 'POST', data })

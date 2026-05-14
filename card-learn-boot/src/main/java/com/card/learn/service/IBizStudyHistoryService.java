@@ -15,7 +15,7 @@ public interface IBizStudyHistoryService extends IService<BizStudyHistory> {
     /**
      * 记录学习历史
      */
-    void recordHistory(Long userId, Long cardId, Integer status);
+    void recordHistory(Long userId, Long cardId, Integer status, String source);
 
     /**
      * 查询某用户某卡片某状态的最近学习时间

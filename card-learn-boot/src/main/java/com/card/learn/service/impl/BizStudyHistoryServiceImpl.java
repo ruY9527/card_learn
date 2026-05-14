@@ -17,11 +17,12 @@ import java.util.stream.Collectors;
 public class BizStudyHistoryServiceImpl extends ServiceImpl<BizStudyHistoryMapper, BizStudyHistory> implements IBizStudyHistoryService {
 
     @Override
-    public void recordHistory(Long userId, Long cardId, Integer status) {
+    public void recordHistory(Long userId, Long cardId, Integer status, String source) {
         BizStudyHistory history = new BizStudyHistory();
         history.setUserId(userId);
         history.setCardId(cardId);
         history.setStatus(status);
+        history.setSource(source);
         history.setCreateTime(LocalDateTime.now());
         save(history);
     }

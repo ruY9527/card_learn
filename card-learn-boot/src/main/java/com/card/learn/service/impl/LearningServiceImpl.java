@@ -8,6 +8,8 @@ import com.card.learn.dto.SM2ReviewDTO;
 import com.card.learn.util.SM2Algorithm;
 import com.card.learn.entity.*;
 import com.card.learn.mapper.*;
+import com.card.learn.common.AppConstants;
+import com.card.learn.common.AppMessages;
 import com.card.learn.dto.AchievementCheckDTO;
 import com.card.learn.service.IBizStudyHistoryService;
 import com.card.learn.service.IIncentiveService;
@@ -231,6 +233,7 @@ public class LearningServiceImpl implements ILearningService {
         history.setUserId(dto.getUserId());
         history.setCardId(dto.getCardId());
         history.setStatus(dto.getStatus());
+        history.setSource(dto.getSource());
         history.setCreateTime(LocalDateTime.now());
         studyHistoryMapper.insert(history);
 
@@ -242,9 +245,9 @@ public class LearningServiceImpl implements ILearningService {
 
         // 9. 激励系统：发放经验值 + 检查成就
         String cardIdStr = String.valueOf(dto.getCardId());
-        incentiveService.awardExp(dto.getUserId(), 1, "STUDY", cardIdStr, "学习卡片");
+        incentiveService.awardExp(dto.getUserId(), 1, AppConstants.EXP_SOURCE_STUDY, cardIdStr, AppMessages.STUDY_CARD);
         if (dto.getStatus() == 2) {
-            incentiveService.awardExp(dto.getUserId(), 5, "MASTER", cardIdStr, "掌握卡片");
+            incentiveService.awardExp(dto.getUserId(), 5, AppConstants.EXP_SOURCE_MASTER, cardIdStr, AppMessages.MASTER_CARD);
         }
 
         AchievementCheckDTO checkDTO = new AchievementCheckDTO();

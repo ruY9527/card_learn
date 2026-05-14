@@ -207,8 +207,8 @@ Page({
 
     // 有用户ID时使用SM-2复习接口，否则使用旧接口（游客模式）
     const apiCall = this.data.userId
-      ? submitReview({ cardId: card.cardId, userId: this.data.userId, status: status })
-      : updateProgress({ cardId: card.cardId, userId: this.data.userId, status: status })
+      ? submitReview({ cardId: card.cardId, userId: this.data.userId, status: status, source: 'mini' })
+      : updateProgress({ cardId: card.cardId, userId: this.data.userId, status: status, source: 'mini' })
 
     apiCall.then((res) => {
       // 显示下次复习时间

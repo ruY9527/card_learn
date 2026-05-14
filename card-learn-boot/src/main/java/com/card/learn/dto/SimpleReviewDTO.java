@@ -22,4 +22,7 @@ public class SimpleReviewDTO implements Serializable {
     /** 掌握状态(0未学 1模糊 2掌握) */
     @NotNull(message = "学习状态不能为空")
     private Integer status;
+
+    /** 学习来源: web/ios/mini */
+    private String source;
 }
