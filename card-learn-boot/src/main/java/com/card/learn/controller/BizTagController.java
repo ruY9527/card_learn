@@ -1,6 +1,7 @@
 package com.card.learn.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.card.learn.common.AppMessages;
 import com.card.learn.common.Result;
 import com.card.learn.dto.TagQueryDTO;
 import com.card.learn.entity.BizTag;
@@ -57,7 +58,7 @@ public class BizTagController {
                 .isNull(tag.getSubjectId() == null, BizTag::getSubjectId)
                 .list();
         if (!existing.isEmpty()) {
-            return Result.error("该科目下已存在同名标签");
+            return Result.error(AppMessages.TAG_DUPLICATE_IN_SUBJECT);
         }
         tagService.save(tag);
         return Result.success();
@@ -74,7 +75,7 @@ public class BizTagController {
                 .ne(BizTag::getTagId, tag.getTagId())
                 .list();
         if (!existing.isEmpty()) {
-            return Result.error("该科目下已存在同名标签");
+            return Result.error(AppMessages.TAG_DUPLICATE_IN_SUBJECT);
         }
         tagService.updateById(tag);
         return Result.success();

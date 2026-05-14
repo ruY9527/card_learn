@@ -1,6 +1,7 @@
 package com.card.learn.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.card.learn.common.AppMessages;
 import com.card.learn.common.Result;
 import com.card.learn.entity.BizCardReply;
 import com.card.learn.service.IBizCardReplyService;
@@ -30,7 +31,7 @@ public class MiniReplyController {
     @ApiOperation("提交回复")
     public Result<Long> submit(@PathVariable Long commentId, @RequestBody BizCardReply reply) {
         if (reply.getUserId() == null) {
-            return Result.error("请先登录后再回复");
+            return Result.error(AppMessages.PLEASE_LOGIN_REPLY);
         }
         reply.setCommentId(commentId);
         BizCardReply saved = replyService.submitReply(reply);

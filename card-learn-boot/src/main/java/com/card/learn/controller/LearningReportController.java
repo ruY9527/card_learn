@@ -1,5 +1,6 @@
 package com.card.learn.controller;
 
+import com.card.learn.common.AppMessages;
 import com.card.learn.common.Result;
 import com.card.learn.dto.ReportQueryDTO;
 import com.card.learn.service.IReportService;
@@ -63,7 +64,7 @@ public class LearningReportController {
             @RequestParam(required = false) Long userId) {
         ReportDetailVO report = reportService.getReportById(id, userId);
         if (report == null) {
-            return Result.error("报告不存在");
+            return Result.error(AppMessages.REPORT_NOT_FOUND);
         }
         return Result.success(report);
     }

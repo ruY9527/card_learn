@@ -1,5 +1,7 @@
 package com.card.learn.service.impl;
 
+import com.card.learn.common.AppConstants;
+import com.card.learn.common.AppMessages;
 import com.card.learn.entity.BizLearningReport;
 import com.card.learn.entity.BizStudyHistory;
 import com.card.learn.entity.BizUserProgress;
@@ -268,8 +270,8 @@ public class ReportServiceImpl implements IReportService {
             habits.setMorning(0);
             habits.setAfternoon(0);
             habits.setEvening(0);
-            habits.setPeakHour("无数据");
-            habits.setMostActiveDay("无数据");
+            habits.setPeakHour(AppMessages.NO_DATA);
+            habits.setMostActiveDay(AppMessages.NO_DATA);
             habits.setAvgDailyDuration(0);
             habits.setStudyFrequency(0);
             return habits;
@@ -343,11 +345,11 @@ public class ReportServiceImpl implements IReportService {
         if (detail.getSubjectAnalysis() != null) {
             for (SubjectAnalysisVO subject : detail.getSubjectAnalysis()) {
                 if (subject.getMasteryRate() < 40) {
-                    suggestions.add(new SuggestionVO("subject", "high",
-                            subject.getSubjectName() + "掌握率偏低(" + subject.getMasteryRate() + "%)，建议加强复习"));
+                    suggestions.add(new SuggestionVO(AppConstants.SUGGESTION_TYPE_SUBJECT, AppConstants.PRIORITY_HIGH,
+                            subject.getSubjectName() + String.format(AppMessages.SUGGESTION_MASTERY_LOW, subject.getMasteryRate())));
                 } else if (subject.getMasteryRate() < 60) {
-                    suggestions.add(new SuggestionVO("subject", "medium",
-                            subject.getSubjectName() + "掌握率有待提高(" + subject.getMasteryRate() + "%)，建议增加练习"));
+                    suggestions.add(new SuggestionVO(AppConstants.SUGGESTION_TYPE_SUBJECT, AppConstants.PRIORITY_MEDIUM,
+                            subject.getSubjectName() + String.format(AppMessages.SUGGESTION_MASTERY_MEDIUM, subject.getMasteryRate())));
                 }
             }
         }
@@ -355,22 +357,22 @@ public class ReportServiceImpl implements IReportService {
         // 基于薄弱点生成建议
         if (detail.getWeakPoints() != null && !detail.getWeakPoints().isEmpty()) {
             WeakPointVO topWeak = detail.getWeakPoints().get(0);
-            suggestions.add(new SuggestionVO("card", "high",
-                    "「" + topWeak.getFrontContent() + "」错误" + topWeak.getErrorCount() + "次，建议重新学习后重试"));
+            suggestions.add(new SuggestionVO(AppConstants.SUGGESTION_TYPE_CARD, AppConstants.PRIORITY_HIGH,
+                    String.format(AppMessages.SUGGESTION_WEAK_CARD, topWeak.getFrontContent(), topWeak.getErrorCount())));
         }
 
         // 基于学习习惯生成建议
         if (detail.getLearningHabits() != null) {
             LearningHabitsVO habits = detail.getLearningHabits();
             if (habits.getStudyFrequency() != null && habits.getStudyFrequency() >= 5) {
-                suggestions.add(new SuggestionVO("habit", "medium", "保持当前学习节奏，连续学习有助于记忆巩固"));
+                suggestions.add(new SuggestionVO(AppConstants.SUGGESTION_TYPE_HABIT, AppConstants.PRIORITY_MEDIUM, AppMessages.SUGGESTION_KEEP_RHYTHM));
             } else if (habits.getStudyFrequency() != null && habits.getStudyFrequency() < 3) {
-                suggestions.add(new SuggestionVO("habit", "high", "学习频率较低，建议每天保持一定的学习量"));
+                suggestions.add(new SuggestionVO(AppConstants.SUGGESTION_TYPE_HABIT, AppConstants.PRIORITY_HIGH, AppMessages.SUGGESTION_LOW_FREQUENCY));
             }
         }
 
         if (suggestions.isEmpty()) {
-            suggestions.add(new SuggestionVO("habit", "low", "继续保持良好的学习习惯"));
+            suggestions.add(new SuggestionVO(AppConstants.SUGGESTION_TYPE_HABIT, AppConstants.PRIORITY_LOW, AppMessages.SUGGESTION_KEEP_HABIT));
         }
 
         return suggestions;
@@ -414,7 +416,7 @@ public class ReportServiceImpl implements IReportService {
      */
     private LocalDate[] getCurrentPeriod(String reportType) {
         LocalDate today = LocalDate.now();
-        if ("monthly".equals(reportType)) {
+        if (AppConstants.REPORT_TYPE_MONTHLY.equals(reportType)) {
             LocalDate start = today.with(TemporalAdjusters.firstDayOfMonth());
             LocalDate end = today.with(TemporalAdjusters.lastDayOfMonth());
             return new LocalDate[]{start, end};
@@ -430,7 +432,7 @@ public class ReportServiceImpl implements IReportService {
      */
     private LocalDate[] getPreviousPeriod(String reportType) {
         LocalDate today = LocalDate.now();
-        if ("monthly".equals(reportType)) {
+        if (AppConstants.REPORT_TYPE_MONTHLY.equals(reportType)) {
             LocalDate lastMonth = today.minusMonths(1);
             LocalDate start = lastMonth.with(TemporalAdjusters.firstDayOfMonth());
             LocalDate end = lastMonth.with(TemporalAdjusters.lastDayOfMonth());
@@ -476,13 +478,13 @@ public class ReportServiceImpl implements IReportService {
      */
     private String formatDayOfWeek(DayOfWeek dow) {
         switch (dow) {
-            case MONDAY: return "周一";
-            case TUESDAY: return "周二";
-            case WEDNESDAY: return "周三";
-            case THURSDAY: return "周四";
-            case FRIDAY: return "周五";
-            case SATURDAY: return "周六";
-            case SUNDAY: return "周日";
+            case MONDAY: return AppMessages.DAY_MONDAY;
+            case TUESDAY: return AppMessages.DAY_TUESDAY;
+            case WEDNESDAY: return AppMessages.DAY_WEDNESDAY;
+            case THURSDAY: return AppMessages.DAY_THURSDAY;
+            case FRIDAY: return AppMessages.DAY_FRIDAY;
+            case SATURDAY: return AppMessages.DAY_SATURDAY;
+            case SUNDAY: return AppMessages.DAY_SUNDAY;
             default: return "";
         }
     }

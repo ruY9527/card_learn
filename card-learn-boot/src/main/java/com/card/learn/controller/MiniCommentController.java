@@ -1,6 +1,7 @@
 package com.card.learn.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.card.learn.common.AppMessages;
 import com.card.learn.common.Result;
 import com.card.learn.dto.CommentQueryDTO;
 import com.card.learn.dto.NoteQueryDTO;
@@ -32,7 +33,7 @@ public class MiniCommentController {
     @ApiOperation("提交评论")
     public Result<Long> submit(@RequestBody BizCardComment comment) {
         if (comment.getUserId() == null) {
-            return Result.error("请先登录后再提交评论");
+            return Result.error(AppMessages.PLEASE_LOGIN_SUBMIT_COMMENT);
         }
         BizCardComment saved = commentService.submitComment(comment);
         return Result.success(saved.getCommentId());
@@ -66,7 +67,7 @@ public class MiniCommentController {
     @ApiOperation("获取我的笔记列表")
     public Result<Page<NoteVO>> myNotes(NoteQueryDTO queryDTO) {
         if (queryDTO.getUserId() == null) {
-            return Result.error("请先登录");
+            return Result.error(AppMessages.PLEASE_LOGIN_FIRST);
         }
         return Result.success(commentService.pageMyNotes(queryDTO));
     }
@@ -98,7 +99,7 @@ public class MiniCommentController {
     @ApiOperation("导出笔记")
     public Result<String> exportNotes(NoteQueryDTO queryDTO) {
         if (queryDTO.getUserId() == null) {
-            return Result.error("请先登录");
+            return Result.error(AppMessages.PLEASE_LOGIN_FIRST);
         }
         queryDTO.setPageSize(1000);
         Page<NoteVO> page = commentService.pageMyNotes(queryDTO);

@@ -1,6 +1,7 @@
 package com.card.learn.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.card.learn.common.AppMessages;
 import com.card.learn.common.Result;
 import com.card.learn.dto.RequestLogQueryDTO;
 import com.card.learn.entity.SysRequestLog;
@@ -44,7 +45,7 @@ public class SysRequestLogController {
     public Result<SysRequestLog> getLogById(@PathVariable Long id) {
         SysRequestLog log = requestLogService.getById(id);
         if (log == null) {
-            return Result.error("日志不存在");
+            return Result.error(AppMessages.LOG_NOT_FOUND);
         }
         return Result.success(log);
     }

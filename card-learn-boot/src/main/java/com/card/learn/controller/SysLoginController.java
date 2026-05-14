@@ -1,5 +1,6 @@
 package com.card.learn.controller;
 
+import com.card.learn.common.AppMessages;
 import com.card.learn.common.Result;
 import com.card.learn.dto.EmailRegisterDTO;
 import com.card.learn.dto.LoginDTO;
@@ -67,14 +68,14 @@ public class SysLoginController {
     public Result<LoginVO> login(@RequestBody LoginDTO loginDTO) {
         // 验证码校验
         if (loginDTO.getCaptchaKey() == null || loginDTO.getCaptcha() == null) {
-            return Result.error("请输入验证码");
+            return Result.error(AppMessages.CAPTCHA_REQUIRED);
         }
         String cachedCaptcha = (String) redisTemplate.opsForValue().get(CAPTCHA_PREFIX + loginDTO.getCaptchaKey());
         if (cachedCaptcha == null) {
-            return Result.error("验证码已过期，请重新获取");
+            return Result.error(AppMessages.CAPTCHA_EXPIRED);
         }
         if (!cachedCaptcha.equalsIgnoreCase(loginDTO.getCaptcha())) {
-            return Result.error("验证码错误");
+            return Result.error(AppMessages.CAPTCHA_WRONG);
         }
         // 删除验证码，防止重复使用
         redisTemplate.delete(CAPTCHA_PREFIX + loginDTO.getCaptchaKey());
@@ -82,14 +83,14 @@ public class SysLoginController {
         // 用户验证 - 支持用户名或邮箱登录
         SysUser user = findUserByLoginId(loginDTO.getUsername(), loginDTO.getEmail());
         if (user == null) {
-            return Result.error("用户不存在");
+            return Result.error(AppMessages.USER_NOT_FOUND);
         }
         // 使用BCrypt密码校验
         if (!passwordEncoder.matches(loginDTO.getPassword(), user.getPassword())) {
-            return Result.error("密码错误");
+            return Result.error(AppMessages.PASSWORD_WRONG);
         }
         if ("1".equals(user.getStatus())) {
-            return Result.error("账号未激活或已停用");
+            return Result.error(AppMessages.ACCOUNT_INACTIVE);
         }
         String token = jwtUtil.generateToken(user.getUsername());
 
@@ -109,7 +110,7 @@ public class SysLoginController {
             String codeKey = emailAuthService.sendEmailCode(dto.getEmail(), dto.getType());
             Map<String, String> data = new HashMap<>();
             data.put("codeKey", codeKey);
-            return Result.success("验证码已发送", data);
+            return Result.success(AppMessages.CAPTCHA_SENT, data);
         } catch (RuntimeException e) {
             return Result.error(e.getMessage());
         }
@@ -122,12 +123,12 @@ public class SysLoginController {
             Object result = emailAuthService.register(dto);
             if (result instanceof LoginVO) {
                 // 不需要激活，直接返回登录信息
-                return Result.success("注册成功", result);
+                return Result.success(AppMessages.REGISTER_SUCCESS, result);
             } else {
                 // 需要激活，返回用户名
                 Map<String, String> data = new HashMap<>();
                 data.put("username", result.toString());
-                return Result.success("注册成功，请查收激活邮件并在24小时内完成激活", data);
+                return Result.success(AppMessages.REGISTER_SUCCESS_ACTIVATE, data);
             }
         } catch (RuntimeException e) {
             return Result.error(e.getMessage());
@@ -139,7 +140,7 @@ public class SysLoginController {
     public Result<LoginVO> activate(@RequestParam String code, @RequestParam String key) {
         try {
             LoginVO loginVO = emailAuthService.activate(code, key);
-            return Result.success("激活成功", loginVO);
+            return Result.success(AppMessages.ACTIVATE_SUCCESS, loginVO);
         } catch (RuntimeException e) {
             return Result.error(e.getMessage());
         }
@@ -150,13 +151,13 @@ public class SysLoginController {
     public Result<Map<String, String>> sendResetCode(@RequestBody Map<String, String> body) {
         String email = body.get("email");
         if (email == null || email.isEmpty()) {
-            return Result.error("邮箱不能为空");
+            return Result.error(AppMessages.EMAIL_REQUIRED);
         }
         try {
             emailAuthService.sendResetCode(email);
             Map<String, String> data = new HashMap<>();
             data.put("codeKey", "sent");
-            return Result.success("验证码已发送", data);
+            return Result.success(AppMessages.CAPTCHA_SENT, data);
         } catch (RuntimeException e) {
             return Result.error(e.getMessage());
         }
@@ -167,7 +168,7 @@ public class SysLoginController {
     public Result<Void> resetPassword(@Valid @RequestBody ResetPasswordDTO dto) {
         try {
             emailAuthService.resetPassword(dto);
-            return Result.success("密码重置成功", null);
+            return Result.success(AppMessages.PASSWORD_RESET_SUCCESS, null);
         } catch (RuntimeException e) {
             return Result.error(e.getMessage());
         }

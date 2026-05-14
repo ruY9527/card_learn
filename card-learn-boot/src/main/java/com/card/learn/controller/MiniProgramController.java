@@ -1,6 +1,8 @@
 package com.card.learn.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.card.learn.common.AppConstants;
+import com.card.learn.common.AppMessages;
 import com.card.learn.common.Result;
 import com.card.learn.dto.*;
 import com.card.learn.entity.BizCard;
@@ -111,16 +113,16 @@ public class MiniProgramController {
 
         // 验证码校验
         if (captchaKey == null || captcha == null) {
-            return Result.error("请输入验证码");
+            return Result.error(AppMessages.CAPTCHA_REQUIRED);
         }
 
         Object cachedCaptcha = redisTemplate.opsForValue().get(CAPTCHA_PREFIX + captchaKey);
         if (cachedCaptcha == null) {
-            return Result.error("验证码已过期，请重新获取");
+            return Result.error(AppMessages.CAPTCHA_EXPIRED);
         }
 
         if (!cachedCaptcha.toString().equalsIgnoreCase(captcha)) {
-            return Result.error("验证码错误");
+            return Result.error(AppMessages.CAPTCHA_WRONG);
         }
 
         // 删除验证码
@@ -128,22 +130,22 @@ public class MiniProgramController {
 
         // 用户验证
         if (username == null || password == null) {
-            return Result.error("请输入账号和密码");
+            return Result.error(AppMessages.USERNAME_PASSWORD_REQUIRED);
         }
 
         SysUser user = userService.getByUsername(username);
         if (user == null) {
-            return Result.error("用户不存在");
+            return Result.error(AppMessages.USER_NOT_FOUND);
         }
 
         // 密码验证（实际应加密比对）
         if (!userService.checkPassword(user.getUserId(), password)) {
-            return Result.error("密码错误");
+            return Result.error(AppMessages.PASSWORD_WRONG);
         }
 
         // 状态检查
         if ("1".equals(user.getStatus())) {
-            return Result.error("账号已被停用");
+            return Result.error(AppMessages.ACCOUNT_DISABLED);
         }
 
         // 生成token
@@ -367,20 +369,20 @@ public class MiniProgramController {
 
         // 根据状态筛选
         String status = queryDTO.getStatus();
-        if (status != null && !status.isEmpty() && !status.equals("all")) {
+        if (status != null && !status.isEmpty() && !status.equals(AppConstants.STATUS_ALL)) {
             cardDTOs = cardDTOs.stream().filter(dto -> {
                 Integer cardStatus = dto.getStatus();
                 switch (status) {
-                    case "learned":
+                    case AppConstants.STATUS_LEARNED:
                         // 已学习：状态 >= 1（包括模糊和掌握）
                         return cardStatus != null && cardStatus >= 1;
-                    case "mastered":
+                    case AppConstants.STATUS_MASTERED:
                         // 已掌握：状态 == 2
                         return cardStatus != null && cardStatus == 2;
-                    case "review":
+                    case AppConstants.STATUS_REVIEW:
                         // 待复习：状态 == 1（模糊状态）
                         return cardStatus != null && cardStatus == 1;
-                    case "unlearned":
+                    case AppConstants.STATUS_UNLEARNED:
                         // 未学习：状态 == 0 或 null
                         return cardStatus == null || cardStatus == 0;
                     default:
@@ -425,7 +427,7 @@ public class MiniProgramController {
     public Result<MiniCardDTO> getCardById(@PathVariable Long id) {
         BizCard card = cardService.getById(id);
         if (card == null) {
-            return Result.error("卡片不存在");
+            return Result.error(AppMessages.CARD_NOT_FOUND);
         }
 
         // 获取科目名称
@@ -503,7 +505,7 @@ public class MiniProgramController {
         }
 
         // 记录学习历史
-        studyHistoryService.recordHistory(dto.getUserId(), dto.getCardId(), dto.getStatus());
+        studyHistoryService.recordHistory(dto.getUserId(), dto.getCardId(), dto.getStatus(), dto.getSource());
 
         return Result.success();
     }

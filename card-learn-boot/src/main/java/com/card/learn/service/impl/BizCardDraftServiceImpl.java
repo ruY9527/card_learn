@@ -3,6 +3,7 @@ package com.card.learn.service.impl;
 import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.card.learn.common.AppMessages;
 import com.card.learn.dto.AuditCardQueryDTO;
 import com.card.learn.dto.CardAuditDTO;
 import com.card.learn.dto.CardCreateDTO;
@@ -108,12 +109,12 @@ public class BizCardDraftServiceImpl extends ServiceImpl<BizCardDraftMapper, Biz
     public Long auditDraftCard(CardAuditDTO dto) {
         BizCardDraft draft = getById(dto.getCardId());
         if (draft == null) {
-            throw new RuntimeException("临时卡片不存在");
+            throw new RuntimeException(AppMessages.DRAFT_CARD_NOT_FOUND);
         }
         
         // 只有待审批状态的卡片才能审批
         if (!"0".equals(draft.getAuditStatus())) {
-            throw new RuntimeException("该卡片已审批，不能重复审批");
+            throw new RuntimeException(AppMessages.CARD_ALREADY_AUDITED);
         }
         
         Long cardId = null;
@@ -185,17 +186,17 @@ public class BizCardDraftServiceImpl extends ServiceImpl<BizCardDraftMapper, Biz
     public void updateMyDraftCard(Long draftId, CardCreateDTO dto, Long createBy) {
         BizCardDraft draft = getById(draftId);
         if (draft == null) {
-            throw new RuntimeException("临时卡片不存在");
+            throw new RuntimeException(AppMessages.DRAFT_CARD_NOT_FOUND);
         }
         
         // 校验是否是用户自己的卡片
         if (!draft.getCreateBy().equals(createBy)) {
-            throw new RuntimeException("无权限修改此卡片");
+            throw new RuntimeException(AppMessages.CARD_NO_PERMISSION_EDIT);
         }
         
         // 只有待审批状态的卡片才能修改
         if (!"0".equals(draft.getAuditStatus())) {
-            throw new RuntimeException("只有待审批状态的卡片才能修改");
+            throw new RuntimeException(AppMessages.CARD_ONLY_PENDING_EDIT);
         }
         
         draft.setSubjectId(dto.getSubjectId());
@@ -217,17 +218,17 @@ public class BizCardDraftServiceImpl extends ServiceImpl<BizCardDraftMapper, Biz
     public void deleteMyDraftCard(Long draftId, Long createBy) {
         BizCardDraft draft = getById(draftId);
         if (draft == null) {
-            throw new RuntimeException("临时卡片不存在");
+            throw new RuntimeException(AppMessages.DRAFT_CARD_NOT_FOUND);
         }
         
         // 校验是否是用户自己的卡片
         if (!draft.getCreateBy().equals(createBy)) {
-            throw new RuntimeException("无权限删除此卡片");
+            throw new RuntimeException(AppMessages.CARD_NO_PERMISSION_DELETE);
         }
         
         // 只有待审批状态的卡片才能删除
         if (!"0".equals(draft.getAuditStatus())) {
-            throw new RuntimeException("只有待审批状态的卡片才能删除");
+            throw new RuntimeException(AppMessages.CARD_ONLY_PENDING_DELETE);
         }
         
         removeById(draftId);

@@ -1,6 +1,7 @@
 package com.card.learn.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.card.learn.common.AppMessages;
 import com.card.learn.common.Result;
 import com.card.learn.dto.CardAuditDTO;
 import com.card.learn.dto.CardCreateDTO;
@@ -58,11 +59,11 @@ public class MiniCardController {
     public Result<Long> createCard(@RequestBody @Validated CardCreateDTO dto) {
         Long currentUserId = getCurrentUserId();
         if (currentUserId == null) {
-            return Result.error(401, "请先登录后再提交卡片");
+            return Result.error(401, AppMessages.PLEASE_LOGIN_SUBMIT_CARD);
         }
         dto.setCreateBy(currentUserId);
         Long draftId = draftService.createDraftCard(dto);
-        return Result.success("卡片提交成功，等待审核", draftId);
+        return Result.success(AppMessages.CARD_SUBMIT_SUCCESS, draftId);
     }
 
     /**
@@ -73,7 +74,7 @@ public class MiniCardController {
     public Result<Page<MyCardVO>> getMyCards(MyCardQueryDTO queryDTO) {
         Long currentUserId = getCurrentUserId();
         if (currentUserId == null) {
-            return Result.error(401, "请先登录后再查看我的卡片");
+            return Result.error(401, AppMessages.PLEASE_LOGIN_VIEW_CARDS);
         }
         return Result.success(draftService.pageMyDrafts(currentUserId, queryDTO));
     }
@@ -88,7 +89,7 @@ public class MiniCardController {
             @RequestBody @Validated CardCreateDTO dto) {
         Long currentUserId = getCurrentUserId();
         if (currentUserId == null) {
-            return Result.error(401, "请先登录后再修改卡片");
+            return Result.error(401, AppMessages.PLEASE_LOGIN_EDIT_CARD);
         }
         dto.setCreateBy(currentUserId);
         draftService.updateMyDraftCard(id, dto, currentUserId);
@@ -105,7 +106,7 @@ public class MiniCardController {
             @RequestParam(required = false) Long userId) {
         Long currentUserId = getCurrentUserId();
         if (currentUserId == null) {
-            return Result.error(401, "请先登录后再删除卡片");
+            return Result.error(401, AppMessages.PLEASE_LOGIN_DELETE_CARD);
         }
         draftService.deleteMyDraftCard(id, currentUserId);
         return Result.success();
@@ -119,7 +120,7 @@ public class MiniCardController {
     public Result<MyCardStatsVO> getMyCardStats(@RequestParam(required = false) Long userId) {
         Long currentUserId = getCurrentUserId();
         if (currentUserId == null) {
-            return Result.error(401, "请先登录后再查看统计");
+            return Result.error(401, AppMessages.PLEASE_LOGIN_VIEW_STATS);
         }
 
         // 待审批数量

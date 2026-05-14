@@ -2,6 +2,7 @@ package com.card.learn.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.card.learn.common.AppMessages;
 import com.card.learn.entity.BizCardComment;
 import com.card.learn.entity.BizCardReply;
 import com.card.learn.entity.BizCommentLike;
@@ -38,7 +39,7 @@ public class BizCommentLikeServiceImpl extends ServiceImpl<BizCommentLikeMapper,
 
         BizCardComment comment = commentService.getById(commentId);
         if (comment == null) {
-            throw new RuntimeException("评论不存在");
+            throw new RuntimeException(AppMessages.COMMENT_NOT_FOUND);
         }
 
         if (existing == null) {
@@ -111,7 +112,7 @@ public class BizCommentLikeServiceImpl extends ServiceImpl<BizCommentLikeMapper,
 
         BizCardReply reply = replyService.getById(replyId);
         if (reply == null) {
-            throw new RuntimeException("回复不存在");
+            throw new RuntimeException(AppMessages.REPLY_NOT_FOUND);
         }
 
         if (existing == null) {

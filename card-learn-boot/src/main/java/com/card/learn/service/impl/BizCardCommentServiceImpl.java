@@ -2,6 +2,8 @@ package com.card.learn.service.impl;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.card.learn.common.AppConstants;
+import com.card.learn.common.AppMessages;
 import com.card.learn.dto.CommentQueryDTO;
 import com.card.learn.dto.NoteQueryDTO;
 import com.card.learn.entity.BizCardComment;
@@ -67,13 +69,13 @@ public class BizCardCommentServiceImpl extends ServiceImpl<BizCardCommentMapper,
         save(comment);
 
         // 如果是劣质评论，自动创建反馈记录
-        if ("POOR".equals(comment.getCommentType())) {
+        if (AppConstants.COMMENT_TYPE_POOR.equals(comment.getCommentType())) {
             BizFeedback feedback = new BizFeedback();
             feedback.setUserId(comment.getUserId());
             feedback.setCardId(comment.getCardId());
-            feedback.setType("ERROR");
+            feedback.setType(AppConstants.FEEDBACK_TYPE_ERROR);
             feedback.setRating(comment.getRating());
-            feedback.setContent("用户标记为劣质内容：" + comment.getContent());
+            feedback.setContent(AppMessages.POOR_CONTENT_PREFIX + comment.getContent());
             feedback.setStatus("0");
             feedback.setCreateTime(LocalDateTime.now());
             feedbackService.save(feedback);

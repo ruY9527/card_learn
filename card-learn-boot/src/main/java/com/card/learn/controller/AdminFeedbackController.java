@@ -1,6 +1,7 @@
 package com.card.learn.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.card.learn.common.AppMessages;
 import com.card.learn.common.Result;
 import com.card.learn.dto.FeedbackQueryDTO;
 import com.card.learn.entity.BizFeedback;
@@ -39,7 +40,7 @@ public class AdminFeedbackController {
     public Result<BizFeedback> getById(@PathVariable Long id) {
         BizFeedback feedback = feedbackService.getById(id);
         if (feedback == null) {
-            return Result.error("反馈不存在");
+            return Result.error(AppMessages.FEEDBACK_NOT_FOUND);
         }
         return Result.success(feedback);
     }

@@ -1,5 +1,6 @@
 package com.card.learn.service.impl;
 
+import com.card.learn.common.AppConstants;
 import com.card.learn.entity.BizWeakPoint;
 import com.card.learn.mapper.BizWeakPointMapper;
 import com.card.learn.service.IWeakPointService;
@@ -32,7 +33,7 @@ public class WeakPointServiceImpl implements IWeakPointService {
                 wp.setCardId(cardId);
                 wp.setErrorCount(1);
                 wp.setLastErrorTime(LocalDateTime.now());
-                wp.setStatus("active");
+                wp.setStatus(AppConstants.WEAK_POINT_ACTIVE);
                 weakPointMapper.insert(wp);
             } else {
                 existing.setErrorCount(existing.getErrorCount() + 1);
@@ -60,7 +61,7 @@ public class WeakPointServiceImpl implements IWeakPointService {
     public void markReviewed(Long userId, Long cardId) {
         BizWeakPoint existing = weakPointMapper.selectByUserAndCard(userId, cardId);
         if (existing != null) {
-            existing.setStatus("reviewed");
+            existing.setStatus(AppConstants.WEAK_POINT_REVIEWED);
             weakPointMapper.updateById(existing);
         }
     }

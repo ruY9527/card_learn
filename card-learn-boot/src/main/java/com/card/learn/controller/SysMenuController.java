@@ -1,5 +1,6 @@
 package com.card.learn.controller;
 
+import com.card.learn.common.AppMessages;
 import com.card.learn.common.Result;
 import com.card.learn.entity.SysMenu;
 import com.card.learn.entity.SysUser;
@@ -53,7 +54,7 @@ public class SysMenuController {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         SysUser user = userService.getByUsername(username);
         if (user == null) {
-            return Result.error("用户不存在");
+            return Result.error(AppMessages.USER_NOT_FOUND);
         }
         List<SysMenu> menus = menuService.selectMenusByUserId(user.getUserId());
         return Result.success(menuService.buildMenuTree(menus));

@@ -23,7 +23,7 @@ public class Result<T> implements Serializable {
     public static <T> Result<T> success(T data) {
         Result<T> result = new Result<>();
         result.setCode(200);
-        result.setMessage("操作成功");
+        result.setMessage(AppMessages.SUCCESS);
         result.setData(data);
         return result;
     }

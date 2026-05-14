@@ -1,6 +1,7 @@
 package com.card.learn.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.card.learn.common.AppMessages;
 import com.card.learn.common.Result;
 import com.card.learn.dto.UserFeedbackQueryDTO;
 import com.card.learn.entity.BizFeedback;
@@ -28,13 +29,13 @@ public class MiniFeedbackController {
     @ApiOperation("提交反馈")
     public Result<Void> submitFeedback(@RequestBody BizFeedback feedback) {
         if (feedback.getUserId() == null) {
-            return Result.error("请先登录后再提交反馈");
+            return Result.error(AppMessages.PLEASE_LOGIN_SUBMIT_FEEDBACK);
         }
         if (feedback.getType() == null || feedback.getType().isEmpty()) {
-            return Result.error("请选择反馈类型");
+            return Result.error(AppMessages.FEEDBACK_TYPE_REQUIRED);
         }
         if (feedback.getContent() == null || feedback.getContent().isEmpty()) {
-            return Result.error("请填写反馈内容");
+            return Result.error(AppMessages.FEEDBACK_CONTENT_REQUIRED);
         }
         feedback.setStatus("0"); // 默认待处理
         feedbackService.save(feedback);
@@ -58,7 +59,7 @@ public class MiniFeedbackController {
     public Result<BizFeedback> getFeedbackDetail(@PathVariable Long id) {
         BizFeedback feedback = feedbackService.getById(id);
         if (feedback == null) {
-            return Result.error("反馈不存在");
+            return Result.error(AppMessages.FEEDBACK_NOT_FOUND);
         }
         return Result.success(feedback);
     }

@@ -3,6 +3,7 @@ package com.card.learn.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.card.learn.common.AppMessages;
 import com.card.learn.entity.BizCardComment;
 import com.card.learn.entity.BizCardReply;
 import com.card.learn.entity.SysUser;
@@ -46,7 +47,7 @@ public class BizCardReplyServiceImpl extends ServiceImpl<BizCardReplyMapper, Biz
         // 从父评论获取card_id
         BizCardComment comment = commentService.getById(reply.getCommentId());
         if (comment == null) {
-            throw new RuntimeException("评论不存在");
+            throw new RuntimeException(AppMessages.COMMENT_NOT_FOUND);
         }
 
         // 设置用户昵称
@@ -113,7 +114,7 @@ public class BizCardReplyServiceImpl extends ServiceImpl<BizCardReplyMapper, Biz
                             if (user != null) {
                                 return user.getNickname() != null ? user.getNickname() : user.getUsername();
                             }
-                            return "匿名用户";
+                            return AppMessages.ANONYMOUS_USER;
                         }
                 ));
 
@@ -123,7 +124,7 @@ public class BizCardReplyServiceImpl extends ServiceImpl<BizCardReplyMapper, Biz
             vo.setReplyId(r.getReplyId());
             vo.setCommentId(r.getCommentId());
             vo.setUserId(r.getUserId());
-            vo.setUserNickname(r.getUserNickname() != null ? r.getUserNickname() : nicknameMap.getOrDefault(r.getUserId(), "匿名用户"));
+            vo.setUserNickname(r.getUserNickname() != null ? r.getUserNickname() : nicknameMap.getOrDefault(r.getUserId(), AppMessages.ANONYMOUS_USER));
             vo.setContent(r.getContent());
             vo.setLikeCount(r.getLikeCount());
             vo.setDislikeCount(r.getDislikeCount());

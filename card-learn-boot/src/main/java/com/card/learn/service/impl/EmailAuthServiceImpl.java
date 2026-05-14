@@ -1,5 +1,7 @@
 package com.card.learn.service.impl;
 
+import com.card.learn.common.AppConstants;
+import com.card.learn.common.AppMessages;
 import com.card.learn.dto.EmailRegisterDTO;
 import com.card.learn.dto.ResetPasswordDTO;
 import com.card.learn.entity.SysUser;
@@ -18,6 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -70,7 +73,7 @@ public class EmailAuthServiceImpl implements IEmailAuthService {
         // 频率限制：60秒间隔
         String lastSendKey = EMAIL_SEND_LAST_PREFIX + email;
         if (Boolean.TRUE.equals(redisTemplate.hasKey(lastSendKey))) {
-            throw new RuntimeException("发送太频繁，请60秒后重试");
+            throw new RuntimeException(AppMessages.SEND_TOO_FREQUENT);
         }
 
         // 频率限制：每日上限
@@ -78,16 +81,16 @@ public class EmailAuthServiceImpl implements IEmailAuthService {
         Object countObj = redisTemplate.opsForValue().get(countKey);
         int count = countObj != null ? Integer.parseInt(countObj.toString()) : 0;
         if (count >= sendLimitPerDay) {
-            throw new RuntimeException("今日发送次数已用完");
+            throw new RuntimeException(AppMessages.DAILY_SEND_LIMIT);
         }
 
         // 注册类型需检查邮箱未注册
-        if ("register".equals(type) && userService.existsByEmail(email)) {
-            throw new RuntimeException("该邮箱已注册");
+        if (AppConstants.EMAIL_TYPE_REGISTER.equals(type) && userService.existsByEmail(email)) {
+            throw new RuntimeException(AppMessages.EMAIL_ALREADY_REGISTERED);
         }
         // 重置类型需检查邮箱已注册
-        if ("reset".equals(type) && !userService.existsByEmail(email)) {
-            throw new RuntimeException("该邮箱未注册");
+        if (AppConstants.EMAIL_TYPE_RESET.equals(type) && !userService.existsByEmail(email)) {
+            throw new RuntimeException(AppMessages.EMAIL_NOT_REGISTERED);
         }
 
         // 生成验证码
@@ -96,7 +99,7 @@ public class EmailAuthServiceImpl implements IEmailAuthService {
 
         // 存储验证码到Redis
         String redisKey;
-        if ("register".equals(type)) {
+        if (AppConstants.EMAIL_TYPE_REGISTER.equals(type)) {
             redisKey = EMAIL_VERIFY_PREFIX + codeKey;
         } else {
             redisKey = EMAIL_RESET_PREFIX + codeKey;
@@ -108,7 +111,7 @@ public class EmailAuthServiceImpl implements IEmailAuthService {
         redisTemplate.opsForValue().set(countKey, String.valueOf(count + 1), 24, TimeUnit.HOURS);
 
         // 发送邮件
-        if ("register".equals(type)) {
+        if (AppConstants.EMAIL_TYPE_REGISTER.equals(type)) {
             emailService.sendVerifyCode(email, code);
         } else {
             emailService.sendResetCode(email, code);
@@ -122,23 +125,23 @@ public class EmailAuthServiceImpl implements IEmailAuthService {
     public Object register(EmailRegisterDTO dto) {
         // 验证密码格式
         if (!isValidPassword(dto.getPassword())) {
-            throw new RuntimeException("密码格式不正确，需6-20位且包含字母和数字");
+            throw new RuntimeException(AppMessages.PASSWORD_FORMAT_INVALID);
         }
 
         // 检查邮箱未注册
         if (userService.existsByEmail(dto.getEmail())) {
-            throw new RuntimeException("该邮箱已注册");
+            throw new RuntimeException(AppMessages.EMAIL_ALREADY_REGISTERED);
         }
 
         // 验证验证码
         String redisKey = EMAIL_VERIFY_PREFIX + dto.getCodeKey();
         String cached = (String) redisTemplate.opsForValue().get(redisKey);
         if (cached == null) {
-            throw new RuntimeException("验证码已过期");
+            throw new RuntimeException(AppMessages.CAPTCHA_EXPIRED);
         }
         String[] parts = cached.split(":");
         if (!parts[0].equals(dto.getEmail()) || !parts[1].equals(dto.getCode())) {
-            throw new RuntimeException("验证码错误");
+            throw new RuntimeException(AppMessages.CAPTCHA_WRONG);
         }
         // 验证成功后删除验证码
         redisTemplate.delete(redisKey);
@@ -187,6 +190,7 @@ public class EmailAuthServiceImpl implements IEmailAuthService {
             userInfo.setNickname(user.getNickname());
             userInfo.setEmail(user.getEmail());
             userInfo.setAvatar(user.getAvatar());
+            userInfo.setRoles(new ArrayList<>());
 
             LoginVO loginVO = new LoginVO();
             loginVO.setToken(token);
@@ -203,7 +207,7 @@ public class EmailAuthServiceImpl implements IEmailAuthService {
         String redisKey = EMAIL_ACTIVATE_PREFIX + key;
         String cached = (String) redisTemplate.opsForValue().get(redisKey);
         if (cached == null) {
-            throw new RuntimeException("激活链接已失效，请重新注册");
+            throw new RuntimeException(AppMessages.ACTIVATE_LINK_EXPIRED);
         }
 
         String[] parts = cached.split(":");
@@ -211,15 +215,15 @@ public class EmailAuthServiceImpl implements IEmailAuthService {
         String storedCode = parts[1];
 
         if (!storedCode.equals(code)) {
-            throw new RuntimeException("激活链接无效");
+            throw new RuntimeException(AppMessages.ACTIVATE_LINK_INVALID);
         }
 
         SysUser user = userService.getById(userId);
         if (user == null) {
-            throw new RuntimeException("用户不存在");
+            throw new RuntimeException(AppMessages.USER_NOT_FOUND);
         }
         if ("0".equals(user.getStatus())) {
-            throw new RuntimeException("该账号已激活，请直接登录");
+            throw new RuntimeException(AppMessages.ACCOUNT_ALREADY_ACTIVATED);
         }
 
         // 激活用户
@@ -238,6 +242,7 @@ public class EmailAuthServiceImpl implements IEmailAuthService {
         userInfo.setNickname(user.getNickname());
         userInfo.setEmail(user.getEmail());
         userInfo.setAvatar(user.getAvatar());
+        userInfo.setRoles(new ArrayList<>());
 
         LoginVO loginVO = new LoginVO();
         loginVO.setToken(token);
@@ -249,31 +254,31 @@ public class EmailAuthServiceImpl implements IEmailAuthService {
 
     @Override
     public void sendResetCode(String email) {
-        sendEmailCode(email, "reset");
+        sendEmailCode(email, AppConstants.EMAIL_TYPE_RESET);
     }
 
     @Override
     public void resetPassword(ResetPasswordDTO dto) {
         // 验证密码格式
         if (!isValidPassword(dto.getNewPassword())) {
-            throw new RuntimeException("密码格式不正确，需6-20位且包含字母和数字");
+            throw new RuntimeException(AppMessages.PASSWORD_FORMAT_INVALID);
         }
 
         // 检查邮箱已注册
         SysUser user = userService.getByEmail(dto.getEmail());
         if (user == null) {
-            throw new RuntimeException("该邮箱未注册");
+            throw new RuntimeException(AppMessages.EMAIL_NOT_REGISTERED);
         }
 
         // 验证验证码
         String redisKey = EMAIL_RESET_PREFIX + dto.getCodeKey();
         String cached = (String) redisTemplate.opsForValue().get(redisKey);
         if (cached == null) {
-            throw new RuntimeException("验证码已过期");
+            throw new RuntimeException(AppMessages.CAPTCHA_EXPIRED);
         }
         String[] parts = cached.split(":");
         if (!parts[0].equals(dto.getEmail()) || !parts[1].equals(dto.getCode())) {
-            throw new RuntimeException("验证码错误");
+            throw new RuntimeException(AppMessages.CAPTCHA_WRONG);
         }
         // 验证成功后删除验证码
         redisTemplate.delete(redisKey);

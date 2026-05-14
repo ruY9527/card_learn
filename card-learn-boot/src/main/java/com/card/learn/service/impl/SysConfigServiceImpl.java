@@ -2,6 +2,7 @@ package com.card.learn.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.card.learn.common.AppMessages;
 import com.card.learn.dto.SprintConfigDTO;
 import com.card.learn.entity.SysConfig;
 import com.card.learn.mapper.SysConfigMapper;
@@ -60,7 +61,7 @@ public class SysConfigServiceImpl extends ServiceImpl<SysConfigMapper, SysConfig
         String examName = getConfigValue("sprint_exam_name");
         String enabled = getConfigValue("sprint_enabled");
 
-        dto.setExamName(examName != null ? examName : "考研冲刺");
+        dto.setExamName(examName != null ? examName : AppMessages.DEFAULT_EXAM_NAME);
         dto.setEnabled("true".equals(enabled));
 
         if (examDateStr != null) {

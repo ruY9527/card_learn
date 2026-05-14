@@ -1,5 +1,6 @@
 package com.card.learn.controller;
 
+import com.card.learn.common.AppMessages;
 import com.card.learn.common.Result;
 import com.card.learn.dto.AiConvertDTO;
 import com.card.learn.dto.AiCardDTO;
@@ -97,7 +98,7 @@ public class AiController {
                 // 如果是问题格式，直接作为正面
                 String[] parts = paragraph.split("[?？]");
                 card.setFrontContent(parts[0] + "?");
-                card.setBackContent(parts.length > 1 ? parts[1].trim() : "请参考教材解析");
+                card.setBackContent(parts.length > 1 ? parts[1].trim() : AppMessages.AI_REFER_TEXTBOOK);
             } else {
                 // 否则生成模拟问题
                 card.setFrontContent("什么是" + paragraph.substring(0, Math.min(20, paragraph.length())) + "?");
@@ -105,7 +106,7 @@ public class AiController {
             }
             
             card.setDifficultyLevel(3);
-            card.setTags(Arrays.asList("AI生成"));
+            card.setTags(Arrays.asList(AppMessages.AI_GENERATED));
             result.add(card);
         }
         

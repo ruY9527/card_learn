@@ -1,6 +1,7 @@
 package com.card.learn.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.card.learn.common.AppMessages;
 import com.card.learn.common.Result;
 import com.card.learn.dto.UserQueryDTO;
 import com.card.learn.entity.SysUser;
@@ -62,7 +63,7 @@ public class SysUserController {
     public Result<Void> save(@RequestBody SysUser user) {
         // 检查用户名是否存在
         if (userService.getByUsername(user.getUsername()) != null) {
-            return Result.error("用户名已存在");
+            return Result.error(AppMessages.USERNAME_ALREADY_EXISTS);
         }
         // 对密码进行BCrypt加密
         if (user.getPassword() == null || user.getPassword().isEmpty()) {

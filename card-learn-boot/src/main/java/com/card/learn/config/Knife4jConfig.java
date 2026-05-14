@@ -1,5 +1,6 @@
 package com.card.learn.config;
 
+import com.card.learn.common.AppMessages;
 import com.github.xiaoymin.knife4j.spring.annotations.EnableKnife4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,7 +33,7 @@ public class Knife4jConfig {
 
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
-                .title("考研知识点学习卡片系统API文档")
+                .title(AppMessages.API_DOC_TITLE)
                 .description("Card Learn Boot RESTful API")
                 .contact(new Contact("Card Learn", "", ""))
                 .version("1.0.0")

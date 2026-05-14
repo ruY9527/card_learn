@@ -2,6 +2,7 @@ package com.card.learn.config;
 
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
+import com.card.learn.common.AppMessages;
 import com.card.learn.entity.SysRequestLog;
 import com.card.learn.service.ISysRequestLogService;
 import com.card.learn.util.JwtUtil;
@@ -166,7 +167,7 @@ public class RequestLogAspect {
             }
 
             log.info("执行耗时    : {} ms", duration);
-            log.info("执行状态    : {}", success ? "成功" : "失败");
+            log.info("执行状态    : {}", success ? AppMessages.SUCCESS : AppMessages.FAILED);
             log.info("==================== 请求结束 ====================\n");
 
             // 异步保存日志到数据库（不影响主业务流程）

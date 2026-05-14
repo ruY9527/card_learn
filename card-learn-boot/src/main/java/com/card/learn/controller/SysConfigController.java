@@ -1,5 +1,6 @@
 package com.card.learn.controller;
 
+import com.card.learn.common.AppMessages;
 import com.card.learn.common.Result;
 import com.card.learn.dto.SprintConfigDTO;
 import com.card.learn.entity.SysConfig;
@@ -42,7 +43,7 @@ public class SysConfigController {
     public Result<SysConfig> getConfigByKey(@PathVariable String key) {
         SysConfig config = configService.getConfigByKey(key);
         if (config == null) {
-            return Result.error("配置不存在");
+            return Result.error(AppMessages.CONFIG_NOT_FOUND);
         }
         return Result.success(config);
     }
@@ -55,13 +56,13 @@ public class SysConfigController {
     public Result<Void> updateConfig(@PathVariable String key, @RequestBody ConfigUpdateDTO body) {
         String value = body.getValue();
         if (value == null) {
-            return Result.error("配置值不能为空");
+            return Result.error(AppMessages.CONFIG_VALUE_REQUIRED);
         }
         boolean success = configService.updateConfigValue(key, value);
         if (success) {
             return Result.success();
         } else {
-            return Result.error("配置不存在或更新失败");
+            return Result.error(AppMessages.CONFIG_NOT_FOUND_OR_UPDATE_FAILED);
         }
     }
 
@@ -72,13 +73,13 @@ public class SysConfigController {
     @ApiOperation("更新配置对象")
     public Result<Void> updateConfigEntity(@RequestBody SysConfig config) {
         if (config.getConfigKey() == null) {
-            return Result.error("配置键不能为空");
+            return Result.error(AppMessages.CONFIG_KEY_REQUIRED);
         }
         boolean success = configService.updateById(config);
         if (success) {
             return Result.success();
         } else {
-            return Result.error("更新失败");
+            return Result.error(AppMessages.CONFIG_UPDATE_FAILED);
         }
     }
 
@@ -103,12 +104,12 @@ public class SysConfigController {
     @ApiOperation("新增配置")
     public Result<Void> addConfig(@RequestBody SysConfig config) {
         if (config.getConfigKey() == null || config.getConfigValue() == null) {
-            return Result.error("配置键和配置值不能为空");
+            return Result.error(AppMessages.CONFIG_KEY_VALUE_REQUIRED);
         }
         // 检查是否已存在
         SysConfig existing = configService.getConfigByKey(config.getConfigKey());
         if (existing != null) {
-            return Result.error("配置键已存在");
+            return Result.error(AppMessages.CONFIG_KEY_ALREADY_EXISTS);
         }
         configService.save(config);
         return Result.success();
@@ -122,7 +123,7 @@ public class SysConfigController {
     public Result<Void> deleteConfig(@PathVariable String key) {
         SysConfig config = configService.getConfigByKey(key);
         if (config == null) {
-            return Result.error("配置不存在");
+            return Result.error(AppMessages.CONFIG_NOT_FOUND);
         }
         configService.removeById(config.getId());
         return Result.success();

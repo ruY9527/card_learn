@@ -2,6 +2,8 @@ package com.card.learn.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.card.learn.common.AppConstants;
+import com.card.learn.common.AppMessages;
 import com.card.learn.dto.AchievementCheckDTO;
 import com.card.learn.dto.GoalSetDTO;
 import com.card.learn.entity.*;
@@ -32,10 +34,7 @@ public class IncentiveServiceImpl implements IIncentiveService {
     private static final int[] LEVEL_EXP = {0, 100, 300, 600, 1000, 1500, 2100, 2800, 3600, 4500};
 
     /** 等级名称 */
-    private static final String[] LEVEL_NAMES = {
-            "", "入门学徒", "初出茅庐", "勤学苦练", "小有所成", "学富五车",
-            "融会贯通", "登堂入室", "炉火纯青", "博学多才", "学贯中西"
-    };
+    private static final String[] LEVEL_NAMES = AppMessages.LEVEL_NAMES;
 
     @Autowired
     private BizUserLevelMapper userLevelMapper;
@@ -128,9 +127,9 @@ public class IncentiveServiceImpl implements IIncentiveService {
         result.setLeveledUp(false);
 
         // 获取用户统计数据
-        int learnCount = getDailyCountSum(userId, "learn");
-        int masterCount = getDailyCountSum(userId, "master");
-        int reviewCount = getDailyCountSum(userId, "review");
+        int learnCount = getDailyCountSum(userId, AppConstants.COUNT_TYPE_LEARN);
+        int masterCount = getDailyCountSum(userId, AppConstants.COUNT_TYPE_MASTER);
+        int reviewCount = getDailyCountSum(userId, AppConstants.COUNT_TYPE_REVIEW);
         int streakDays = getStreakDays(userId);
 
         // 查询所有已启用的成就
@@ -143,16 +142,16 @@ public class IncentiveServiceImpl implements IIncentiveService {
 
             boolean shouldUnlock = false;
             switch (achievement.getCategory()) {
-                case "count":
+                case AppConstants.ACHIEVEMENT_CATEGORY_COUNT:
                     shouldUnlock = checkCountAchievement(achievement, learnCount, masterCount, reviewCount);
                     break;
-                case "streak":
+                case AppConstants.ACHIEVEMENT_CATEGORY_STREAK:
                     shouldUnlock = checkStreakAchievement(achievement, streakDays);
                     break;
-                case "social":
+                case AppConstants.ACHIEVEMENT_CATEGORY_SOCIAL:
                     shouldUnlock = checkSocialAchievement(achievement, userId, actionType);
                     break;
-                case "subject":
+                case AppConstants.ACHIEVEMENT_CATEGORY_SUBJECT:
                     // 科目成就需要额外数据，暂跳过
                     break;
             }
@@ -163,7 +162,7 @@ public class IncentiveServiceImpl implements IIncentiveService {
 
                 // 发放成就奖励经验
                 if (achievement.getExpReward() > 0) {
-                    awardExp(userId, achievement.getExpReward(), "ACHIEVEMENT",
+                    awardExp(userId, achievement.getExpReward(), AppConstants.EXP_SOURCE_ACHIEVEMENT,
                             String.valueOf(achievement.getAchievementId()),
                             "解锁成就: " + achievement.getName());
                 }
@@ -226,10 +225,12 @@ public class IncentiveServiceImpl implements IIncentiveService {
         vo.setEnabled(true);
 
         for (BizLearningGoal goal : goals) {
-            if ("daily_learn".equals(goal.getGoalType())) {
+            if (AppConstants.GOAL_TYPE_DAILY_LEARN.equals(goal.getGoalType())) {
                 vo.setDailyLearnTarget(goal.getTargetCount());
                 vo.setEnabled(goal.getEnabled() == 1);
-            } else if ("daily_master".equals(goal.getGoalType())) {
+                vo.setReminderHour(goal.getReminderHour());
+                vo.setReminderMinute(goal.getReminderMinute());
+            } else if (AppConstants.GOAL_TYPE_DAILY_MASTER.equals(goal.getGoalType())) {
                 vo.setDailyMasterTarget(goal.getTargetCount());
             }
         }
@@ -242,13 +243,13 @@ public class IncentiveServiceImpl implements IIncentiveService {
         LocalDate today = LocalDate.now();
 
         if (dto.getDailyLearnTarget() != null) {
-            saveOrUpdateGoal(userId, "daily_learn", dto.getDailyLearnTarget(), dto.getEnabled());
+            saveOrUpdateGoal(userId, AppConstants.GOAL_TYPE_DAILY_LEARN, dto.getDailyLearnTarget(), dto.getEnabled(), dto.getReminderHour(), dto.getReminderMinute());
             // 更新今日目标记录
-            saveOrUpdateGoalRecord(userId, today, "daily_learn", dto.getDailyLearnTarget());
+            saveOrUpdateGoalRecord(userId, today, AppConstants.GOAL_TYPE_DAILY_LEARN, dto.getDailyLearnTarget());
         }
         if (dto.getDailyMasterTarget() != null) {
-            saveOrUpdateGoal(userId, "daily_master", dto.getDailyMasterTarget(), dto.getEnabled());
-            saveOrUpdateGoalRecord(userId, today, "daily_master", dto.getDailyMasterTarget());
+            saveOrUpdateGoal(userId, AppConstants.GOAL_TYPE_DAILY_MASTER, dto.getDailyMasterTarget(), dto.getEnabled(), dto.getReminderHour(), dto.getReminderMinute());
+            saveOrUpdateGoalRecord(userId, today, AppConstants.GOAL_TYPE_DAILY_MASTER, dto.getDailyMasterTarget());
         }
 
         return getCurrentGoal(userId);
@@ -378,13 +379,13 @@ public class IncentiveServiceImpl implements IIncentiveService {
         }
 
         switch (sourceType) {
-            case "STUDY":
+            case AppConstants.EXP_SOURCE_STUDY:
                 count.setLearnCount(count.getLearnCount() + 1);
                 break;
-            case "MASTER":
+            case AppConstants.EXP_SOURCE_MASTER:
                 count.setMasterCount(count.getMasterCount() + 1);
                 break;
-            case "REVIEW":
+            case AppConstants.EXP_SOURCE_REVIEW:
                 count.setReviewCount(count.getReviewCount() + 1);
                 break;
         }
@@ -396,10 +397,10 @@ public class IncentiveServiceImpl implements IIncentiveService {
         List<BizGoalRecord> records = goalRecordMapper.selectByUserAndDate(userId, today);
 
         String goalType = null;
-        if ("STUDY".equals(sourceType)) {
-            goalType = "daily_learn";
-        } else if ("MASTER".equals(sourceType)) {
-            goalType = "daily_master";
+        if (AppConstants.EXP_SOURCE_STUDY.equals(sourceType)) {
+            goalType = AppConstants.GOAL_TYPE_DAILY_LEARN;
+        } else if (AppConstants.EXP_SOURCE_MASTER.equals(sourceType)) {
+            goalType = AppConstants.GOAL_TYPE_DAILY_MASTER;
         }
 
         if (goalType == null) {
@@ -419,7 +420,7 @@ public class IncentiveServiceImpl implements IIncentiveService {
 
         // 不存在则创建
         LearningGoalVO goal = getCurrentGoal(userId);
-        int target = "daily_learn".equals(goalType) ? goal.getDailyLearnTarget() : goal.getDailyMasterTarget();
+        int target = AppConstants.GOAL_TYPE_DAILY_LEARN.equals(goalType) ? goal.getDailyLearnTarget() : goal.getDailyMasterTarget();
         BizGoalRecord newRecord = new BizGoalRecord();
         newRecord.setUserId(userId);
         newRecord.setGoalDate(today);
@@ -436,9 +437,9 @@ public class IncentiveServiceImpl implements IIncentiveService {
             return 0;
         }
         switch (type) {
-            case "learn": return count.getLearnCount();
-            case "master": return count.getMasterCount();
-            case "review": return count.getReviewCount();
+            case AppConstants.COUNT_TYPE_LEARN: return count.getLearnCount();
+            case AppConstants.COUNT_TYPE_MASTER: return count.getMasterCount();
+            case AppConstants.COUNT_TYPE_REVIEW: return count.getReviewCount();
             default: return 0;
         }
     }
@@ -452,19 +453,19 @@ public class IncentiveServiceImpl implements IIncentiveService {
 
     private boolean checkCountAchievement(AchievementVO achievement, int learnCount, int masterCount, int reviewCount) {
         switch (achievement.getCode()) {
-            case "FIRST_LEARN": return learnCount >= 1;
-            case "FIRST_MASTER": return masterCount >= 1;
-            case "FIRST_REVIEW": return reviewCount >= 1;
-            case "LEARN_50": return learnCount >= 50;
-            case "LEARN_100": return learnCount >= 100;
-            case "LEARN_300": return learnCount >= 300;
-            case "LEARN_500": return learnCount >= 500;
-            case "LEARN_1000": return learnCount >= 1000;
-            case "MASTER_10": return masterCount >= 10;
-            case "MASTER_50": return masterCount >= 50;
-            case "MASTER_100": return masterCount >= 100;
-            case "MASTER_300": return masterCount >= 300;
-            case "MASTER_500": return masterCount >= 500;
+            case AppConstants.ACHIEVE_FIRST_LEARN: return learnCount >= 1;
+            case AppConstants.ACHIEVE_FIRST_MASTER: return masterCount >= 1;
+            case AppConstants.ACHIEVE_FIRST_REVIEW: return reviewCount >= 1;
+            case AppConstants.ACHIEVE_LEARN_50: return learnCount >= 50;
+            case AppConstants.ACHIEVE_LEARN_100: return learnCount >= 100;
+            case AppConstants.ACHIEVE_LEARN_300: return learnCount >= 300;
+            case AppConstants.ACHIEVE_LEARN_500: return learnCount >= 500;
+            case AppConstants.ACHIEVE_LEARN_1000: return learnCount >= 1000;
+            case AppConstants.ACHIEVE_MASTER_10: return masterCount >= 10;
+            case AppConstants.ACHIEVE_MASTER_50: return masterCount >= 50;
+            case AppConstants.ACHIEVE_MASTER_100: return masterCount >= 100;
+            case AppConstants.ACHIEVE_MASTER_300: return masterCount >= 300;
+            case AppConstants.ACHIEVE_MASTER_500: return masterCount >= 500;
             default: return false;
         }
     }
@@ -473,16 +474,17 @@ public class IncentiveServiceImpl implements IIncentiveService {
         if (streakDays < achievement.getConditionValue()) {
             return false;
         }
-        return Arrays.asList("STREAK_3", "STREAK_7", "STREAK_14", "STREAK_30", "STREAK_60", "STREAK_100")
+        return Arrays.asList(AppConstants.ACHIEVE_STREAK_3, AppConstants.ACHIEVE_STREAK_7, AppConstants.ACHIEVE_STREAK_14,
+                        AppConstants.ACHIEVE_STREAK_30, AppConstants.ACHIEVE_STREAK_60, AppConstants.ACHIEVE_STREAK_100)
                 .contains(achievement.getCode());
     }
 
     private boolean checkSocialAchievement(AchievementVO achievement, Long userId, String actionType) {
         // 简化处理：根据 actionType 匹配
-        if ("FIRST_COMMENT".equals(achievement.getCode()) && "comment".equals(actionType)) {
+        if (AppConstants.ACHIEVE_FIRST_COMMENT.equals(achievement.getCode()) && AppConstants.ACHIEVE_ALIAS_COMMENT.equals(actionType)) {
             return true;
         }
-        if ("FIRST_CONTRIBUTE".equals(achievement.getCode()) && "contribute".equals(actionType)) {
+        if (AppConstants.ACHIEVE_FIRST_CONTRIBUTE.equals(achievement.getCode()) && AppConstants.ACHIEVE_ALIAS_CONTRIBUTE.equals(actionType)) {
             return true;
         }
         return false;
@@ -500,7 +502,7 @@ public class IncentiveServiceImpl implements IIncentiveService {
         log.info("用户 {} 解锁成就: {}", userId, achievement.getName());
     }
 
-    private void saveOrUpdateGoal(Long userId, String goalType, Integer targetCount, Boolean enabled) {
+    private void saveOrUpdateGoal(Long userId, String goalType, Integer targetCount, Boolean enabled, Integer reminderHour, Integer reminderMinute) {
         LambdaQueryWrapper<BizLearningGoal> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(BizLearningGoal::getUserId, userId)
                 .eq(BizLearningGoal::getGoalType, goalType);
@@ -513,6 +515,12 @@ public class IncentiveServiceImpl implements IIncentiveService {
             if (enabled != null) {
                 existing.setEnabled(enabled ? 1 : 0);
             }
+            if (reminderHour != null) {
+                existing.setReminderHour(reminderHour);
+            }
+            if (reminderMinute != null) {
+                existing.setReminderMinute(reminderMinute);
+            }
             learningGoalMapper.updateById(existing);
         } else {
             BizLearningGoal goal = new BizLearningGoal();
@@ -520,6 +528,8 @@ public class IncentiveServiceImpl implements IIncentiveService {
             goal.setGoalType(goalType);
             goal.setTargetCount(targetCount != null ? targetCount : 20);
             goal.setEnabled(enabled != null && enabled ? 1 : 0);
+            goal.setReminderHour(reminderHour);
+            goal.setReminderMinute(reminderMinute);
             learningGoalMapper.insert(goal);
         }
     }

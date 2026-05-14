@@ -1,6 +1,7 @@
 package com.card.learn.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.card.learn.common.AppMessages;
 import com.card.learn.common.Result;
 import com.card.learn.dto.AuditCardQueryDTO;
 import com.card.learn.dto.BatchAuditDTO;
@@ -46,7 +47,7 @@ public class AdminCardController {
     public Result<BizCardDraft> getById(@PathVariable Long id) {
         BizCardDraft draft = draftService.getById(id);
         if (draft == null) {
-            return Result.error("卡片不存在");
+            return Result.error(AppMessages.CARD_NOT_FOUND);
         }
         return Result.success(draft);
     }
@@ -60,7 +61,7 @@ public class AdminCardController {
     public Result<AuditResultVO> auditCard(@RequestBody @Validated CardAuditDTO dto) {
         try {
             Long cardId = draftService.auditDraftCard(dto);
-            String msg = "1".equals(dto.getAuditStatus()) ? "审批通过，已添加到知识库" : "审批拒绝";
+            String msg = "1".equals(dto.getAuditStatus()) ? AppMessages.AUDIT_APPROVED : AppMessages.AUDIT_REJECTED;
 
             AuditResultVO result = new AuditResultVO();
             result.setCardId(cardId);
@@ -101,7 +102,7 @@ public class AdminCardController {
                 // 跳过已审批的卡片
             }
         }
-        return Result.success("批量审批完成，成功通过" + passCount + "张卡片");
+        return Result.success(String.format(AppMessages.BATCH_APPROVE_TEMPLATE, passCount));
     }
 
     /**
@@ -124,7 +125,7 @@ public class AdminCardController {
                 // 跳过已审批的卡片
             }
         }
-        return Result.success("批量拒绝完成，成功拒绝" + rejectCount + "张卡片");
+        return Result.success(String.format(AppMessages.BATCH_REJECT_TEMPLATE, rejectCount));
     }
 
 }
