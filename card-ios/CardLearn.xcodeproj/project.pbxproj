@@ -54,6 +54,7 @@
 		A0000033 /* WeakPointListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000033; };
 		A0000034 /* EmailAuthApiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000034; };
 		A0000035 /* ForgotPasswordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000035; };
+		A0000036 /* NotificationPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000036; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -105,6 +106,7 @@
 		B0000033 /* WeakPointListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeakPointListView.swift; sourceTree = "<group>"; };
 		B0000034 /* EmailAuthApiService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmailAuthApiService.swift; sourceTree = "<group>"; };
 		B0000035 /* ForgotPasswordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgotPasswordView.swift; sourceTree = "<group>"; };
+		B0000036 /* NotificationPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPreferences.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -173,6 +175,7 @@
 				B0000032 /* ReportApiService.swift */,
 				B0000034 /* EmailAuthApiService.swift */,
 				B000001E /* NotificationService.swift */,
+				B0000036 /* NotificationPreferences.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -343,6 +346,7 @@
 				A0000033 /* WeakPointListView.swift in Sources */,
 				A0000034 /* EmailAuthApiService.swift in Sources */,
 				A0000035 /* ForgotPasswordView.swift in Sources */,
+				A0000036 /* NotificationPreferences.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

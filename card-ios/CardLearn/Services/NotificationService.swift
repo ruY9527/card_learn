@@ -51,7 +51,7 @@ final class NotificationService: NSObject {
         content.title = "复习提醒"
         content.body = "「\(cardTitle)」已到复习时间，点击查看"
         content.sound = .default
-        content.userInfo = ["cardId": cardId]
+        content.userInfo = ["cardId": cardId, "cardTitle": cardTitle]
         content.categoryIdentifier = "REVIEW"
 
         let components = Calendar.current.dateComponents(
@@ -172,14 +172,37 @@ extension NotificationService: UNUserNotificationCenterDelegate {
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
         let userInfo = response.notification.request.content.userInfo
-        if let cardId = userInfo["cardId"] as? Int {
-            // 发送通知让App导航到对应卡片
-            NotificationCenter.default.post(
-                name: .init("OpenCardDetail"),
-                object: nil,
-                userInfo: ["cardId": cardId]
-            )
+
+        switch response.actionIdentifier {
+        case "REVIEW_ACTION":
+            if let cardId = userInfo["cardId"] as? Int {
+                NotificationCenter.default.post(
+                    name: .init("OpenCardDetail"),
+                    object: nil,
+                    userInfo: ["cardId": cardId]
+                )
+            }
+
+        case "SNOOZE_ACTION":
+            if let cardId = userInfo["cardId"] as? Int {
+                let cardTitle = userInfo["cardTitle"] as? String ?? "学习卡片"
+                let snoozeDate = Date().addingTimeInterval(30 * 60)
+                scheduleReviewReminder(cardId: cardId, cardTitle: cardTitle, at: snoozeDate)
+            }
+
+        case UNNotificationDefaultActionIdentifier:
+            if let cardId = userInfo["cardId"] as? Int {
+                NotificationCenter.default.post(
+                    name: .init("OpenCardDetail"),
+                    object: nil,
+                    userInfo: ["cardId": cardId]
+                )
+            }
+
+        default:
+            break
         }
+
         completionHandler()
     }
 }

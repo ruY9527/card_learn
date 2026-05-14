@@ -81,6 +81,9 @@ enum AppKey {
     static let notification = "notification"
     static let sound = "sound"
     static let environment = "environment"
+    static let reminderEnabled = "reminder_enabled"
+    static let reminderHour = "reminder_hour"
+    static let reminderMinute = "reminder_minute"
 }
 
 enum AppPageSize {

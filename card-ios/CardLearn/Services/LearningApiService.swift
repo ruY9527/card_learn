@@ -38,13 +38,13 @@ final class LearningApiService: BaseApiService {
         }
     }
 
-    func submitSimpleReview(cardId: Int, userId: Int?, status: Int) async throws -> ReviewResultVO {
+    func submitSimpleReview(cardId: Int, userId: Int?, status: Int, source: String = "ios") async throws -> ReviewResultVO {
         let url = URL(string: config.getApiUrl(path: "/api/learning/review/simple"))!
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = "POST"
         urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
-        let requestBody = SimpleReviewRequest(cardId: cardId, userId: userId ?? 0, status: status)
+        let requestBody = SimpleReviewRequest(cardId: cardId, userId: userId ?? 0, status: status, source: source)
         urlRequest.httpBody = try JSONEncoder().encode(requestBody)
 
         let response: APIResponse<ReviewResultVO> = try await post(url: urlRequest)

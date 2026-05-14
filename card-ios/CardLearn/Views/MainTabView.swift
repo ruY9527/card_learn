@@ -3,6 +3,8 @@ import SwiftUI
 struct MainTabView: View {
     @EnvironmentObject var appState: AppState
     @State private var selectedTab: Tab = .home
+    @State private var showCardFromNotification = false
+    @State private var notificationCardId: Int?
 
     enum Tab {
         case home
@@ -36,6 +38,51 @@ struct MainTabView: View {
         }
         .ignoresSafeArea(.keyboard)
         .background(AppColor.backgroundGray)
+        .onChange(of: appState.pendingNavigationCardId) { cardId in
+            if let cardId = cardId {
+                notificationCardId = cardId
+                showCardFromNotification = true
+                appState.pendingNavigationCardId = nil
+            }
+        }
+        .sheet(isPresented: $showCardFromNotification) {
+            if let cardId = notificationCardId {
+                NotificationCardNavigationView(cardId: cardId)
+            }
+        }
+    }
+}
+
+/// 通知点击后的卡片导航中间层
+struct NotificationCardNavigationView: View {
+    let cardId: Int
+    @EnvironmentObject var appState: AppState
+    @Environment(\.dismiss) private var dismiss
+    @State private var isLoading = true
+
+    var body: some View {
+        NavigationStack {
+            Group {
+                if isLoading {
+                    ProgressView("加载卡片...")
+                } else {
+                    Text("卡片ID: \(cardId)")
+                        .foregroundColor(AppColor.textSecondary)
+                }
+            }
+            .navigationTitle("复习卡片")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("关闭") { dismiss() }
+                }
+            }
+        }
+        .task {
+            // 模拟加载，实际需要根据cardId获取卡片数据
+            try? await Task.sleep(nanoseconds: 500_000_000)
+            isLoading = false
+        }
     }
 }
 

@@ -1,18 +1,35 @@
 import SwiftUI
+import UserNotifications
 
 @main
 struct CardLearnApp: App {
     @StateObject private var appState = AppState()
-    
+
     var body: some Scene {
         WindowGroup {
             MainTabView()
                 .environmentObject(appState)
                 .onAppear {
-                    // 检查本地存储的登录状态
                     appState.checkLoginStatus()
+                    initializeNotifications()
+                }
+                .onReceive(
+                    NotificationCenter.default.publisher(for: .init("OpenCardDetail"))
+                ) { notification in
+                    handleNotificationDeepLink(notification)
                 }
         }
+    }
+
+    private func initializeNotifications() {
+        NotificationService.setupNotificationCategories()
+        appState.checkNotificationPermission()
+        NotificationPreferences.shared.syncLocalNotification()
+    }
+
+    private func handleNotificationDeepLink(_ notification: NotificationCenter.Publisher.Output) {
+        guard let cardId = notification.userInfo?["cardId"] as? Int else { return }
+        appState.pendingNavigationCardId = cardId
     }
 }
 
@@ -26,6 +43,10 @@ class AppState: ObservableObject {
     // 专业选择持久化
     @Published var selectedMajorId: Int?
     @Published var selectedMajorName: String?
+
+    // 通知相关状态
+    @Published var notificationPermissionGranted: Bool = false
+    @Published var pendingNavigationCardId: Int? = nil
 
     /// 当前环境信息（用于显示）
     var environmentName: String {
@@ -102,6 +123,15 @@ class AppState: ObservableObject {
         self.selectedMajorName = nil
         UserDefaults.standard.removeObject(forKey: AppKey.selectedMajorId)
         UserDefaults.standard.removeObject(forKey: AppKey.selectedMajorName)
+    }
+
+    /// 查询当前通知授权状态
+    func checkNotificationPermission() {
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+            DispatchQueue.main.async {
+                self.notificationPermissionGranted = (settings.authorizationStatus == .authorized)
+            }
+        }
     }
 
     func loadStats() {

@@ -419,6 +419,7 @@ struct SimpleReviewRequest: Codable {
     let cardId: Int
     let userId: Int
     let status: Int
+    let source: String
 }
 
 // 简化复习结果
@@ -524,6 +525,8 @@ struct LearningGoal: Codable {
     let dailyLearnTarget: Int
     let dailyMasterTarget: Int
     let enabled: Bool
+    let reminderHour: Int?
+    let reminderMinute: Int?
 }
 
 // 目标进度
@@ -557,6 +560,8 @@ struct GoalSetRequest: Codable {
     var dailyLearnTarget: Int?
     var dailyMasterTarget: Int?
     var enabled: Bool?
+    var reminderHour: Int?
+    var reminderMinute: Int?
 }
 
 // 排行榜项

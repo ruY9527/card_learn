@@ -327,14 +327,31 @@ struct StatItem: View {
 
 // 设置区域
 struct SettingsSection: View {
-    @State private var notificationEnabled: Bool = UserDefaults.standard.bool(forKey: AppKey.notification)
+    @EnvironmentObject var appState: AppState
+    @State private var notificationEnabled: Bool = NotificationPreferences.shared.reminderEnabled
     @State private var soundEnabled: Bool = UserDefaults.standard.bool(forKey: AppKey.sound)
 
     var body: some View {
         VStack(spacing: 12) {
             SettingItem(label: "学习提醒", isOn: notificationEnabled) {
                 notificationEnabled.toggle()
-                UserDefaults.standard.set(notificationEnabled, forKey: AppKey.notification)
+                let prefs = NotificationPreferences.shared
+                prefs.reminderEnabled = notificationEnabled
+                prefs.syncLocalNotification()
+
+                if notificationEnabled {
+                    Task {
+                        let granted = await NotificationService.shared.requestAuthorization()
+                        await MainActor.run {
+                            appState.notificationPermissionGranted = granted
+                            if !granted {
+                                notificationEnabled = false
+                                prefs.reminderEnabled = false
+                                prefs.syncLocalNotification()
+                            }
+                        }
+                    }
+                }
             }
 
             SettingItem(label: "音效", isOn: soundEnabled) {

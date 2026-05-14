@@ -159,8 +159,8 @@ class APIService {
         try await learningApi.submitSM2Review(request: request, token: token)
     }
 
-    func submitSimpleReview(cardId: Int, userId: Int?, status: Int) async throws -> ReviewResultVO {
-        try await learningApi.submitSimpleReview(cardId: cardId, userId: userId, status: status)
+    func submitSimpleReview(cardId: Int, userId: Int?, status: Int, source: String = "ios") async throws -> ReviewResultVO {
+        try await learningApi.submitSimpleReview(cardId: cardId, userId: userId, status: status, source: source)
     }
 
     func getReviewPlan(appUserId: Int?) async throws -> [ReviewPlanResponse] {
